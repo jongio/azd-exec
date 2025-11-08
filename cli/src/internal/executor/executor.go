@@ -1,6 +1,7 @@
 package executor
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -124,8 +125,11 @@ func (e *Executor) readShebang(scriptPath string) string {
 		_ = file.Close()
 	}()
 
+	reader := bufio.NewReader(file)
+
+	// Read first two bytes to check for shebang
 	buf := make([]byte, 2)
-	if _, err := io.ReadFull(file, buf); err != nil {
+	if _, err := io.ReadFull(reader, buf); err != nil {
 		return ""
 	}
 
@@ -133,17 +137,13 @@ func (e *Executor) readShebang(scriptPath string) string {
 		return ""
 	}
 
-	// Read the rest of the first line
-	var shebang strings.Builder
-	for {
-		b := make([]byte, 1)
-		if _, err := file.Read(b); err != nil || b[0] == '\n' {
-			break
-		}
-		shebang.WriteByte(b[0])
+	// Read the rest of the line
+	line, err := reader.ReadString('\n')
+	if err != nil && err != io.EOF {
+		return ""
 	}
 
-	line := strings.TrimSpace(shebang.String())
+	line = strings.TrimSpace(line)
 	parts := strings.Fields(line)
 	if len(parts) > 0 {
 		// Handle "#!/usr/bin/env python3" style shebangs

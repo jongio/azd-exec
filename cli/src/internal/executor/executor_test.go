@@ -136,7 +136,8 @@ func TestExecute(t *testing.T) {
 			// Create temp script
 			tmpDir := t.TempDir()
 			scriptPath := filepath.Join(tmpDir, tt.scriptName)
-			if err := os.WriteFile(scriptPath, []byte(tt.content), 0o600); err != nil {
+			// #nosec G306 - Script files need execute permission to run
+			if err := os.WriteFile(scriptPath, []byte(tt.content), 0o700); err != nil {
 				t.Fatal(err)
 			}
 
