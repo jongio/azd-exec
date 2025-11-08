@@ -1,0 +1,13 @@
+name: azd-script
+version: 0.1.0
+description: "Execute scripts with Azure Developer CLI context and environment variables"
+metadata:
+  author: "jongio"
+  repository: "https://github.com/jongio/azd-script"
+  homepage: "https://github.com/jongio/azd-script"
+capabilities:
+  - custom-commands
+commands:
+  - name: script
+    description: "Execute a script with azd context (environment variables, configuration, etc.)"
+    type: binary
