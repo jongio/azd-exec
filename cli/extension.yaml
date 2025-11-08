@@ -1,0 +1,20 @@
+id: jongio.azd.script
+namespace: script
+displayName: Script Extension
+description: Execute scripts with Azure Developer CLI context and environment variables
+usage: azd script <command> [options]
+version: 0.1.0
+language: go
+capabilities:
+  - custom-commands
+examples:
+  - name: run
+    description: Execute a script file with azd context
+    usage: azd script run ./my-script.sh
+  - name: version
+    description: Display extension version
+    usage: azd script version
+tags:
+  - scripting
+  - automation
+  - developer-tools

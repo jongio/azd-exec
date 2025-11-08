@@ -1,1 +1,230 @@
 # azd-script
+
+[![CI](https://github.com/jongio/azd-script/actions/workflows/ci.yml/badge.svg)](https://github.com/jongio/azd-script/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/jongio/azd-script/actions/workflows/codeql.yml/badge.svg)](https://github.com/jongio/azd-script/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+Execute scripts with Azure Developer CLI (azd) context and environment variables.
+
+## Overview
+
+`azd-script` is an Azure Developer CLI extension that allows you to execute scripts with full access to the azd environment, including:
+
+- All azd environment variables
+- Azure subscription and tenant information
+- Project configuration and settings
+- Current working environment context
+
+This extension is perfect for automation tasks, custom deployment scripts, environment setup, and any scenario where you need to run scripts within the azd context.
+
+## Features
+
+- ✨ **Automatic Shell Detection**: Detects the appropriate shell based on script file extension or shebang
+- 🔧 **Multiple Shell Support**: Works with bash, sh, zsh, PowerShell, pwsh, and cmd
+- 🌍 **Environment Context**: Full access to azd environment variables
+- 🎯 **Script Arguments**: Pass arguments to your scripts
+- 📂 **Working Directory Control**: Execute scripts in any directory
+- 🔄 **Interactive Mode**: Run scripts with interactive input
+- 🔒 **Security**: Comprehensive security scanning with CodeQL and gosec
+- ✅ **Well Tested**: Extensive unit and integration tests
+
+## Installation
+
+### Prerequisites
+
+- [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) installed
+- Go 1.23 or later (for building from source)
+
+### Install from Release
+
+Download the latest release for your platform from the [releases page](https://github.com/jongio/azd-script/releases).
+
+### Build from Source
+
+```bash
+git clone https://github.com/jongio/azd-script.git
+cd azd-script/cli
+chmod +x build.sh
+./build.sh
+```
+
+The binary will be created in `cli/bin/script`.
+
+## Usage
+
+### Basic Usage
+
+Execute a script file:
+
+```bash
+azd script run ./my-script.sh
+```
+
+### Specify Shell
+
+Explicitly specify which shell to use:
+
+```bash
+azd script run ./deploy.ps1 --shell pwsh
+```
+
+### Pass Arguments to Script
+
+Pass arguments to your script after `--`:
+
+```bash
+azd script run ./build.sh -- --verbose --config release
+```
+
+### Set Working Directory
+
+Execute script from a specific directory:
+
+```bash
+azd script run ./scripts/setup.sh --cwd /path/to/project
+```
+
+### Interactive Mode
+
+Run script with interactive input:
+
+```bash
+azd script run ./interactive-setup.sh --interactive
+```
+
+### Get Version
+
+```bash
+azd script version
+```
+
+## Script Examples
+
+### Bash Script with azd Context
+
+```bash
+#!/bin/bash
+# deploy.sh
+
+echo "Deploying to environment: $AZURE_ENV_NAME"
+echo "Subscription: $AZURE_SUBSCRIPTION_ID"
+echo "Location: $AZURE_LOCATION"
+
+# Your deployment logic here
+azd deploy --all
+```
+
+### PowerShell Script
+
+```powershell
+# setup.ps1
+
+Write-Host "Setting up environment: $env:AZURE_ENV_NAME"
+Write-Host "Resource Group: $env:AZURE_RESOURCE_GROUP"
+
+# Your setup logic here
+```
+
+## Environment Variables
+
+When you run a script using `azd-script`, it has access to all azd environment variables, including:
+
+- `AZURE_ENV_NAME`: Current azd environment name
+- `AZURE_SUBSCRIPTION_ID`: Azure subscription ID
+- `AZURE_LOCATION`: Azure region/location
+- `AZURE_RESOURCE_GROUP`: Resource group name
+- `AZURE_TENANT_ID`: Azure tenant ID
+- And all custom environment variables defined in your azd environment
+
+## Development
+
+### Prerequisites
+
+- Go 1.23 or later
+- golangci-lint
+- Node.js 20+ (for cspell)
+
+### Building
+
+```bash
+cd cli
+./build.sh
+```
+
+### Running Tests
+
+```bash
+cd cli
+go test ./...
+```
+
+### Running Linters
+
+```bash
+cd cli
+golangci-lint run
+```
+
+### Running Spell Check
+
+```bash
+npm install -g cspell
+cspell "**/*.{go,md,yaml,yml}" --config cspell.json
+```
+
+### Running Security Scan
+
+```bash
+go install github.com/securego/gosec/v2/cmd/gosec@latest
+cd cli
+gosec ./...
+```
+
+## CI/CD
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+- **CI Workflow**: Runs on every PR and push to main
+  - Linting with golangci-lint
+  - Spell checking with cspell
+  - Tests on Linux, Windows, and macOS
+  - Security scanning with gosec
+  - Code coverage reporting
+
+- **CodeQL Workflow**: Security analysis
+  - Runs on push to main and weekly
+  - Detects security vulnerabilities
+
+- **Release Workflow**: Automated releases
+  - Triggered on version tags (e.g., v0.1.0)
+  - Builds for multiple platforms
+  - Creates GitHub releases with binaries
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+Please ensure:
+- All tests pass
+- Code is properly linted
+- Documentation is updated
+- Security scans pass
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Related Projects
+
+- [Azure Developer CLI](https://github.com/Azure/azure-dev)
+- [azd-app](https://github.com/jongio/azd-app)
+
+## Support
+
+For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/jongio/azd-script/issues) page.
