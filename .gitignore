@@ -47,8 +47,8 @@ Thumbs.db
 # Extension builds
 /azd-script
 /azd-script.exe
-script
-script.exe
+/script
+/script.exe
 
 # Test artifacts
 *.test
