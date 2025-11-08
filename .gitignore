@@ -8,19 +8,27 @@
 # Test binary, built with `go test -c`
 *.test
 
-# Output of the go coverage tool, specifically when used with LiteIDE
+# Output of the go coverage tool
 *.out
+*.coverprofile
+coverage.txt
+coverage.html
+coverage/
 
 # Go workspace file
 go.work
+go.work.sum
 
-# Dependency directories (remove the comment below to include it)
+# Dependency directories
 vendor/
 
 # Build artifacts
-/bin/
-/dist/
-/build/
+/cli/bin/
+/cli/dist/
+/cli/build/
+*.tgz
+*.tar.gz
+*.zip
 
 # IDE specific files
 .vscode/
@@ -28,22 +36,20 @@ vendor/
 *.swp
 *.swo
 *~
-
-# OS specific files
 .DS_Store
 Thumbs.db
-
-# Extension builds
-*.tgz
-*.tar.gz
-/azd-script
-/azd-script.exe
 
 # Temporary files
 /tmp/
 *.tmp
+*.log
 
-# Coverage reports
-coverage.txt
-coverage.html
-*.coverprofile
+# Extension builds
+/azd-script
+/azd-script.exe
+script
+script.exe
+
+# Test artifacts
+*.test
+testdata/tmp/
