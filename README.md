@@ -30,7 +30,7 @@ This extension is perfect for automation tasks, custom deployment scripts, envir
 
 ### ❌ Dangerous Practices
 
-- ❌ **Never pipe untrusted scripts** - Avoid: `curl https://random-site.com/script.sh | azd exec run -`
+- ❌ **Never pipe untrusted scripts** - Avoid: `curl https://random-site.com/script.sh | azd exec -`
 - ❌ **Don't run scripts from unknown sources** - Verify author identity and repository ownership
 - ❌ **Avoid storing secrets in environment variables** - Use Azure Key Vault or managed identities instead
 - ❌ **Don't blindly follow tutorials** - Always review and understand script behavior
@@ -103,7 +103,7 @@ The binary will be created in `cli/bin/exec`.
 Execute a script file:
 
 ```bash
-azd exec run ./my-script.sh
+azd exec ./my-script.sh
 ```
 
 ### Specify Shell
@@ -111,7 +111,7 @@ azd exec run ./my-script.sh
 Explicitly specify which shell to use:
 
 ```bash
-azd exec run ./deploy.ps1 --shell pwsh
+azd exec ./deploy.ps1 --shell pwsh
 ```
 
 ### Pass Arguments to Script
@@ -119,7 +119,7 @@ azd exec run ./deploy.ps1 --shell pwsh
 Pass arguments to your script after `--`:
 
 ```bash
-azd exec run ./build.sh -- --verbose --config release
+azd exec ./build.sh -- --verbose --config release
 ```
 
 ### Set Working Directory
@@ -127,7 +127,7 @@ azd exec run ./build.sh -- --verbose --config release
 Execute script from a specific directory:
 
 ```bash
-azd exec run ./scripts/setup.sh --cwd /path/to/project
+azd exec ./scripts/setup.sh --cwd /path/to/project
 ```
 
 ### Interactive Mode
@@ -135,7 +135,7 @@ azd exec run ./scripts/setup.sh --cwd /path/to/project
 Run script with interactive input:
 
 ```bash
-azd exec run ./interactive-setup.sh --interactive
+azd exec ./interactive-setup.sh --interactive
 ```
 
 ### Get Version
@@ -166,7 +166,7 @@ Run it:
 cat ./deploy.sh
 
 # Then execute
-azd exec run ./deploy.sh
+azd exec ./deploy.sh
 ```
 
 ### PowerShell Script

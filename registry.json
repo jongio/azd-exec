@@ -14,7 +14,7 @@
             {
               "name": "run",
               "description": "Execute a script file with azd context",
-              "usage": "azd exec run ./my-script.sh"
+              "usage": "azd exec ./my-script.sh"
             },
             {
               "name": "version",

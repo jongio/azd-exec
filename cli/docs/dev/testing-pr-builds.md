@@ -69,7 +69,7 @@ azd extension install jongio.azd.exec --version 0.1.0-pr123
 azd exec version
 # Should show: azd exec extension version 0.1.0-pr123
 
-azd exec run ./my-script.sh
+azd exec ./my-script.sh
 ```
 
 ## Testing
@@ -194,7 +194,7 @@ curl -fsSL https://raw.githubusercontent.com/jongio/azd-exec/main/cli/scripts/in
 
 # Try it out
 azd exec version
-azd exec run ./my-script.sh
+azd exec ./my-script.sh
 
 # Done testing - restore stable
 curl -fsSL https://raw.githubusercontent.com/jongio/azd-exec/main/cli/scripts/restore-stable.sh | bash
@@ -206,7 +206,7 @@ iex "& { $(irm https://raw.githubusercontent.com/jongio/azd-exec/main/cli/script
 
 # Try it out
 azd exec version
-azd exec run ./my-script.sh
+azd exec ./my-script.sh
 
 # Done testing - restore stable
 iex "& { $(irm https://raw.githubusercontent.com/jongio/azd-exec/main/cli/scripts/restore-stable.ps1) }"
@@ -229,7 +229,7 @@ azd extension install jongio.azd.exec --version 0.1.0-pr456
 
 # 5. Test
 azd exec version
-azd exec run ./my-script.sh
+azd exec ./my-script.sh
 
 # 6. When done, cleanup
 azd extension uninstall jongio.azd.exec
