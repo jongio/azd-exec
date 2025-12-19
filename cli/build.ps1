@@ -16,6 +16,11 @@ $targetOS = $env:GOOS
 $targetArch = $env:GOARCH
 $outputPath = $env:OUTPUT_PATH
 
+Write-Host "DEBUG: GOOS=$targetOS GOARCH=$targetArch OUTPUT_PATH=$outputPath" -ForegroundColor Yellow
+
+# Write debug to file for troubleshooting
+"GOOS=$targetOS GOARCH=$targetArch OUTPUT_PATH=$outputPath" | Out-File -FilePath "build-debug.txt" -Append
+
 if (-not $extensionId) {
     Write-Host "ERROR: EXTENSION_ID environment variable not set" -ForegroundColor Red
     exit 1
@@ -47,6 +52,14 @@ Write-Host "Building $extensionId v$extensionVersion" -ForegroundColor Cyan
 
 # If OUTPUT_PATH is set, this is a targeted build for azd x build
 if ($outputPath) {
+    # Default OS/Arch if not explicitly set by azd x build
+    if (-not $targetOS) {
+        $targetOS = if ($IsWindows) { "windows" } elseif ($IsLinux) { "linux" } elseif ($IsMacOS) { "darwin" } else { "windows" }
+    }
+    if (-not $targetArch) {
+        $targetArch = if ([System.Environment]::Is64BitOperatingSystem) { "amd64" } else { "386" }
+    }
+    
     Write-Host "  OS/Arch: $targetOS/$targetArch" -ForegroundColor Gray
     Write-Host "  Output: $outputPath" -ForegroundColor Gray
     
@@ -58,6 +71,27 @@ if ($outputPath) {
     if ($LASTEXITCODE -ne 0) {
         Write-Host "ERROR: Build failed" -ForegroundColor Red
         exit $LASTEXITCODE
+    }
+    
+    # IMPORTANT: azd x pack expects binaries with platform-specific names
+    # Copy the binary with the correct naming convention for pack to find it
+    $extensionIdSafe = $extensionId -replace '\.', '-'
+    $namespace = "exec"  # from extension.yaml
+    $binaryExt = if ($targetOS -eq "windows") { ".exe" } else { "" }
+    $platformSpecificName = "$extensionIdSafe-$targetOS-$targetArch$binaryExt"
+    
+    $binDir = Split-Path -Parent $outputPath
+    $platformSpecificPath = Join-Path $binDir $platformSpecificName
+    
+    Write-Host "  Creating platform-specific copy: $platformSpecificName" -ForegroundColor Magenta
+    Write-Host "    From: $outputPath" -ForegroundColor DarkGray
+    Write-Host "    To: $platformSpecificPath" -ForegroundColor DarkGray
+    
+    if (Test-Path $outputPath) {
+        Copy-Item $outputPath $platformSpecificPath -Force
+        Write-Host "    ✓ Copy successful" -ForegroundColor Green
+    } else {
+        Write-Host "    ✗ Source file not found!" -ForegroundColor Red
     }
     
     Write-Host "✅ Build successful!" -ForegroundColor Green

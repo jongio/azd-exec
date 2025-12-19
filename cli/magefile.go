@@ -5,7 +5,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -32,8 +31,7 @@ func All() error {
 	return nil
 }
 
-// Build compiles the CLI binary and installs it locally using azd x build.
-// This command builds the extension and automatically installs it for local use.
+// Build compiles the CLI binary using azd x build.
 func Build() error {
 	// Ensure azd extensions are set up (enables extensions + installs azd x if needed)
 	if err := ensureAzdExtensions(); err != nil {
@@ -54,13 +52,178 @@ func Build() error {
 		"EXTENSION_VERSION": version,
 	}
 
-	// Build and install using azd x build
-	if err := sh.RunWithV(env, "azd", "x", "build"); err != nil {
+	// Build using azd x build (always skip install - we'll do proper publish workflow)
+	if err := sh.RunWithV(env, "azd", "x", "build", "--skip-install"); err != nil {
 		return fmt.Errorf("azd x build failed: %w", err)
 	}
 
 	fmt.Printf("✅ Build complete! Version: %s\n", version)
-	fmt.Println("   Run 'azd exec version' to verify")
+	fmt.Println("\n📝 Next steps for local testing:")
+	fmt.Println("   1. Run 'mage pack' to package the extension")
+	fmt.Println("   2. Run 'mage publish' to update local registry")
+	fmt.Println("   3. Run 'azd extension install jongio.azd.exec --source local' to install")
+	fmt.Println("\n   Or run 'mage setup' to do all three steps at once")
+	return nil
+}
+
+// Pack packages the extension into archives using azd x pack.
+// This creates platform-specific zip/tar.gz files in ~/.azd/registry/...
+func Pack() error {
+	fmt.Println("Packaging extension...")
+	
+	// First, ensure we have platform-specific binaries for pack to find
+	// azd x build creates bin/exec.exe but azd x pack needs bin/jongio-azd-exec-windows-amd64.exe
+	version, err := getVersion()
+	if err != nil {
+		return err
+	}
+
+	// Build for current platform first
+	env := map[string]string{
+		"EXTENSION_ID":      extensionID,
+		"EXTENSION_VERSION": version,
+	}
+
+	fmt.Println("Building binary...")
+	if err := sh.RunWithV(env, "azd", "x", "build", "--skip-install"); err != nil {
+		return fmt.Errorf("azd x build failed: %w", err)
+	}
+
+	// Now rename/copy the binary to the format azd x pack expects
+	// Format: {extension-id-with-dashes}-{os}-{arch}{ext}
+	fmt.Println("Creating platform-specific binary names...")
+	
+	binPath := filepath.Join(binDir, binaryName+".exe")
+	if _, err := os.Stat(binPath); err != nil {
+		return fmt.Errorf("binary not found at %s: %w", binPath, err)
+	}
+
+	// Create copies with platform-specific names
+	extensionIdSafe := strings.ReplaceAll(extensionID, ".", "-")
+	platforms := []struct {
+		os, arch, ext string
+	}{
+		{"windows", "amd64", ".exe"},
+	}
+
+	for _, platform := range platforms {
+		platformName := fmt.Sprintf("%s-%s-%s%s", extensionIdSafe, platform.os, platform.arch, platform.ext)
+		platformPath := filepath.Join(binDir, platformName)
+		
+		fmt.Printf("  Creating %s\n", platformName)
+		data, err := os.ReadFile(binPath)
+		if err != nil {
+			return fmt.Errorf("failed to read binary: %w", err)
+		}
+		
+		if err := os.WriteFile(platformPath, data, 0755); err != nil {
+			return fmt.Errorf("failed to write platform binary: %w", err)
+		}
+	}
+
+	// Now pack
+	fmt.Println("Creating packages...")
+	return sh.RunV("azd", "x", "pack")
+}
+
+// Publish updates the local registry with extension metadata using azd x publish.
+// This makes the extension available for installation via 'azd extension install'.
+func Publish() error {
+	fmt.Println("Publishing to local registry...")
+	return sh.RunV("azd", "x", "publish")
+}
+
+// Setup runs the complete local development setup: build -> pack -> publish -> install.
+// This is the recommended way to set up the extension for local testing.
+func Setup() error {
+	fmt.Println("🚀 Setting up extension for local development...\n")
+
+	// Step 1: Ensure local registry exists
+	if err := ensureLocalRegistry(); err != nil {
+		return err
+	}
+
+	// Step 2: Build
+	fmt.Println("\n[1/4] Building...")
+	if err := Build(); err != nil {
+		return err
+	}
+
+	// Step 3: Pack
+	fmt.Println("\n[2/4] Packaging...")
+	if err := Pack(); err != nil {
+		return err
+	}
+
+	// Step 3: Publish
+	fmt.Println("\n[3/4] Publishing to local registry...")
+	if err := Publish(); err != nil {
+		return err
+	}
+
+	// Step 4: Install
+	fmt.Println("\n[4/4] Installing...")
+	if err := sh.RunV("azd", "extension", "install", extensionID, "--source", "local", "--force"); err != nil {
+		return fmt.Errorf("installation failed: %w", err)
+	}
+
+	fmt.Println("\n✅ Setup complete!")
+	fmt.Println("\n🎉 You can now use: azd exec version")
+	return nil
+}
+
+// ensureLocalRegistry creates the local extension registry if it doesn't exist.
+func ensureLocalRegistry() error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("failed to get home directory: %w", err)
+	}
+
+	registryPath := filepath.Join(homeDir, ".azd", "registry.json")
+
+	// Check if registry already exists
+	if _, err := os.Stat(registryPath); err == nil {
+		// Registry exists, check if "local" source is configured
+		output, err := sh.Output("azd", "extension", "source", "list")
+		if err == nil && strings.Contains(output, "local") {
+			return nil // All good
+		}
+	}
+
+	// Create registry file
+	fmt.Println("📦 Setting up local extension registry...")
+	
+	azdDir := filepath.Join(homeDir, ".azd")
+	if err := os.MkdirAll(azdDir, 0755); err != nil {
+		return fmt.Errorf("failed to create .azd directory: %w", err)
+	}
+
+	// Write minimal registry structure
+	registryContent := `{"extensions":[]}`
+	if err := os.WriteFile(registryPath, []byte(registryContent), 0644); err != nil {
+		return fmt.Errorf("failed to create registry.json: %w", err)
+	}
+
+	// Add local source
+	fmt.Println("📦 Adding local extension source...")
+	if err := sh.RunV("azd", "extension", "source", "add", "--name", "local", "--location", "registry.json", "--type", "file"); err != nil {
+		return fmt.Errorf("failed to add local source: %w", err)
+	}
+
+	fmt.Println("✅ Local registry created!")
+	return nil
+}
+
+// Uninstall removes the locally installed extension.
+func Uninstall() error {
+	fmt.Println("Uninstalling extension...")
+
+	if err := sh.RunV("azd", "extension", "uninstall", extensionID); err != nil {
+		fmt.Println("⚠️  Extension may not be installed")
+		return nil
+	}
+
+	fmt.Println("✅ Extension uninstalled!")
 	return nil
 }
 
@@ -82,11 +245,6 @@ func getVersion() (string, error) {
 	}
 
 	return "", fmt.Errorf("version not found in %s", extensionFile)
-}
-
-// Install builds and installs the extension (alias for Build).
-func Install() error {
-	return Build()
 }
 
 // Test runs unit tests only (with -short flag).
@@ -165,11 +323,9 @@ func TestCoverage() error {
 	coverageOut := filepath.Join(absCoverageDir, "coverage.out")
 	coverageHTML := filepath.Join(absCoverageDir, "coverage.html")
 
-	// Run tests with coverage (use -short to skip integration tests)
-	cmd := exec.Command("go", "test", "-short", "-coverprofile="+coverageOut, "./src/...")
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
+	// Run go test with coverage
+	args := []string{"test", "-short", "-coverprofile=" + coverageOut, "./src/..."}
+	if err := sh.RunV("go", args...); err != nil {
 		return fmt.Errorf("tests failed: %w", err)
 	}
 
@@ -179,19 +335,17 @@ func TestCoverage() error {
 	}
 
 	// Calculate coverage percentage
-	cmd = exec.Command("go", "tool", "cover", "-func="+coverageOut)
-	output, err := cmd.CombinedOutput()
+	output, err := sh.Output("go", "tool", "cover", "-func="+coverageOut)
 	if err != nil {
 		return fmt.Errorf("failed to calculate coverage: %w", err)
 	}
 
-	fmt.Println("\n" + string(output))
+	fmt.Println("\n" + output)
 	fmt.Printf("✅ Coverage report generated: %s\n", coverageHTML)
 
 	// Check if coverage meets threshold
-	outputStr := string(output)
-	if strings.Contains(outputStr, "total:") {
-		lines := strings.Split(outputStr, "\n")
+	if strings.Contains(output, "total:") {
+		lines := strings.Split(output, "\n")
 		for _, line := range lines {
 			if strings.Contains(line, "total:") {
 				fmt.Println("\n📊 " + strings.TrimSpace(line))
@@ -220,7 +374,7 @@ func Lint() error {
 	}
 
 	// Check if golangci-lint is available
-	if _, err := exec.LookPath("golangci-lint"); err != nil {
+	if _, err := sh.Output("golangci-lint", "version"); err != nil {
 		fmt.Println("⚠️  golangci-lint not found, skipping")
 		fmt.Println("   Install: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest")
 	} else {
@@ -246,19 +400,6 @@ func Clean() error {
 	}
 
 	fmt.Println("✅ Clean complete!")
-	return nil
-}
-
-// Uninstall removes the locally installed extension.
-func Uninstall() error {
-	fmt.Println("Uninstalling extension...")
-
-	if err := sh.RunV("azd", "extension", "uninstall", extensionID); err != nil {
-		fmt.Println("⚠️  Extension may not be installed")
-		return nil
-	}
-
-	fmt.Println("✅ Extension uninstalled!")
 	return nil
 }
 

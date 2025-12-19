@@ -1,12 +1,40 @@
 {
-  "extensions": {
-    "jongio.azd.exec": {
+  "extensions": [
+    {
       "id": "jongio.azd.exec",
-      "name": "Exec Extension",
-      "description": "Execute commands and scripts with Azure Developer CLI context and environment variables",
       "namespace": "exec",
-      "repository": "https://github.com/jongio/azd-exec",
-      "versions": []
+      "displayName": "Exec Extension",
+      "description": "Execute commands and scripts with Azure Developer CLI context and environment variables",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "capabilities": ["custom-commands"],
+          "usage": "azd exec <command> [options]",
+          "examples": [
+            {
+              "name": "run",
+              "description": "Execute a script file with azd context",
+              "usage": "azd exec run ./my-script.sh"
+            },
+            {
+              "name": "version",
+              "description": "Display extension version",
+              "usage": "azd exec version"
+            }
+          ],
+          "artifacts": {
+            "windows/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "0000000000000000000000000000000000000000000000000000000000000000"
+              },
+              "entryPoint": "jongio-azd-exec-windows-amd64.exe",
+              "url": "file://D:/code/azd-script/cli/bin/exec.exe"
+            }
+          }
+        }
+      ],
+      "tags": ["scripting", "automation", "developer-tools"]
     }
-  }
+  ]
 }
