@@ -40,12 +40,12 @@ func main() {
 			if noPrompt {
 				_ = os.Setenv("AZD_NO_PROMPT", "true")
 			}
-environment selection
+
+			// Handle environment selection
 			if environment != "" {
 				_ = os.Setenv("AZURE_ENV_NAME", environment)
 			}
 
-			// Handle 
 			// Handle trace logging
 			if traceLogFile != "" {
 				_ = os.Setenv("AZD_TRACE_LOG_FILE", traceLogFile)
@@ -62,9 +62,9 @@ environment selection
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "default", "Output format: default or json")
 
 	// Add azd global flags
-	// These flags match the global flaP(&environment, "environment", "e", "", "The name of the environment to use.")
-	rootCmd.PersistentFlags().StringVargs available in azd to ensure compatibility
+	// These flags match the global flags available in azd to ensure compatibility
 	// Without these, the extension will error when users pass global flags like --debug or --no-prompt
+	rootCmd.PersistentFlags().StringVarP(&environment, "environment", "e", "", "The name of the environment to use.")
 	rootCmd.PersistentFlags().StringVarP(&cwd, "cwd", "C", "", "Sets the current working directory.")
 	rootCmd.PersistentFlags().BoolVar(&debugMode, "debug", false, "Enables debugging and diagnostics logging.")
 	rootCmd.PersistentFlags().BoolVar(&noPrompt, "no-prompt", false, "Accepts the default value instead of prompting, or it fails if there is no default.")
