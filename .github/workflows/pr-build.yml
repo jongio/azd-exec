@@ -32,6 +32,9 @@ jobs:
   check-permission:
     name: Check Build Permission
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
     # Only run if:
     # 1. CI workflow succeeded, OR
     # 2. Manual trigger via workflow_dispatch, OR
