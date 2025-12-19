@@ -88,7 +88,7 @@ Examples:
 	// Add script execution flags
 	rootCmd.Flags().StringVarP(&shell, "shell", "s", "", "Shell to use for execution (bash, sh, zsh, pwsh, powershell, cmd). Auto-detected if not specified.")
 	rootCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Run script in interactive mode")
-	
+
 	// Add extension-specific flags
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "default", "Output format: default or json")
 

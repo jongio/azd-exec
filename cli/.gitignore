@@ -49,3 +49,6 @@ Thumbs.db
 coverage.txt
 coverage.html
 *.coverprofile
+cov
+cov-*
+test-cov*
