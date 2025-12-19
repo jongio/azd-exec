@@ -1,4 +1,4 @@
-module github.com/jongio/azd-script/cli
+module github.com/jongio/azd-exec/cli
 
 go 1.23
 

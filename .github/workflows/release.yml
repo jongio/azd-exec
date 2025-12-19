@@ -59,19 +59,19 @@ jobs:
           cd bin
           
           # Linux AMD64
-          tar -czf azd-script-linux-amd64.tar.gz -C linux-amd64 script
+          tar -czf azd-exec-linux-amd64.tar.gz -C linux-amd64 exec
           
           # Linux ARM64
-          tar -czf azd-script-linux-arm64.tar.gz -C linux-arm64 script
+          tar -czf azd-exec-linux-arm64.tar.gz -C linux-arm64 exec
           
           # macOS AMD64
-          tar -czf azd-script-darwin-amd64.tar.gz -C darwin-amd64 script
+          tar -czf azd-exec-darwin-amd64.tar.gz -C darwin-amd64 exec
           
           # macOS ARM64
-          tar -czf azd-script-darwin-arm64.tar.gz -C darwin-arm64 script
+          tar -czf azd-exec-darwin-arm64.tar.gz -C darwin-arm64 exec
           
           # Windows AMD64
-          cd windows-amd64 && zip ../azd-script-windows-amd64.zip script.exe && cd ..
+          cd windows-amd64 && zip ../azd-exec-windows-amd64.zip exec.exe && cd ..
           
           # Calculate checksums
           sha256sum *.tar.gz *.zip > checksums.txt
@@ -121,10 +121,10 @@ jobs:
         run: |
           cat > extension-info.json <<EOF
           {
-            "id": "jongio.azd.script",
+            "id": "jongio.azd.exec",
             "version": "${{ steps.version.outputs.version }}",
-            "repository": "https://github.com/jongio/azd-script",
-            "releaseUrl": "https://github.com/jongio/azd-script/releases/tag/${{ steps.version.outputs.version }}"
+            "repository": "https://github.com/jongio/azd-exec",
+            "releaseUrl": "https://github.com/jongio/azd-exec/releases/tag/${{ steps.version.outputs.version }}"
           }
           EOF
 

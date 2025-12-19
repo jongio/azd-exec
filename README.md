@@ -1,14 +1,14 @@
-# azd-script
+# azd-exec
 
-[![CI](https://github.com/jongio/azd-script/actions/workflows/ci.yml/badge.svg)](https://github.com/jongio/azd-script/actions/workflows/ci.yml)
-[![CodeQL](https://github.com/jongio/azd-script/actions/workflows/codeql.yml/badge.svg)](https://github.com/jongio/azd-script/actions/workflows/codeql.yml)
+[![CI](https://github.com/jongio/azd-exec/actions/workflows/ci.yml/badge.svg)](https://github.com/jongio/azd-exec/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/jongio/azd-exec/actions/workflows/codeql.yml/badge.svg)](https://github.com/jongio/azd-exec/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Execute scripts with Azure Developer CLI (azd) context and environment variables.
 
 ## Overview
 
-`azd-script` is an Azure Developer CLI extension that allows you to execute scripts with full access to the azd environment, including:
+`azd-exec` is an Azure Developer CLI extension that allows you to execute commands and scripts with full access to the azd environment, including:
 
 - All azd environment variables
 - Azure subscription and tenant information
@@ -37,13 +37,13 @@ This extension is perfect for automation tasks, custom deployment scripts, envir
 
 ### Install from Release
 
-Download the latest release for your platform from the [releases page](https://github.com/jongio/azd-script/releases).
+Download the latest release for your platform from the [releases page](https://github.com/jongio/azd-exec/releases).
 
 ### Build from Source
 
 ```bash
-git clone https://github.com/jongio/azd-script.git
-cd azd-script/cli
+git clone https://github.com/jongio/azd-exec.git
+cd azd-exec/cli
 chmod +x build.sh
 ./build.sh
 ```
@@ -140,7 +140,7 @@ Write-Host "Resource Group: $env:AZURE_RESOURCE_GROUP"
 
 ## Environment Variables
 
-When you run a script using `azd-script`, it has access to all azd environment variables, including:
+When you run a script using `azd-exec`, it has access to all azd environment variables, including:
 
 - `AZURE_ENV_NAME`: Current azd environment name
 - `AZURE_SUBSCRIPTION_ID`: Azure subscription ID
@@ -240,4 +240,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Support
 
-For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/jongio/azd-script/issues) page.
+For issues, questions, or contributions, please use the [GitHub Issues](https://github.com/jongio/azd-exec/issues) page.

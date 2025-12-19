@@ -36,8 +36,10 @@ Thumbs.db
 # Extension builds
 *.tgz
 *.tar.gz
-/azd-script
-/azd-script.exe
+/azd-exec
+/azd-exec.exe
+/exec
+/exec.exe
 
 # Temporary files
 /tmp/

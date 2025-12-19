@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jongio/azd-script/cli/src/cmd/script/commands"
+	"github.com/jongio/azd-exec/cli/src/cmd/script/commands"
 	"github.com/spf13/cobra"
 )
 
