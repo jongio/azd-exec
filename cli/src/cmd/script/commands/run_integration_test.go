@@ -152,19 +152,19 @@ func getTestProjectsDir(t *testing.T) string {
 
 	// Try multiple possible paths
 	possiblePaths := []string{
-		filepath.Join(cwd, "..", "..", "..", "tests", "projects"),     // From commands dir
-		filepath.Join(cwd, "..", "tests", "projects"),                 // From src dir
-		filepath.Join(cwd, "tests", "projects"),                       // From cli dir
+		filepath.Join(cwd, "..", "..", "..", "tests", "projects"),       // From commands dir
+		filepath.Join(cwd, "..", "tests", "projects"),                   // From src dir
+		filepath.Join(cwd, "tests", "projects"),                         // From cli dir
 		filepath.Join(cwd, "..", "..", "..", "..", "tests", "projects"), // From nested test dir
 	}
-	
+
 	for _, testDir := range possiblePaths {
 		testDir = filepath.Clean(testDir)
 		if _, err := os.Stat(testDir); err == nil {
 			return testDir
 		}
 	}
-	
+
 	// If not found, try to find the cli directory
 	testDir := filepath.Join(cwd, "tests", "projects")
 	for i := 0; i < 5; i++ {
@@ -174,7 +174,7 @@ func getTestProjectsDir(t *testing.T) string {
 			return testDir
 		}
 	}
-	
+
 	t.Fatalf("Test projects directory not found. CWD: %s", cwd)
 	return ""
 }
@@ -185,7 +185,7 @@ func captureOutput(t *testing.T, fn func() error) string {
 
 	// Save original stdout
 	origStdout := os.Stdout
-	
+
 	// Create pipe
 	r, w, err := os.Pipe()
 	if err != nil {

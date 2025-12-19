@@ -251,7 +251,7 @@ func TestGetPowerShellNameUnit(t *testing.T) {
 	// Test PowerShell name selection based on OS
 	exec := New(Config{})
 	got := exec.detectShell("test.ps1")
-	
+
 	if runtime.GOOS == "windows" {
 		if got != "powershell" {
 			t.Errorf("detectShell(.ps1) on Windows = %v, want powershell", got)

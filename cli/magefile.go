@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/magefile/mage/mg"
@@ -33,37 +32,56 @@ func All() error {
 	return nil
 }
 
-// Build compiles the CLI binary and installs it locally.
+// Build compiles the CLI binary and installs it locally using azd x build.
+// This command builds the extension and automatically installs it for local use.
 func Build() error {
+	// Ensure azd extensions are set up (enables extensions + installs azd x if needed)
+	if err := ensureAzdExtensions(); err != nil {
+		return err
+	}
+
 	fmt.Println("Building azd exec extension...")
 
-	binaryExt := ""
-	if runtime.GOOS == "windows" {
-		binaryExt = ".exe"
+	// Get version from extension.yaml
+	version, err := getVersion()
+	if err != nil {
+		return err
 	}
 
-	// Ensure bin directory exists
-	if err := os.MkdirAll(binDir, 0755); err != nil {
-		return fmt.Errorf("failed to create bin directory: %w", err)
+	// Set environment variables required by azd x build
+	env := map[string]string{
+		"EXTENSION_ID":      extensionID,
+		"EXTENSION_VERSION": version,
 	}
 
-	outputPath := filepath.Join(binDir, binaryName+binaryExt)
-
-	// Build the binary
-	if err := sh.RunV("go", "build", "-o", outputPath, "./"+srcDir); err != nil {
-		return fmt.Errorf("build failed: %w", err)
-	}
-
-	fmt.Printf("✅ Built successfully: %s\n", outputPath)
-
-	// Install using azd x build
-	fmt.Println("Installing extension locally...")
-	if err := sh.RunV("azd", "x", "build"); err != nil {
+	// Build and install using azd x build
+	if err := sh.RunWithV(env, "azd", "x", "build"); err != nil {
 		return fmt.Errorf("azd x build failed: %w", err)
 	}
 
-	fmt.Println("✅ Extension installed successfully!")
+	fmt.Printf("✅ Build complete! Version: %s\n", version)
+	fmt.Println("   Run 'azd exec version' to verify")
 	return nil
+}
+
+// getVersion reads the version from extension.yaml
+func getVersion() (string, error) {
+	data, err := os.ReadFile(extensionFile)
+	if err != nil {
+		return "", fmt.Errorf("failed to read %s: %w", extensionFile, err)
+	}
+
+	lines := strings.Split(string(data), "\n")
+	for _, line := range lines {
+		if strings.HasPrefix(line, "version:") {
+			parts := strings.Split(line, ":")
+			if len(parts) == 2 {
+				return strings.TrimSpace(parts[1]), nil
+			}
+		}
+	}
+
+	return "", fmt.Errorf("version not found in %s", extensionFile)
 }
 
 // Install builds and installs the extension (alias for Build).
@@ -246,8 +264,62 @@ func Uninstall() error {
 
 // Watch monitors files and rebuilds on changes (requires azd x watch).
 func Watch() error {
+	// Ensure azd extensions are set up
+	if err := ensureAzdExtensions(); err != nil {
+		return err
+	}
+
 	fmt.Println("Starting watch mode...")
-	return sh.RunV("azd", "x", "watch")
+
+	// Get version from extension.yaml
+	version, err := getVersion()
+	if err != nil {
+		return err
+	}
+
+	// Set environment variables required by azd x watch
+	env := map[string]string{
+		"EXTENSION_ID":      extensionID,
+		"EXTENSION_VERSION": version,
+	}
+
+	return sh.RunWithV(env, "azd", "x", "watch")
+}
+
+// ensureAzdExtensions checks that azd is installed, extensions are enabled, and the azd x extension is installed.
+// This is a prerequisite for commands that use azd x (build, watch, etc.).
+func ensureAzdExtensions() error {
+	// Check if azd is available
+	if _, err := sh.Output("azd", "version"); err != nil {
+		return fmt.Errorf("azd is not installed or not in PATH. Install from https://aka.ms/azd")
+	}
+
+	// Check if extensions are enabled by looking at config
+	configOutput, err := sh.Output("azd", "config", "show")
+	if err != nil {
+		// Config might not exist yet, that's okay
+		configOutput = ""
+	}
+
+	// Enable extensions if not already enabled
+	if !strings.Contains(configOutput, `"enabled": "on"`) && !strings.Contains(configOutput, `"enabled":"on"`) {
+		fmt.Println("📦 Enabling azd extensions...")
+		if err := sh.RunV("azd", "config", "set", "alpha.extension.enabled", "on"); err != nil {
+			return fmt.Errorf("failed to enable azd extensions: %w", err)
+		}
+		fmt.Println("✅ Extensions enabled!")
+	}
+
+	// Check if azd x extension is available
+	if _, err := sh.Output("azd", "x", "--help"); err != nil {
+		fmt.Println("📦 Installing azd x extension (developer kit)...")
+		if err := sh.RunV("azd", "extension", "install", "microsoft.azd.extensions", "--source", "azd", "--no-prompt"); err != nil {
+			return fmt.Errorf("failed to install azd x extension: %w", err)
+		}
+		fmt.Println("✅ azd x extension installed!")
+	}
+
+	return nil
 }
 
 // Preflight runs all checks before shipping: format, build, lint, tests, and coverage.
