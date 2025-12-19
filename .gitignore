@@ -45,10 +45,10 @@ Thumbs.db
 *.log
 
 # Extension builds
-/azd-script
-/azd-script.exe
-/script
-/script.exe
+/azd-exec
+/azd-exec.exe
+/exec
+/exec.exe
 
 # Test artifacts
 *.test

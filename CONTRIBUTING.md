@@ -1,6 +1,6 @@
-# Contributing to azd-script
+# Contributing to azd-exec
 
-We love your input! We want to make contributing to azd-script as easy and transparent as possible, whether it's:
+We love your input! We want to make contributing to azd-exec as easy and transparent as possible, whether it's:
 
 - Reporting a bug
 - Discussing the current state of the code
@@ -32,8 +32,8 @@ We use GitHub to host code, to track issues and feature requests, as well as acc
 
 ```bash
 # Clone your fork
-git clone https://github.com/YOUR_USERNAME/azd-script.git
-cd azd-script
+git clone https://github.com/YOUR_USERNAME/azd-exec.git
+cd azd-exec
 
 # Install dependencies
 cd cli
@@ -126,7 +126,7 @@ In short, when you submit code changes, your submissions are understood to be un
 
 ## Report Bugs Using GitHub Issues
 
-We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/jongio/azd-script/issues/new).
+We use GitHub issues to track public bugs. Report a bug by [opening a new issue](https://github.com/jongio/azd-exec/issues/new).
 
 ### Write Bug Reports with Detail, Background, and Sample Code
 

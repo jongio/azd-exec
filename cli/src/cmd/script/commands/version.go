@@ -15,7 +15,7 @@ func NewVersionCommand() *cobra.Command {
 		Short: "Display the extension version",
 		Long:  `Display the version information for the azd exec extension.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("azd exec (azd-script) version %s\n", version)
+			fmt.Printf("azd exec version %s\n", version)
 		},
 	}
 }

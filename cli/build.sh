@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Build script for azd-script (azd exec) extension
+# Build script for azd-exec extension
 
 VERSION="${VERSION:-0.1.0}"
 BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -9,7 +9,7 @@ GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
 LDFLAGS="-X main.version=${VERSION} -X main.buildDate=${BUILD_DATE} -X main.gitCommit=${GIT_COMMIT}"
 
-echo "Building azd-script ${VERSION} (${GIT_COMMIT})"
+echo "Building azd-exec ${VERSION} (${GIT_COMMIT})"
 
 # Create output directory
 mkdir -p bin
