@@ -70,7 +70,7 @@ func Build() error {
 // This creates platform-specific zip/tar.gz files in ~/.azd/registry/...
 func Pack() error {
 	fmt.Println("Packaging extension...")
-	
+
 	// First, ensure we have platform-specific binaries for pack to find
 	// azd x build creates bin/exec.exe but azd x pack needs bin/jongio-azd-exec-windows-amd64.exe
 	version, err := getVersion()
@@ -92,7 +92,7 @@ func Pack() error {
 	// Now rename/copy the binary to the format azd x pack expects
 	// Format: {extension-id-with-dashes}-{os}-{arch}{ext}
 	fmt.Println("Creating platform-specific binary names...")
-	
+
 	binPath := filepath.Join(binDir, binaryName+".exe")
 	if _, err := os.Stat(binPath); err != nil {
 		return fmt.Errorf("binary not found at %s: %w", binPath, err)
@@ -109,13 +109,13 @@ func Pack() error {
 	for _, platform := range platforms {
 		platformName := fmt.Sprintf("%s-%s-%s%s", extensionIdSafe, platform.os, platform.arch, platform.ext)
 		platformPath := filepath.Join(binDir, platformName)
-		
+
 		fmt.Printf("  Creating %s\n", platformName)
 		data, err := os.ReadFile(binPath)
 		if err != nil {
 			return fmt.Errorf("failed to read binary: %w", err)
 		}
-		
+
 		if err := os.WriteFile(platformPath, data, 0755); err != nil {
 			return fmt.Errorf("failed to write platform binary: %w", err)
 		}
@@ -192,7 +192,7 @@ func ensureLocalRegistry() error {
 
 	// Create registry file
 	fmt.Println("📦 Setting up local extension registry...")
-	
+
 	azdDir := filepath.Join(homeDir, ".azd")
 	if err := os.MkdirAll(azdDir, 0755); err != nil {
 		return fmt.Errorf("failed to create .azd directory: %w", err)
