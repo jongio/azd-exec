@@ -33,6 +33,11 @@ linters-settings:
     check-blank: false  # Allow _ = in tests
     exclude-functions:
       - (os).RemoveAll  # Defer cleanup in tests is OK to ignore
+  
+  gosec:
+    excludes:
+      - G204  # Subprocess launched with variable - needed for script execution
+      - G306  # File permissions - we need executable scripts
 
   gofmt:
     simplify: true

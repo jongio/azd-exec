@@ -33,20 +33,28 @@ We use GitHub to host code, to track issues and feature requests, as well as acc
 ```bash
 # Clone your fork
 git clone https://github.com/YOUR_USERNAME/azd-exec.git
-cd azd-exec
+cd azd-exec/cli
 
 # Install dependencies
-cd cli
 go mod download
 
-# Build the project
-./build.sh
+# Install mage (build tool)
+go install github.com/magefile/mage@latest
+
+# Enable azd extensions
+azd config set alpha.extension.enabled on
+
+# Build and install
+mage install
+
+# Verify installation
+azd exec version
 
 # Run tests
-go test ./...
+mage test
 
-# Run linters
-golangci-lint run
+# Run all quality checks
+mage preflight
 ```
 
 ## Code Style
@@ -65,14 +73,14 @@ golangci-lint run
 cd cli
 
 # Format code
-gofmt -s -w .
-goimports -w .
+mage fmt
 
-# Run golangci-lint
-golangci-lint run --timeout=5m
+# Run all linters
+mage lint
 
-# Run spell checker
-cspell "**/*.{go,md,yaml,yml}" --config ../cspell.json
+# Run spell checker (from root)
+cd ..
+cspell "**/*.{go,md,yaml,yml}" --config cspell.json
 ```
 
 ## Testing
@@ -81,22 +89,43 @@ cspell "**/*.{go,md,yaml,yml}" --config ../cspell.json
 
 ```bash
 cd cli
-go test ./...
+
+# Run unit tests (fast, <5s)
+mage test
+
+# Run with verbose output
+go test -v -short ./src/...
 ```
 
 ### Integration Tests
 
 ```bash
-cd cli
-go test -v ./...
+# Run all integration tests
+mage testIntegration
+
+# Run specific package
+TEST_PACKAGE=executor mage testIntegration
+
+# Run specific test
+TEST_NAME=TestRunCommandIntegration mage testIntegration
+
+# Run all tests (unit + integration)
+mage testAll
 ```
 
 ### Running Tests with Coverage
 
 ```bash
-cd cli
-go test -coverprofile=coverage.out ./...
-go tool cover -html=coverage.out
+# Generate coverage report
+mage testCoverage
+
+# View coverage in browser
+# Windows
+start coverage/coverage.html
+# macOS
+open coverage/coverage.html
+# Linux
+xdg-open coverage/coverage.html
 ```
 
 ## Pull Request Process
@@ -108,10 +137,27 @@ go tool cover -html=coverage.out
 ## Pull Request Guidelines
 
 - **Keep it small**: Small, focused PRs are easier to review and merge.
-- **Write good commit messages**: Use clear, descriptive commit messages.
-- **Add tests**: Ensure your changes are covered by tests.
+- **Write good commit messages**: Follow [Conventional Commits](https://www.conventionalcommits.org/) (feat:, fix:, docs:, etc.)
+- **Add tests**: Ensure your changes are covered by tests (>=80% coverage).
 - **Update documentation**: If you change functionality, update the docs.
 - **Follow the code style**: Make sure your code passes all linters.
+- **Run preflight**: Execute `mage preflight` before submitting.
+
+### Quality Gates (Must Pass)
+
+Before submitting a PR:
+
+```bash
+# Run all quality checks
+mage preflight
+```
+
+This ensures:
+- ✅ Code formatting (`go fmt`)
+- ✅ Linting (`go vet`, `golangci-lint`)
+- ✅ Unit tests (100% pass)
+- ✅ Integration tests (100% pass)
+- ✅ Coverage report (>=80%)
 
 ## Commit Message Guidelines
 
