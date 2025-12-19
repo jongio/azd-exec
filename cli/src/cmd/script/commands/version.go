@@ -18,16 +18,19 @@ func NewVersionCommand(outputFormat *string) *cobra.Command {
 		Short: "Display the extension version",
 		Long:  `Display the version information for the azd exec extension.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if *outputFormat == "json" {
+			switch *outputFormat {
+			case "json":
 				output := map[string]string{
 					"version": version,
 				}
 				data, _ := json.MarshalIndent(output, "", "  ")
 				fmt.Println(string(data))
-			} else if quiet {
-				fmt.Println(version)
-			} else {
-				fmt.Printf("azd exec version %s\n", version)
+			default:
+				if quiet {
+					fmt.Println(version)
+				} else {
+					fmt.Printf("azd exec version %s\n", version)
+				}
 			}
 		},
 	}
