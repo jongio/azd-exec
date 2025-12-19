@@ -168,6 +168,7 @@ func TestNewExecutor(t *testing.T) {
 			exec := New(tt.config)
 			if exec == nil {
 				t.Error("New() returned nil")
+				return
 			}
 			if exec.config.Shell != tt.config.Shell {
 				t.Errorf("Shell = %v, want %v", exec.config.Shell, tt.config.Shell)

@@ -224,7 +224,7 @@ func TestBuildCommandLookPath(t *testing.T) {
 	}
 }
 
-// Helper to wrap exec.LookPath for testing
+// Helper to wrap exec.LookPath for testing.
 func execLookPath(file string) (string, error) {
 	return exec.LookPath(file)
 }
