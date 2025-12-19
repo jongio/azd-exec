@@ -38,7 +38,6 @@ Examples:
 	azd exec ./init.sh -i  # Interactive mode
 	
 	azd exec version  # Show version
-	azd exec listen   # Start listener mode
 `,
 		Args: func(cmd *cobra.Command, args []string) error {
 			// Allow subcommands (version, listen) or script execution
