@@ -11,6 +11,9 @@ examples:
   - name: run
     description: Execute a script file with azd context
     usage: azd exec run ./my-script.sh
+  - name: listen
+    description: Listen for script execution via named pipe
+    usage: azd exec listen
   - name: version
     description: Display extension version
     usage: azd exec version
