@@ -1,0 +1,12 @@
+{
+  "extensions": {
+    "jongio.azd.exec": {
+      "id": "jongio.azd.exec",
+      "name": "Exec Extension",
+      "description": "Execute commands and scripts with Azure Developer CLI context and environment variables",
+      "namespace": "exec",
+      "repository": "https://github.com/jongio/azd-exec",
+      "versions": []
+    }
+  }
+}

@@ -35,6 +35,22 @@ This extension is perfect for automation tasks, custom deployment scripts, envir
 - [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) installed
 - Go 1.23 or later (for building from source)
 
+### Install via azd (Recommended)
+
+```bash
+# Enable azd extensions
+azd config set alpha.extension.enabled on
+
+# Add the extension registry
+azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+
+# Install the extension
+azd extension install jongio.azd.exec
+
+# Verify installation
+azd exec version
+```
+
 ### Install from Release
 
 Download the latest release for your platform from the [releases page](https://github.com/jongio/azd-exec/releases).
@@ -50,18 +66,7 @@ chmod +x build.sh
 
 The binary will be created in `cli/bin/exec`.
 
-Compatibility: this extension supports the legacy invocation `azd script` as an alias to `azd exec` for backwards compatibility.
-
-### Package Extension
-
-After building, create a packaged extension zip used by azd by running:
-
-```bash
-cd cli
-./pack.sh 0.1.0
-```
-
-This produces a file like `azd-exec-0.1.0.zip` containing the binary and extension metadata suitable for distribution.
+**Note:** This extension supports the legacy invocation `azd script` as an alias to `azd exec` for backwards compatibility.
 
 ## Usage
 
@@ -232,6 +237,51 @@ Please ensure:
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Release Process (for Maintainers)
+
+This project uses an automated release workflow powered by `azd x` commands:
+
+### Creating a Release
+
+1. Go to **Actions** → **Release** workflow
+2. Click **Run workflow**
+3. Choose bump type:
+   - **patch**: Bug fixes (0.1.0 → 0.1.1)
+   - **minor**: New features (0.1.0 → 0.2.0)
+   - **major**: Breaking changes (0.1.0 → 1.0.0)
+4. Click **Run workflow**
+
+The workflow automatically:
+- Calculates next version
+- Updates `cli/extension.yaml` and `cli/CHANGELOG.md`
+- Commits version bump
+- Builds binaries for all platforms
+- Packages extension archives
+- Creates GitHub release
+- Updates `registry.json`
+
+### Manual Release (for testing)
+
+```bash
+# Install azd extensions tooling
+azd extension install microsoft.azd.extensions
+
+# Build for all platforms
+cd cli
+export extension_id="jongio.azd.exec"
+export extension_version="0.1.0"
+azd x build --all
+
+# Package extension
+azd x pack
+
+# Create release (test)
+azd x release --repo "jongio/azd-exec" --version "0.1.0" --draft
+
+# Update registry
+azd x publish --registry ../registry.json --version "0.1.0"
+```
 
 ## Related Projects
 
