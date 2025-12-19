@@ -167,7 +167,7 @@ azd exec run ./malicious.sh  # Gets both secrets!
 
 **Attack Scenario**:
 ```bash
-# Popular "awesome-azd-scripts" GitHub repo gets compromised
+# Popular "awesome-azd-execs" GitHub repo gets compromised
 # Attacker adds subtle malicious code to existing scripts
 
 # Before (legitimate):
