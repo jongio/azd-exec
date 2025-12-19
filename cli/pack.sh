@@ -1,31 +1,39 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-# pack.sh - Create azd extension package for release
+# pack.sh - Manual packaging script (for local testing)
+# For releases, use: azd x pack
 # Usage: ./pack.sh [version]
 
 VERSION="${1:-0.1.0}"
-OUT_DIR="out"
-PKG_NAME="azd-exec-${VERSION}.zip"
 
-echo "Packaging azd exec extension version ${VERSION}"
+echo "🎁 Packaging azd exec extension version ${VERSION}"
+echo ""
+echo "Note: This is for local testing. The release workflow uses 'azd x pack' automatically."
+echo ""
 
-rm -rf "${OUT_DIR}"
-mkdir -p "${OUT_DIR}"/bin
-
-# Copy binary and metadata
-if [ -f bin/exec ]; then
-  cp bin/exec "${OUT_DIR}/bin/"
-fi
-if [ -f bin/exec.exe ]; then
-  cp bin/exec.exe "${OUT_DIR}/bin/"
+# Check if azd is available
+if ! command -v azd &> /dev/null; then
+    echo "❌ azd not found. Install from https://aka.ms/azd"
+    echo "   For local testing, you can still create a basic zip manually."
+    exit 1
 fi
 
-cp extension.yaml "${OUT_DIR}/"
-cp README.md "${OUT_DIR}/"
+# Check if azd x extensions are enabled
+if ! azd extension list &> /dev/null; then
+    echo "⚠️  azd extensions not enabled. Enabling..."
+    azd config set alpha.extension.enabled on
+    echo "📦 Installing microsoft.azd.extensions..."
+    azd extension install microsoft.azd.extensions
+fi
 
-pushd "${OUT_DIR}" >/dev/null
-zip -r "../${PKG_NAME}" .
-popd >/dev/null
+# Use azd x pack
+echo "📦 Running azd x pack..."
+azd x pack
 
-echo "Created package: ${PKG_NAME}"
+echo ""
+echo "✅ Package created in: ~/.azd/registry/jongio.azd.exec/${VERSION}/"
+echo ""
+echo "To test locally:"
+echo "  azd extension source add -n local -t file -l \"\$HOME/.azd/registry/jongio.azd.exec/${VERSION}/registry.json\""
+echo "  azd extension install jongio.azd.exec --version ${VERSION}"

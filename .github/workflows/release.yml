@@ -1,27 +1,24 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
     inputs:
-      version:
-        description: 'Version to release (e.g., v0.1.0)'
+      bump:
+        description: 'Version bump type'
         required: true
-        type: string
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+        default: patch
 
 permissions:
   contents: write
-  packages: write
-
-defaults:
-  run:
-    working-directory: cli
 
 jobs:
-  build:
-    name: Build Release Binaries
+  release:
+    name: Automated Release
     runs-on: ubuntu-latest
     
     steps:
@@ -29,6 +26,82 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git pull --rebase origin main
+
+      - name: Calculate next version
+        id: version
+        run: |
+          CURRENT=$(grep '^version:' cli/extension.yaml | awk '{print $2}')
+          echo "Current version: $CURRENT"
+          
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          
+          case "${{ github.event.inputs.bump }}" in
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+          esac
+          
+          NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "Next version: $NEXT_VERSION"
+          echo "version=${NEXT_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Update version in extension.yaml
+        run: |
+          sed -i "s/^version:.*/version: ${{ steps.version.outputs.version }}/" cli/extension.yaml
+          cat cli/extension.yaml | grep version
+
+      - name: Generate changelog entry
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          DATE=$(date +%Y-%m-%d)
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          
+          if [ -z "$LAST_TAG" ]; then
+            COMMITS=$(git log --oneline --pretty=format:"- %s (%h)")
+          else
+            COMMITS=$(git log ${LAST_TAG}..HEAD --oneline --pretty=format:"- %s (%h)")
+          fi
+          
+          # Prepend new version to CHANGELOG.md
+          {
+            echo "# Changelog"
+            echo ""
+            echo "All notable changes to the azd exec extension will be documented in this file."
+            echo ""
+            echo "The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),"
+            echo "and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)."
+            echo ""
+            echo "## [${VERSION}] - ${DATE}"
+            echo ""
+            echo "$COMMITS"
+            echo ""
+            tail -n +8 cli/CHANGELOG.md
+          } > cli/CHANGELOG.md.new
+          
+          mv cli/CHANGELOG.md.new cli/CHANGELOG.md
+
+      - name: Commit version bump
+        run: |
+          git add cli/extension.yaml cli/CHANGELOG.md
+          git commit -m "chore: bump version to ${{ steps.version.outputs.version }}"
+          git push origin main
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -36,100 +109,56 @@ jobs:
           go-version: '1.23'
           cache-dependency-path: cli/go.sum
 
-      - name: Determine version
-        id: version
+      - name: Install azd and extensions CLI
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            VERSION="${GITHUB_REF#refs/tags/}"
-          fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-          echo "Building version: ${VERSION}"
+          curl -fsSL https://aka.ms/install-azd.sh | bash
+          azd config set alpha.extension.enabled on
+          azd extension install microsoft.azd.extensions
 
-      - name: Build all platforms
+      - name: Build binaries
         env:
-          VERSION: ${{ steps.version.outputs.version }}
+          extension_id: jongio.azd.exec
+          extension_version: ${{ steps.version.outputs.version }}
         run: |
-          chmod +x build.sh
-          BUILD_ALL=true ./build.sh
+          cd cli
+          azd x build --all
 
-      - name: Create release archives
+      - name: Package extension
         run: |
-          cd bin
-          
-          # Linux AMD64
-          tar -czf azd-exec-linux-amd64.tar.gz -C linux-amd64 exec
-          
-          # Linux ARM64
-          tar -czf azd-exec-linux-arm64.tar.gz -C linux-arm64 exec
-          
-          # macOS AMD64
-          tar -czf azd-exec-darwin-amd64.tar.gz -C darwin-amd64 exec
-          
-          # macOS ARM64
-          tar -czf azd-exec-darwin-arm64.tar.gz -C darwin-arm64 exec
-          
-          # Windows AMD64
-          cd windows-amd64 && zip ../azd-exec-windows-amd64.zip exec.exe && cd ..
-          
-          # Calculate checksums
-          sha256sum *.tar.gz *.zip > checksums.txt
+          cd cli
+          azd x pack
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ steps.version.outputs.version }}
-          name: Release ${{ steps.version.outputs.version }}
-          draft: false
-          prerelease: false
-          generate_release_notes: true
-          files: |
-            cli/bin/*.tar.gz
-            cli/bin/*.zip
-            cli/bin/checksums.txt
+      - name: Extract release notes
+        id: notes
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          NOTES=$(sed -n "/## \[${VERSION}\]/,/## \[/p" cli/CHANGELOG.md | sed '$d' | tail -n +3)
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-  publish-extension:
-    name: Publish Extension Metadata
-    runs-on: ubuntu-latest
-    needs: build
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Determine version
-        id: version
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
-          else
-            VERSION="${GITHUB_REF#refs/tags/}"
-          fi
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          cd cli
+          VERSION="${{ steps.version.outputs.version }}"
+          
+          azd x release \
+            --repo "jongio/azd-exec" \
+            --version "${VERSION}" \
+            --confirm || echo "Release creation may have already completed"
 
-      - name: Update extension version
+      - name: Update registry
         run: |
-          VERSION=${{ steps.version.outputs.version }}
-          # Remove 'v' prefix if present
-          VERSION=${VERSION#v}
-          sed -i "s/^version:.*/version: ${VERSION}/" cli/extension.yaml
+          cd cli
+          azd x publish \
+            --registry ../registry.json \
+            --version "${{ steps.version.outputs.version }}"
 
-      - name: Create extension package info
+      - name: Commit registry update
         run: |
-          cat > extension-info.json <<EOF
-          {
-            "id": "jongio.azd.exec",
-            "version": "${{ steps.version.outputs.version }}",
-            "repository": "https://github.com/jongio/azd-exec",
-            "releaseUrl": "https://github.com/jongio/azd-exec/releases/tag/${{ steps.version.outputs.version }}"
-          }
-          EOF
-
-      - name: Upload extension info
-        uses: actions/upload-artifact@v4
-        with:
-          name: extension-info
-          path: extension-info.json
+          git pull --rebase origin main
+          git add registry.json
+          git commit -m "chore: update registry for v${{ steps.version.outputs.version }}" || echo "No registry changes"
+          git push origin main
