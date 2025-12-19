@@ -17,6 +17,34 @@ Execute scripts with Azure Developer CLI (azd) context and environment variables
 
 This extension is perfect for automation tasks, custom deployment scripts, environment setup, and any scenario where you need to run scripts within the azd context.
 
+## ⚠️ Security Notice
+
+**IMPORTANT**: `azd-exec` is a powerful developer tool that executes scripts with **full access** to your Azure credentials, environment variables, and azd context. Please follow these security best practices:
+
+### ✅ Safe Practices
+
+- ✅ **Only run scripts you trust** - Review all scripts before execution
+- ✅ **Use HTTPS for downloads** - Never use HTTP to download scripts
+- ✅ **Verify script sources** - Only use scripts from official Azure documentation or trusted repositories
+- ✅ **Review script contents** - Always read scripts before running them, especially from tutorials or blog posts
+
+### ❌ Dangerous Practices
+
+- ❌ **Never pipe untrusted scripts** - Avoid: `curl https://random-site.com/script.sh | azd exec run -`
+- ❌ **Don't run scripts from unknown sources** - Verify author identity and repository ownership
+- ❌ **Avoid storing secrets in environment variables** - Use Azure Key Vault or managed identities instead
+- ❌ **Don't blindly follow tutorials** - Always review and understand script behavior
+
+### What Scripts Can Access
+
+Scripts executed by `azd-exec` inherit:
+- 🔑 **Azure authentication context** (subscription, tenant, credentials)
+- 🌍 **All environment variables** (including any secrets you may have set)
+- 📂 **Full filesystem access** (same permissions as your user account)
+- 🌐 **Network access** (can make external connections)
+
+**For detailed security information**, see [Security Documentation](cli/docs/SECURITY-REVIEW.md) and [Threat Model](cli/docs/THREAT-MODEL.md).
+
 ## Features
 
 - ✨ **Automatic Shell Detection**: Detects the appropriate shell based on script file extension or shebang
@@ -25,8 +53,8 @@ This extension is perfect for automation tasks, custom deployment scripts, envir
 - 🎯 **Script Arguments**: Pass arguments to your scripts
 - 📂 **Working Directory Control**: Execute scripts in any directory
 - 🔄 **Interactive Mode**: Run scripts with interactive input
-- 🔒 **Security**: Comprehensive security scanning with CodeQL and gosec
-- ✅ **Well Tested**: Extensive unit and integration tests
+- 🔒 **Security**: Comprehensive security scanning with CodeQL and gosec (0 vulnerabilities)
+- ✅ **Well Tested**: Extensive unit and integration tests with 86%+ coverage
 
 ## Installation
 
@@ -130,6 +158,15 @@ echo "Location: $AZURE_LOCATION"
 
 # Your deployment logic here
 azd deploy --all
+```
+
+Run it:
+```bash
+# First, review the script contents
+cat ./deploy.sh
+
+# Then execute
+azd exec run ./deploy.sh
 ```
 
 ### PowerShell Script
