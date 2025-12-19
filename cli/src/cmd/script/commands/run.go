@@ -11,7 +11,7 @@ import (
 )
 
 // NewRunCommand creates a new run command.
-func NewRunCommand() *cobra.Command {
+func NewRunCommand(outputFormat *string) *cobra.Command {
 	var (
 		shell       string
 		workingDir  string
