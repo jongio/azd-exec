@@ -48,7 +48,20 @@ chmod +x build.sh
 ./build.sh
 ```
 
-The binary will be created in `cli/bin/script`.
+The binary will be created in `cli/bin/exec`.
+
+Compatibility: this extension supports the legacy invocation `azd script` as an alias to `azd exec` for backwards compatibility.
+
+### Package Extension
+
+After building, create a packaged extension zip used by azd by running:
+
+```bash
+cd cli
+./pack.sh 0.1.0
+```
+
+This produces a file like `azd-exec-0.1.0.zip` containing the binary and extension metadata suitable for distribution.
 
 ## Usage
 
@@ -57,7 +70,7 @@ The binary will be created in `cli/bin/script`.
 Execute a script file:
 
 ```bash
-azd script run ./my-script.sh
+azd exec run ./my-script.sh
 ```
 
 ### Specify Shell
@@ -65,7 +78,7 @@ azd script run ./my-script.sh
 Explicitly specify which shell to use:
 
 ```bash
-azd script run ./deploy.ps1 --shell pwsh
+azd exec run ./deploy.ps1 --shell pwsh
 ```
 
 ### Pass Arguments to Script
@@ -73,7 +86,7 @@ azd script run ./deploy.ps1 --shell pwsh
 Pass arguments to your script after `--`:
 
 ```bash
-azd script run ./build.sh -- --verbose --config release
+azd exec run ./build.sh -- --verbose --config release
 ```
 
 ### Set Working Directory
@@ -81,7 +94,7 @@ azd script run ./build.sh -- --verbose --config release
 Execute script from a specific directory:
 
 ```bash
-azd script run ./scripts/setup.sh --cwd /path/to/project
+azd exec run ./scripts/setup.sh --cwd /path/to/project
 ```
 
 ### Interactive Mode
@@ -89,13 +102,13 @@ azd script run ./scripts/setup.sh --cwd /path/to/project
 Run script with interactive input:
 
 ```bash
-azd script run ./interactive-setup.sh --interactive
+azd exec run ./interactive-setup.sh --interactive
 ```
 
 ### Get Version
 
 ```bash
-azd script version
+azd exec version
 ```
 
 ## Script Examples

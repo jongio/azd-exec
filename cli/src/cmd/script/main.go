@@ -15,9 +15,9 @@ var (
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:   "script",
-		Short: "Script - Execute scripts with Azure Developer CLI context",
-		Long:  `Script is an Azure Developer CLI extension that executes scripts with full access to azd environment variables and configuration.`,
+		Use:   "exec",
+		Short: "Exec - Execute commands/scripts with Azure Developer CLI context",
+		Long:  `Exec is an Azure Developer CLI extension that executes commands and scripts with full access to azd environment variables and configuration.`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			if debugMode {
 				_ = os.Setenv("AZD_SCRIPT_DEBUG", "true")
@@ -40,5 +40,12 @@ func main() {
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+	}
+}
+
+// init remaps legacy invocation `azd script` to `azd exec` for compatibility.
+func init() {
+	if len(os.Args) > 1 && os.Args[1] == "script" {
+		os.Args[1] = "exec"
 	}
 }

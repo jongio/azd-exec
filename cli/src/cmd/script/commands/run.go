@@ -19,18 +19,18 @@ func NewRunCommand() *cobra.Command {
 		args        []string
 	)
 
-	cmd := &cobra.Command{
-		Use:   "run [script-file] [-- script-args...]",
-		Short: "Execute a script file with azd context",
-		Long: `Execute a script file with access to the Azure Developer CLI context.
+		cmd := &cobra.Command{
+				Use:   "run [script-file] [-- script-args...]",
+				Short: "Execute a script file with azd context",
+				Long: `Execute a script file with access to the Azure Developer CLI context.
 The script will have access to all azd environment variables, configuration,
 and can use azd commands within the script.
 
 Examples:
-  azd script run ./setup.sh
-  azd script run ./deploy.ps1 --shell pwsh
-  azd script run ./build.sh -- --verbose --config release
-  azd script run ./init.sh -i  # Interactive mode
+	azd exec run ./setup.sh
+	azd exec run ./deploy.ps1 --shell pwsh
+	azd exec run ./build.sh -- --verbose --config release
+	azd exec run ./init.sh -i  # Interactive mode
 `,
 		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, cmdArgs []string) error {
