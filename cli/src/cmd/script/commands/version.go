@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -9,7 +10,7 @@ import (
 const version = "0.1.0"
 
 // NewVersionCommand creates a new version command.
-func NewVersionCommand() *cobra.Command {
+func NewVersionCommand(outputFormat *string) *cobra.Command {
 	var quiet bool
 
 	cmd := &cobra.Command{
@@ -17,7 +18,13 @@ func NewVersionCommand() *cobra.Command {
 		Short: "Display the extension version",
 		Long:  `Display the version information for the azd exec extension.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			if quiet {
+			if *outputFormat == "json" {
+				output := map[string]string{
+					"version": version,
+				}
+				data, _ := json.MarshalIndent(output, "", "  ")
+				fmt.Println(string(data))
+			} else if quiet {
 				fmt.Println(version)
 			} else {
 				fmt.Printf("azd exec version %s\n", version)

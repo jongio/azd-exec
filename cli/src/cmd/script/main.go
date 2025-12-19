@@ -9,7 +9,8 @@ import (
 )
 
 var (
-	debugMode bool
+	outputFormat string
+	debugMode    bool
 )
 
 func main() {
@@ -26,12 +27,13 @@ func main() {
 	}
 
 	// Add global flags
+	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "default", "Output format (default, json)")
 	rootCmd.PersistentFlags().BoolVar(&debugMode, "debug", false, "Enable debug logging")
 
 	// Register all commands
 	rootCmd.AddCommand(
-		commands.NewRunCommand(),
-		commands.NewVersionCommand(),
+		commands.NewRunCommand(&outputFormat),
+		commands.NewVersionCommand(&outputFormat),
 		commands.NewListenCommand(), // Required for azd extension framework
 	)
 
