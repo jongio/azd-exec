@@ -29,7 +29,7 @@
                 "value": "0000000000000000000000000000000000000000000000000000000000000000"
               },
               "entryPoint": "jongio-azd-exec-windows-amd64.exe",
-              "url": "file://D:/code/azd-script/cli/bin/exec.exe"
+              "url": "https://github.com/jongio/azd-exec/releases/download/v0.1.0/jongio-azd-exec-windows-amd64.exe"
             }
           }
         }
