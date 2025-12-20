@@ -463,6 +463,26 @@ func ensureAzdExtensions() error {
 	return nil
 }
 
+// SpellCheck runs cspell to check for spelling errors.
+func SpellCheck() error {
+	fmt.Println("Running spell check...")
+
+	// Check if cspell is available
+	if _, err := sh.Output("cspell", "--version"); err != nil {
+		fmt.Println("⚠️  cspell not found, skipping")
+		fmt.Println("   Install: npm install -g cspell")
+		return nil
+	}
+
+	// Run cspell
+	if err := sh.RunV("cspell", "**/*.{go,md,yaml,yml}", "--config", "../cspell.json"); err != nil {
+		return fmt.Errorf("spell check failed: %w", err)
+	}
+
+	fmt.Println("✅ Spell check passed!")
+	return nil
+}
+
 // Preflight runs all checks before shipping: format, build, lint, tests, and coverage.
 func Preflight() error {
 	fmt.Println("🚀 Running preflight checks...\n")
@@ -472,6 +492,7 @@ func Preflight() error {
 		fn   func() error
 	}{
 		{"Format check", Fmt},
+		{"Spell check", SpellCheck},
 		{"Linting", Lint},
 		{"Unit tests", Test},
 		{"Integration tests", TestIntegration},

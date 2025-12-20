@@ -52,6 +52,7 @@
     "testall",
     "testcache",
     "testcoverage",
+    "testhelpers",
     "Timestomping",
     "TOCTOU",
     "tparallel",
