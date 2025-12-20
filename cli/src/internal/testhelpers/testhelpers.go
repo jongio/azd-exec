@@ -44,7 +44,9 @@ func CaptureOutput(t *testing.T, fn func() error) string {
 	fnErr := fn()
 
 	// Close write end and restore stdout
-	w.Close()
+	if err := w.Close(); err != nil {
+		t.Logf("Failed to close pipe writer: %v", err)
+	}
 	os.Stdout = origStdout
 
 	// Get output

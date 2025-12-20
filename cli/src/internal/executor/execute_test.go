@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -49,13 +50,24 @@ func TestExecuteWithCustomShell(t *testing.T) {
 }
 
 func TestExecuteError(t *testing.T) {
-	// Try to execute non-existent script
-	exec := New(Config{})
+	t.Run("Nonexistent script", func(t *testing.T) {
+		exec := New(Config{})
+		err := exec.Execute(context.Background(), "nonexistent-script.sh")
+		if err == nil {
+			t.Error("Expected error for nonexistent script, got nil")
+		}
+	})
 
-	err := exec.Execute(context.Background(), "nonexistent-script.sh")
-	if err == nil {
-		t.Error("Expected error for nonexistent script, got nil")
-	}
+	t.Run("Empty script path", func(t *testing.T) {
+		exec := New(Config{})
+		err := exec.Execute(context.Background(), "")
+		if err == nil {
+			t.Error("Expected error for empty script path, got nil")
+		}
+		if !strings.Contains(err.Error(), "cannot be empty") {
+			t.Errorf("Expected 'cannot be empty' error, got: %v", err)
+		}
+	})
 }
 
 func TestExecuteWithArguments(t *testing.T) {

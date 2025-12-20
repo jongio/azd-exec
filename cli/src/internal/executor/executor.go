@@ -12,16 +12,6 @@ import (
 	"strings"
 )
 
-const (
-	shellBash       = "bash"
-	shellCmd        = "cmd"
-	shellPowerShell = "powershell"
-	shellPwsh       = "pwsh"
-	shellSh         = "sh"
-	shellZsh        = "zsh"
-	osWindows       = "windows"
-)
-
 // Config holds the configuration for script execution.
 type Config struct {
 	Shell       string   // Shell to use for execution
@@ -42,6 +32,11 @@ func New(config Config) *Executor {
 
 // Execute runs a script file with azd context.
 func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
+	// Validate script path
+	if scriptPath == "" {
+		return fmt.Errorf("script path cannot be empty")
+	}
+
 	// Auto-detect shell if not specified
 	shell := e.config.Shell
 	if shell == "" {
@@ -79,7 +74,7 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 		if exitErr, ok := err.(*exec.ExitError); ok {
 			return fmt.Errorf("script exited with code %d", exitErr.ExitCode())
 		}
-		return fmt.Errorf("failed to execute script: %w", err)
+		return fmt.Errorf("failed to execute script %q with shell %q: %w", filepath.Base(scriptPath), shell, err)
 	}
 
 	return nil
@@ -127,13 +122,13 @@ func (e *Executor) readShebang(scriptPath string) string {
 
 	reader := bufio.NewReader(file)
 
-	// Read first two bytes to check for shebang
-	buf := make([]byte, 2)
+	// Read first bytes to check for shebang
+	buf := make([]byte, shebangReadSize)
 	if _, err := io.ReadFull(reader, buf); err != nil {
 		return ""
 	}
 
-	if string(buf) != "#!" {
+	if string(buf) != shebangPrefix {
 		return ""
 	}
 
@@ -147,7 +142,7 @@ func (e *Executor) readShebang(scriptPath string) string {
 	parts := strings.Fields(line)
 	if len(parts) > 0 {
 		// Handle "#!/usr/bin/env python3" style shebangs
-		if filepath.Base(parts[0]) == "env" && len(parts) > 1 {
+		if filepath.Base(parts[0]) == envCommand && len(parts) > 1 {
 			return filepath.Base(parts[1])
 		}
 		shellPath := parts[0]

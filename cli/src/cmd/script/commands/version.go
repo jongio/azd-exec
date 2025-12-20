@@ -3,11 +3,11 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
+	"github.com/jongio/azd-exec/cli/src/internal/version"
 	"github.com/spf13/cobra"
 )
-
-const version = "0.1.0"
 
 // NewVersionCommand creates a new version command.
 func NewVersionCommand(outputFormat *string) *cobra.Command {
@@ -21,15 +21,19 @@ func NewVersionCommand(outputFormat *string) *cobra.Command {
 			switch *outputFormat {
 			case "json":
 				output := map[string]string{
-					"version": version,
+					"version": version.Version,
 				}
-				data, _ := json.MarshalIndent(output, "", "  ")
+				data, err := json.MarshalIndent(output, "", "  ")
+				if err != nil {
+					fmt.Fprintf(os.Stderr, "Error formatting JSON: %v\n", err)
+					return
+				}
 				fmt.Println(string(data))
 			default:
 				if quiet {
-					fmt.Println(version)
+					fmt.Println(version.Version)
 				} else {
-					fmt.Printf("azd exec version %s\n", version)
+					fmt.Printf("azd exec version %s\n", version.Version)
 				}
 			}
 		},
