@@ -64,6 +64,10 @@ func main() {
 	// Add azd global flags
 	// These flags match the global flags available in azd to ensure compatibility
 	// Without these, the extension will error when users pass global flags like --debug or --no-prompt
+	rootCmd.PersistentFlags().BoolVar(&debugMode, "debug", false, "Enable debug mode")
+	rootCmd.PersistentFlags().BoolVar(&noPrompt, "no-prompt", false, "Disable prompts")
+	rootCmd.PersistentFlags().StringVarP(&cwd, "cwd", "C", "", "Sets the current working directory")
+	rootCmd.PersistentFlags().StringVarP(&environment, "environment", "e", "", "The name of the environment to use")
 	rootCmd.PersistentFlags().StringVar(&traceLogFile, "trace-log-file", "", "Write a diagnostics trace to a file.")
 	rootCmd.PersistentFlags().StringVar(&traceLogURL, "trace-log-url", "", "Send traces to an Open Telemetry compatible endpoint.")
 

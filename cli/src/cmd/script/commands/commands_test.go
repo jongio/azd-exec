@@ -3,13 +3,10 @@ package commands
 import (
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
-)
 
-func contains(s, substr string) bool {
-	return strings.Contains(s, substr)
-}
+	"github.com/jongio/azd-exec/cli/src/internal/testhelpers"
+)
 
 func TestNewRunCommand(t *testing.T) {
 	outputFormat := "default"
@@ -19,7 +16,7 @@ func TestNewRunCommand(t *testing.T) {
 		t.Fatal("NewRunCommand returned nil")
 	}
 
-	if !contains(cmd.Use, "run") {
+	if !testhelpers.Contains(cmd.Use, "run") {
 		t.Errorf("Command Use = %v, should contain 'run'", cmd.Use)
 	}
 
@@ -47,7 +44,7 @@ func TestRunCommandScriptNotFound(t *testing.T) {
 	if err == nil {
 		t.Error("Expected error for nonexistent script, got nil")
 	}
-	if !contains(err.Error(), "not found") {
+	if !testhelpers.Contains(err.Error(), "not found") {
 		t.Errorf("Expected 'not found' error, got: %v", err)
 	}
 }
@@ -70,10 +67,10 @@ func TestRunCommandWithValidScript(t *testing.T) {
 	err := cmd.Execute()
 	if err != nil {
 		// Allow shell-not-found or path-related errors, but not arg parsing errors
-		if !contains(err.Error(), "executable file not found") &&
-			!contains(err.Error(), "exec format error") &&
-			!contains(err.Error(), "No such file or directory") &&
-			!contains(err.Error(), "code 127") {
+		if !testhelpers.Contains(err.Error(), "executable file not found") &&
+			!testhelpers.Contains(err.Error(), "exec format error") &&
+			!testhelpers.Contains(err.Error(), "No such file or directory") &&
+			!testhelpers.Contains(err.Error(), "code 127") {
 			t.Errorf("Unexpected error: %v", err)
 		}
 	}
@@ -94,7 +91,7 @@ func TestRunCommandWithShellFlag(t *testing.T) {
 	// Test that command accepts the flag without error in parsing
 	err := cmd.Execute()
 	// Execution may fail if pwsh not available, but flag should parse correctly
-	if err != nil && contains(err.Error(), "unknown flag") {
+	if err != nil && testhelpers.Contains(err.Error(), "unknown flag") {
 		t.Errorf("Shell flag not recognized: %v", err)
 	}
 }

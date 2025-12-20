@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/jongio/azd-exec/cli/src/internal/testhelpers"
 )
 
 func TestVersionCommandIntegration(t *testing.T) {
@@ -47,7 +49,7 @@ func TestVersionCommandIntegration(t *testing.T) {
 			}
 
 			// Capture output
-			output := captureOutput(t, func() error {
+			output := testhelpers.CaptureOutput(t, func() error {
 				return cmd.Execute()
 			})
 
@@ -79,7 +81,7 @@ func TestVersionCommandIntegration_QuietFlag(t *testing.T) {
 	cmd := NewVersionCommand(&outputFormat)
 	cmd.Flags().Set("quiet", "true")
 
-	output := captureOutput(t, func() error {
+	output := testhelpers.CaptureOutput(t, func() error {
 		return cmd.Execute()
 	})
 
@@ -103,7 +105,7 @@ func TestVersionCommandIntegration_JSONFormat(t *testing.T) {
 	outputFormat := "json"
 	cmd := NewVersionCommand(&outputFormat)
 
-	output := captureOutput(t, func() error {
+	output := testhelpers.CaptureOutput(t, func() error {
 		return cmd.Execute()
 	})
 
