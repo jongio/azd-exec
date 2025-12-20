@@ -1,0 +1,167 @@
+---
+/**
+ * InstallTabs Component
+ * 
+ * Platform-specific installation commands with tabbed interface.
+ */
+import CodeBlock from './CodeBlock.astro';
+
+interface Props {
+  defaultPlatform?: 'windows' | 'macos' | 'linux';
+}
+
+const { defaultPlatform = 'windows' } = Astro.props;
+
+const platforms = [
+  {
+    id: 'windows',
+    name: 'Windows',
+    icon: 'windows',
+    commands: `# Install Azure Developer CLI
+winget install microsoft.azd
+
+# Enable extensions
+azd config set alpha.extension.enabled on
+
+# Add extension source
+azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+
+# Install extension
+azd extension install jongio.azd.exec`,
+  },
+  {
+    id: 'macos',
+    name: 'macOS',
+    icon: 'apple',
+    commands: `# Install Azure Developer CLI
+brew tap azure/azd && brew install azd
+
+# Enable extensions
+azd config set alpha.extension.enabled on
+
+# Add extension source
+azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+
+# Install extension
+azd extension install jongio.azd.exec`,
+  },
+  {
+    id: 'linux',
+    name: 'Linux',
+    icon: 'linux',
+    commands: `# Install Azure Developer CLI
+curl -fsSL https://aka.ms/install-azd.sh | bash
+
+# Enable extensions
+azd config set alpha.extension.enabled on
+
+# Add extension source
+azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+
+# Install extension
+azd extension install jongio.azd.exec`,
+  },
+];
+---
+
+<div class="install-tabs">
+  <div class="tabs-header" role="tablist" aria-label="Installation platforms">
+    {platforms.map((platform, index) => (
+      <button
+        class={`tab-button ${index === 0 ? 'active' : ''}`}
+        role="tab"
+        aria-selected={index === 0 ? 'true' : 'false'}
+        aria-controls={`panel-${platform.id}`}
+        id={`tab-${platform.id}`}
+        data-platform={platform.id}
+      >
+        {platform.name}
+      </button>
+    ))}
+  </div>
+
+  <div class="tabs-content">
+    {platforms.map((platform, index) => (
+      <div
+        class={`tab-panel ${index === 0 ? 'active' : ''}`}
+        role="tabpanel"
+        id={`panel-${platform.id}`}
+        aria-labelledby={`tab-${platform.id}`}
+        data-platform={platform.id}
+      >
+        <CodeBlock code={platform.commands} language="bash" />
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .install-tabs {
+    margin: 2rem 0;
+  }
+
+  .tabs-header {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--color-border-default);
+    margin-bottom: 1rem;
+  }
+
+  .tab-button {
+    padding: 0.75rem 1.5rem;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+    margin-bottom: -2px;
+  }
+
+  .tab-button:hover {
+    color: var(--color-text-primary);
+  }
+
+  .tab-button.active {
+    color: var(--color-interactive-default);
+    border-bottom-color: var(--color-interactive-default);
+  }
+
+  .tab-panel {
+    display: none;
+  }
+
+  .tab-panel.active {
+    display: block;
+  }
+</style>
+
+<script>
+  const tabs = document.querySelectorAll('.tab-button');
+  const panels = document.querySelectorAll('.tab-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const platform = tab.getAttribute('data-platform');
+      
+      // Update tabs
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+
+      // Update panels
+      panels.forEach(panel => {
+        if (panel.getAttribute('data-platform') === platform) {
+          panel.classList.add('active');
+        } else {
+          panel.classList.remove('active');
+        }
+      });
+    });
+  });
+</script>

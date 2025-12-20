@@ -3,17 +3,17 @@ namespace: exec
 displayName: Exec Extension
 description: Execute commands and scripts with Azure Developer CLI context and environment variables
 usage: azd exec <command> [options]
-version: 0.0.0
+version: 0.2.0
 language: go
 capabilities:
   - custom-commands
 examples:
-  - name: run
+  - name: execute script
     description: Execute a script file with azd context
-    usage: azd exec run ./my-script.sh
-  - name: listen
-    description: Listen for script execution via named pipe
-    usage: azd exec listen
+    usage: azd exec ./my-script.sh
+  - name: with shell
+    description: Execute with specific shell
+    usage: azd exec ./deploy.ps1 --shell pwsh
   - name: version
     description: Display extension version
     usage: azd exec version

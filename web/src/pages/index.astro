@@ -1,0 +1,476 @@
+---
+import Layout from '../components/Layout.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import InstallTabs from '../components/InstallTabs.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="Home">
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-container">
+      <h1 class="hero-title">Run Scripts with Azure Context</h1>
+      <p class="hero-subtitle">
+        Execute any script with full access to your Azure Developer CLI environment variables and Azure credentials.
+      </p>
+      <div class="hero-cta">
+        <a href={`${base}getting-started`} class="btn-primary">Get Started</a>
+        <a href="https://github.com/jongio/azd-exec" class="btn-secondary" target="_blank" rel="noopener noreferrer">
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Security Warning -->
+  <section class="security-warning">
+    <div class="container">
+      <div class="warning-box">
+        <div class="warning-icon">⚠️</div>
+        <div class="warning-content">
+          <h2 class="warning-title">Security Notice</h2>
+          <p class="warning-text">
+            <strong>IMPORTANT:</strong> <code>azd exec</code> executes scripts with <strong>full access</strong> to your Azure credentials and environment.
+            Only run scripts you trust and have reviewed. Never pipe untrusted scripts from the internet.
+          </p>
+          <p class="warning-actions">
+            <a href={`${base}security`} class="warning-link">Read Security Guidelines →</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features">
+    <div class="container">
+      <h2 class="section-title">Everything You Need</h2>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">🔧</div>
+          <h3 class="feature-title">Multiple Shell Support</h3>
+          <p class="feature-description">
+            Automatically detects and runs bash, sh, zsh, PowerShell, pwsh, and cmd scripts based on file extension or shebang.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3 class="feature-title">Script Arguments</h3>
+          <p class="feature-description">
+            Pass arguments to your scripts seamlessly with the <code>--</code> separator for clean parameter handling.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🌍</div>
+          <h3 class="feature-title">Full Azure Context</h3>
+          <p class="feature-description">
+            Access all azd environment variables including subscription, tenant, location, and custom variables.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📂</div>
+          <h3 class="feature-title">Working Directory Control</h3>
+          <p class="feature-description">
+            Execute scripts from any directory with the <code>--cwd</code> flag for flexible automation.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔄</div>
+          <h3 class="feature-title">Interactive Mode</h3>
+          <p class="feature-description">
+            Run scripts with interactive input support for prompts and user interaction.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">✅</div>
+          <h3 class="feature-title">Battle-Tested</h3>
+          <p class="feature-description">
+            Comprehensive security scanning with CodeQL and gosec (0 vulnerabilities). 86%+ test coverage.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Start Section -->
+  <section class="quick-start">
+    <div class="container">
+      <h2 class="section-title">Quick Start</h2>
+      
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h3 class="step-title">Install Extension</h3>
+            <InstallTabs />
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h3 class="step-title">Verify Installation</h3>
+            <CodeBlock code="azd exec version" language="bash" />
+          </div>
+        </div>
+
+        <div class="step">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h3 class="step-title">Run Your Script</h3>
+            <CodeBlock code={`# Review the script first
+cat ./deploy.sh
+
+# Then execute
+azd exec ./deploy.sh`} language="bash" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Example Scripts Section -->
+  <section class="examples">
+    <div class="container">
+      <h2 class="section-title">Example Scripts</h2>
+      
+      <div class="example-tabs">
+        <div class="tab-content">
+          <h3>Bash Script</h3>
+          <CodeBlock code={`#!/bin/bash
+# deploy.sh
+
+echo "Environment: \$AZURE_ENV_NAME"
+echo "Subscription: \$AZURE_SUBSCRIPTION_ID"
+echo "Location: \$AZURE_LOCATION"
+
+azd deploy --all`} language="bash" />
+        </div>
+
+        <div class="tab-content">
+          <h3>PowerShell Script</h3>
+          <CodeBlock code={`# setup.ps1
+
+Write-Host "Environment: \$env:AZURE_ENV_NAME"
+Write-Host "Resource Group: \$env:AZURE_RESOURCE_GROUP"
+
+# Your setup logic here`} language="powershell" />
+        </div>
+      </div>
+
+      <p class="examples-cta">
+        <a href={`${base}examples`} class="link-arrow">See more examples →</a>
+      </p>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="final-cta">
+    <div class="container">
+      <h2 class="cta-title">Ready to get started?</h2>
+      <p class="cta-subtitle">Install azd exec and start running your scripts with Azure context.</p>
+      <a href={`${base}getting-started`} class="btn-primary-large">Get Started Now</a>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  /* Hero Section */
+  .hero {
+    background: linear-gradient(135deg, #0078d4 0%, #005a9e 100%);
+    color: white;
+    padding: 4rem 1.5rem;
+    text-align: center;
+  }
+
+  .hero-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .hero-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    line-height: 1.2;
+  }
+
+  @media (min-width: 768px) {
+    .hero-title {
+      font-size: 3.5rem;
+    }
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    margin: 0 0 2rem;
+    opacity: 0.95;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary, .btn-secondary, .btn-primary-large {
+    display: inline-block;
+    padding: 0.875rem 2rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+
+  .btn-primary {
+    background-color: white;
+    color: #0078d4;
+  }
+
+  .btn-primary:hover {
+    background-color: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .btn-secondary {
+    background-color: transparent;
+    color: white;
+    border: 2px solid white;
+  }
+
+  .btn-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+  }
+
+  /* Security Warning */
+  .security-warning {
+    padding: 3rem 1.5rem;
+    background-color: var(--color-bg-secondary);
+  }
+
+  .warning-box {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    display: flex;
+    gap: 1rem;
+  }
+
+  [data-theme="dark"] .warning-box {
+    background-color: #664d03;
+    border-color: #997404;
+  }
+
+  .warning-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+  }
+
+  .warning-title {
+    margin: 0 0 0.5rem;
+    font-size: 1.25rem;
+    color: #664d03;
+  }
+
+  [data-theme="dark"] .warning-title {
+    color: #ffc107;
+  }
+
+  .warning-text {
+    margin: 0 0 1rem;
+    color: #664d03;
+    line-height: 1.6;
+  }
+
+  [data-theme="dark"] .warning-text {
+    color: #ffeaa7;
+  }
+
+  .warning-actions {
+    margin: 0;
+  }
+
+  .warning-link {
+    color: #664d03;
+    font-weight: 600;
+    text-decoration: underline;
+  }
+
+  [data-theme="dark"] .warning-link {
+    color: #ffc107;
+  }
+
+  /* Container */
+  .container {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+  }
+
+  /* Section Title */
+  .section-title {
+    font-size: 2rem;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 3rem;
+    color: var(--color-text-primary);
+  }
+
+  /* Features Section */
+  .features {
+    padding: 4rem 1.5rem;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+  }
+
+  .feature-card {
+    padding: 1.5rem;
+    border: 1px solid var(--color-border-default);
+    border-radius: 0.5rem;
+    background-color: var(--color-bg-primary);
+  }
+
+  .feature-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .feature-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+    color: var(--color-text-primary);
+  }
+
+  .feature-description {
+    margin: 0;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+  }
+
+  /* Quick Start Section */
+  .quick-start {
+    padding: 4rem 1.5rem;
+    background-color: var(--color-bg-secondary);
+  }
+
+  .steps {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .step {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .step-number {
+    flex-shrink: 0;
+    width: 3rem;
+    height: 3rem;
+    background-color: var(--color-interactive-default);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+
+  .step-content {
+    flex: 1;
+  }
+
+  .step-title {
+    margin: 0 0 1rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+  }
+
+  /* Examples Section */
+  .examples {
+    padding: 4rem 1.5rem;
+  }
+
+  .example-tabs {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .tab-content {
+    margin-bottom: 2rem;
+  }
+
+  .tab-content h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .examples-cta {
+    text-align: center;
+    margin-top: 2rem;
+  }
+
+  .link-arrow {
+    color: var(--color-interactive-default);
+    font-weight: 600;
+    font-size: 1.125rem;
+  }
+
+  /* Final CTA */
+  .final-cta {
+    padding: 4rem 1.5rem;
+    background-color: var(--color-bg-secondary);
+    text-align: center;
+  }
+
+  .cta-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .cta-subtitle {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    margin: 0 0 2rem;
+  }
+
+  .btn-primary-large {
+    background-color: var(--color-interactive-default);
+    color: white;
+    font-size: 1.125rem;
+  }
+
+  .btn-primary-large:hover {
+    background-color: var(--color-interactive-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 120, 212, 0.3);
+  }
+</style>

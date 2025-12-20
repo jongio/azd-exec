@@ -1,0 +1,471 @@
+---
+import Layout from '../components/Layout.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="Security Guidelines" description="Understand the security implications and best practices for using azd exec">
+  <div class="page-container">
+    <div class="page-header">
+      <h1>Security Guidelines</h1>
+      <p class="page-intro">
+        azd exec is a powerful tool that requires careful handling. Understand the security implications before use.
+      </p>
+    </div>
+
+    <div class="content">
+      <div class="alert-danger">
+        <h3>⚠️ Critical Security Warning</h3>
+        <p>
+          <strong>azd exec grants scripts full access to your Azure credentials and environment.</strong>
+          Always review scripts before execution. Never run untrusted code.
+        </p>
+      </div>
+
+      <section class="section">
+        <h2>What Scripts Can Access</h2>
+        <p>When you run a script with azd exec, it has access to:</p>
+        
+        <div class="access-grid">
+          <div class="access-card danger">
+            <h3>🔐 Azure Credentials</h3>
+            <ul>
+              <li>Azure CLI authentication tokens</li>
+              <li>Active Azure subscription</li>
+              <li>Service principal credentials (if configured)</li>
+              <li>Managed identity (in Azure-hosted environments)</li>
+            </ul>
+          </div>
+
+          <div class="access-card danger">
+            <h3>🌍 Environment Variables</h3>
+            <ul>
+              <li><code>AZURE_SUBSCRIPTION_ID</code></li>
+              <li><code>AZURE_ENV_NAME</code></li>
+              <li><code>AZURE_LOCATION</code></li>
+              <li>Custom variables from <code>.env</code></li>
+              <li>All system environment variables</li>
+            </ul>
+          </div>
+
+          <div class="access-card danger">
+            <h3>💾 File System</h3>
+            <ul>
+              <li>Read/write access to your file system</li>
+              <li>Project files and source code</li>
+              <li>Configuration files</li>
+              <li>Local secrets and credentials</li>
+            </ul>
+          </div>
+
+          <div class="access-card danger">
+            <h3>🌐 Network</h3>
+            <ul>
+              <li>Full network access</li>
+              <li>Can make external API calls</li>
+              <li>Can download/upload data</li>
+              <li>Can communicate with Azure services</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Safe Practices</h2>
+        
+        <h3>✅ DO These Things</h3>
+        <ul class="checklist safe">
+          <li>
+            <strong>Review scripts before running</strong>
+            <CodeBlock code='# Read the script first
+cat deploy.sh
+
+# Then execute
+azd exec ./deploy.sh' language="bash" />
+          </li>
+          <li>
+            <strong>Use version control for scripts</strong>
+            <p>Track changes to scripts in Git. Review diffs before pulling updates.</p>
+          </li>
+          <li>
+            <strong>Verify script sources</strong>
+            <p>Only run scripts from trusted sources: official documentation, your team's repositories, or verified open-source projects.</p>
+          </li>
+          <li>
+            <strong>Use HTTPS for downloads</strong>
+            <CodeBlock code='# Download and review before executing
+curl -O https://trusted-source.com/script.sh
+cat script.sh
+azd exec ./script.sh' language="bash" />
+          </li>
+          <li>
+            <strong>Store secrets in Azure Key Vault</strong>
+            <CodeBlock code='# Retrieve secrets at runtime
+API_KEY=$(az keyvault secret show \
+  --name "api-key" \
+  --vault-name "kv-$AZURE_ENV_NAME" \
+  --query "value" -o tsv)' language="bash" />
+          </li>
+          <li>
+            <strong>Use least privilege Azure RBAC roles</strong>
+            <p>Grant scripts only the permissions they need. Avoid Owner or Contributor roles when Reader or specific roles suffice.</p>
+          </li>
+          <li>
+            <strong>Enable audit logging</strong>
+            <CodeBlock code='# Log script execution
+echo "[$(date)] Running deployment script" >> ~/.azd-exec-audit.log
+azd exec ./deploy.sh' language="bash" />
+          </li>
+        </ul>
+
+        <h3>❌ DON'T Do These Things</h3>
+        <ul class="checklist danger">
+          <li>
+            <strong>Never pipe untrusted scripts directly</strong>
+            <CodeBlock code='# ❌ DANGEROUS - Don\'t do this!
+curl http://unknown-site.com/script.sh | azd exec -
+
+# ❌ Also dangerous
+wget -O - https://site.com/install.sh | azd exec -' language="bash" />
+          </li>
+          <li>
+            <strong>Don't store secrets in environment variables</strong>
+            <CodeBlock code='# ❌ Bad practice
+export DATABASE_PASSWORD=\'my-secret-password\'
+azd exec ./deploy.sh' language="bash" />
+          </li>
+          <li>
+            <strong>Don't ignore script warnings or errors</strong>
+            <CodeBlock code='# ❌ Don\'t suppress errors
+azd exec ./script.sh 2>/dev/null' language="bash" />
+          </li>
+          <li>
+            <strong>Don't use production credentials in development</strong>
+            <p>Use separate Azure subscriptions or environments for development and production.</p>
+          </li>
+          <li>
+            <strong>Don't commit secrets to version control</strong>
+            <CodeBlock code='# ✅ Use .env and .gitignore
+echo "*.env" >> .gitignore
+echo "API_KEY=secret123" >> .env.local' language="bash" />
+          </li>
+          <li>
+            <strong>Don't disable security features</strong>
+            <CodeBlock code='# ❌ Don\'t do this
+set +e  # Disables error handling
+# ... run risky commands' language="bash" />
+          </li>
+        </ul>
+      </section>
+
+      <section class="section">
+        <h2>Common Attack Vectors</h2>
+        
+        <div class="attack-vector">
+          <h3>🎯 Malicious Script Injection</h3>
+          <p><strong>Risk:</strong> Attacker tricks you into running malicious code disguised as helpful scripts.</p>
+          <p><strong>Prevention:</strong></p>
+          <ul>
+            <li>Always inspect scripts before execution</li>
+            <li>Verify the source of scripts from documentation</li>
+            <li>Use checksums to verify script integrity</li>
+          </ul>
+          <CodeBlock code='# Verify script integrity
+sha256sum script.sh
+# Compare with published checksum' language="bash" />
+        </div>
+
+        <div class="attack-vector">
+          <h3>🎯 Credential Theft</h3>
+          <p><strong>Risk:</strong> Scripts exfiltrate Azure credentials or secrets to external servers.</p>
+          <p><strong>Prevention:</strong></p>
+          <ul>
+            <li>Review network calls in scripts</li>
+            <li>Monitor Azure activity logs</li>
+            <li>Use network policies to restrict outbound connections</li>
+            <li>Rotate credentials regularly</li>
+          </ul>
+        </div>
+
+        <div class="attack-vector">
+          <h3>🎯 Resource Abuse</h3>
+          <p><strong>Risk:</strong> Scripts create expensive Azure resources or cryptocurrency miners.</p>
+          <p><strong>Prevention:</strong></p>
+          <ul>
+            <li>Set Azure spending limits and budgets</li>
+            <li>Review resource creation in scripts</li>
+            <li>Enable Azure Cost Management alerts</li>
+            <li>Use Azure Policy to restrict resource types</li>
+          </ul>
+        </div>
+
+        <div class="attack-vector">
+          <h3>🎯 Data Exfiltration</h3>
+          <p><strong>Risk:</strong> Scripts upload sensitive data to unauthorized locations.</p>
+          <p><strong>Prevention:</strong></p>
+          <ul>
+            <li>Audit file operations in scripts</li>
+            <li>Use Azure Private Link for sensitive workloads</li>
+            <li>Enable data loss prevention policies</li>
+            <li>Monitor unusual data transfer patterns</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Incident Response</h2>
+        <p>If you suspect a security incident:</p>
+        
+        <ol class="incident-steps">
+          <li>
+            <strong>Immediately revoke Azure credentials</strong>
+            <CodeBlock code='# Logout from Azure CLI
+az logout
+
+# Revoke all sessions (Azure Portal)
+# Azure Portal > Azure Active Directory > Users > [Your User] > Revoke Sessions' language="bash" />
+          </li>
+          <li>
+            <strong>Rotate all secrets and keys</strong>
+            <p>Update secrets in Azure Key Vault, regenerate storage account keys, rotate service principal credentials.</p>
+          </li>
+          <li>
+            <strong>Review Azure Activity Logs</strong>
+            <CodeBlock code='# Check recent Azure activities
+az monitor activity-log list \
+  --start-time $(date -u -d "1 hour ago" "+%Y-%m-%dT%H:%M:%SZ") \
+  --query "[?contains(authorization.action, \'write\')]" \
+  -o table' language="bash" />
+          </li>
+          <li>
+            <strong>Delete unauthorized resources</strong>
+            <p>Identify and remove any resources created by malicious scripts.</p>
+          </li>
+          <li>
+            <strong>Report the incident</strong>
+            <p>If the script was from a public source, report it. Contact your security team if in an organization.</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="section">
+        <h2>Additional Resources</h2>
+        <div class="resources">
+          <a href="https://github.com/jongio/azd-exec/blob/main/cli/docs/THREAT-MODEL.md" target="_blank" rel="noopener noreferrer" class="resource-link">
+            📄 Complete Threat Model
+          </a>
+          <a href="https://github.com/jongio/azd-exec/blob/main/cli/docs/SECURITY-REVIEW.md" target="_blank" rel="noopener noreferrer" class="resource-link">
+            🔍 Security Review
+          </a>
+          <a href="https://learn.microsoft.com/azure/security/fundamentals/best-practices-and-patterns" target="_blank" rel="noopener noreferrer" class="resource-link">
+            🛡️ Azure Security Best Practices
+          </a>
+          <a href={`${base}getting-started`} class="resource-link">
+            📚 Getting Started Guide
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .page-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+  }
+
+  .page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .page-intro {
+    font-size: 1.25rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .content {
+    line-height: 1.7;
+  }
+
+  .alert-danger {
+    background-color: #fee;
+    border: 2px solid #dc3545;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin: 0 0 3rem;
+  }
+
+  [data-theme="dark"] .alert-danger {
+    background-color: #5a1a1a;
+    border-color: #dc3545;
+  }
+
+  .alert-danger h3 {
+    margin: 0 0 0.5rem;
+    color: #dc3545;
+    font-size: 1.25rem;
+  }
+
+  .alert-danger p {
+    margin: 0;
+    color: #721c24;
+  }
+
+  [data-theme="dark"] .alert-danger p {
+    color: #ffcccb;
+  }
+
+  .section {
+    margin-bottom: 3rem;
+  }
+
+  .section h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .section h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .section p {
+    margin: 0 0 1rem;
+    color: var(--color-text-secondary);
+  }
+
+  .access-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .access-card {
+    border: 2px solid #dc3545;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    background-color: #fff5f5;
+  }
+
+  [data-theme="dark"] .access-card {
+    background-color: #2a1a1a;
+  }
+
+  .access-card h3 {
+    font-size: 1.125rem;
+    margin: 0 0 0.75rem;
+    color: #dc3545;
+  }
+
+  .access-card ul {
+    margin: 0;
+    padding-left: 1.25rem;
+    font-size: 0.875rem;
+  }
+
+  .access-card li {
+    margin: 0.5rem 0;
+    color: var(--color-text-secondary);
+  }
+
+  .checklist {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .checklist li {
+    margin: 2rem 0;
+    padding-left: 2rem;
+    position: relative;
+  }
+
+  .checklist li::before {
+    content: "✅";
+    position: absolute;
+    left: 0;
+    font-size: 1.25rem;
+  }
+
+  .checklist.danger li::before {
+    content: "❌";
+  }
+
+  .checklist strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+  }
+
+  .attack-vector {
+    background-color: var(--color-bg-secondary);
+    border-left: 4px solid var(--color-interactive-default);
+    padding: 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 0.25rem;
+  }
+
+  .attack-vector h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.125rem;
+  }
+
+  .attack-vector p {
+    margin: 0.5rem 0;
+  }
+
+  .attack-vector ul {
+    margin: 0.5rem 0;
+    padding-left: 1.5rem;
+  }
+
+  .incident-steps {
+    padding-left: 1.5rem;
+  }
+
+  .incident-steps li {
+    margin: 1.5rem 0;
+  }
+
+  .incident-steps strong {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--color-text-primary);
+  }
+
+  .resources {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .resource-link {
+    display: block;
+    padding: 1rem;
+    border: 1px solid var(--color-border-default);
+    border-radius: 0.5rem;
+    color: var(--color-interactive-default);
+    text-decoration: none;
+    font-weight: 600;
+    transition: border-color 0.2s;
+  }
+
+  .resource-link:hover {
+    border-color: var(--color-interactive-default);
+  }
+</style>

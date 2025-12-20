@@ -21,7 +21,7 @@ Execute any script with full access to your Azure Developer CLI environment vari
 Run any script with your full Azure context—no manual environment setup.
 
 ```bash
-azd exec run ./deploy.sh
+azd exec ./deploy.sh
 ```
 
 That's it. Your script has access to all azd environment variables, Azure credentials, and configuration.
@@ -52,6 +52,9 @@ Execute scripts from any directory with the `--cwd` flag for flexible automation
 ### 🔄 Interactive Mode
 Run scripts with interactive input support for prompts and user interaction.
 
+### 🔐 Azure Key Vault Integration
+Automatically resolves Key Vault references in environment variables, securely fetching secrets at runtime.
+
 ### ✅ Battle-Tested
 Comprehensive security scanning with CodeQL and gosec (0 vulnerabilities). 86%+ test coverage.
 
@@ -72,7 +75,7 @@ Comprehensive security scanning with CodeQL and gosec (0 vulnerabilities). 86%+ 
 - Review script contents before execution
 
 **❌ Dangerous Practices**
-- Never pipe untrusted scripts: ~~`curl https://random-site.com/script.sh | azd exec run -`~~
+- Never pipe untrusted scripts: ~~`curl https://random-site.com/script.sh | azd exec -`~~
 - Don't run scripts from unknown sources
 - Avoid storing secrets in environment variables (use Azure Key Vault instead)
 
@@ -137,7 +140,7 @@ azd exec version
 cat ./deploy.sh
 
 # Then execute
-azd exec run ./deploy.sh
+azd exec ./deploy.sh
 ```
 
 ---
@@ -149,31 +152,31 @@ azd exec run ./deploy.sh
 ### Basic Execution
 
 ```bash
-azd exec run ./my-script.sh
+azd exec ./my-script.sh
 ```
 
 ### Specify Shell
 
 ```bash
-azd exec run ./deploy.ps1 --shell pwsh
+azd exec ./deploy.ps1 --shell pwsh
 ```
 
 ### Pass Arguments
 
 ```bash
-azd exec run ./build.sh -- --verbose --config release
+azd exec ./build.sh -- --verbose --config release
 ```
 
 ### Set Working Directory
 
 ```bash
-azd exec run ./scripts/setup.sh --cwd /path/to/project
+azd exec ./scripts/setup.sh --cwd /path/to/project
 ```
 
 ### Interactive Mode
 
 ```bash
-azd exec run ./interactive-setup.sh --interactive
+azd exec ./interactive-setup.sh --interactive
 ```
 
 ---
@@ -221,7 +224,7 @@ Write-Host "Resource Group: $env:AZURE_RESOURCE_GROUP"
 cat ./deploy.sh
 
 # Then execute
-azd exec run ./deploy.sh
+azd exec ./deploy.sh
 ```
 
 ---
@@ -238,6 +241,84 @@ Scripts executed by `azd exec` have access to all azd environment variables:
 | `AZURE_RESOURCE_GROUP` | Resource group name |
 | `AZURE_TENANT_ID` | Azure tenant ID |
 | *Custom variables* | All environment variables from your azd environment |
+
+---
+
+## 🔐 Azure Key Vault Integration
+
+`azd exec` automatically resolves Azure Key Vault references in environment variables, allowing you to securely store and access secrets without hardcoding them.
+
+### Supported Reference Formats
+
+**Format 1: SecretUri**
+```bash
+@Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/my-secret)
+@Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/my-secret/abc123)
+```
+
+**Format 2: VaultName and SecretName**
+```bash
+@Microsoft.KeyVault(VaultName=myvault;SecretName=my-secret)
+@Microsoft.KeyVault(VaultName=myvault;SecretName=my-secret;SecretVersion=abc123)
+```
+
+### Usage Example
+
+**1. Store a secret in Azure Key Vault:**
+```bash
+az keyvault secret set --vault-name myvault --name database-password --value "SuperSecret123!"
+```
+
+**2. Set environment variable with Key Vault reference:**
+```bash
+azd env set DATABASE_PASSWORD "@Microsoft.KeyVault(VaultName=myvault;SecretName=database-password)"
+```
+
+**3. Use in your script:**
+```bash
+#!/bin/bash
+# deploy.sh
+
+echo "Connecting to database..."
+# DATABASE_PASSWORD is automatically resolved to the actual secret value
+mysql -u admin -p"$DATABASE_PASSWORD" -h myserver.mysql.database.azure.com
+```
+
+**4. Run the script:**
+```bash
+azd exec ./deploy.sh
+```
+
+### How It Works
+
+1. `azd exec` scans environment variables for Key Vault references
+2. Uses Azure DefaultAzureCredential (same authentication as azd)
+3. Fetches secret values from Key Vault before running your script
+4. Passes resolved values to your script securely
+5. If resolution fails, warns but continues with original values
+
+### Authentication
+
+Key Vault resolution uses the same Azure credentials that `azd` uses:
+- Azure CLI (`az login`)
+- Managed Identity (when running on Azure)
+- Environment variables (`AZURE_CLIENT_ID`, `AZURE_CLIENT_SECRET`, `AZURE_TENANT_ID`)
+- Visual Studio / VS Code authentication
+
+### Error Handling
+
+If Key Vault resolution fails (e.g., secret not found, no access, vault doesn't exist):
+- A warning is displayed to stderr
+- Script continues with the original Key Vault reference string
+- This allows scripts to handle missing secrets gracefully
+
+### Security Benefits
+
+- ✅ **No secrets in code**: Store references, not actual secrets
+- ✅ **Centralized management**: Update secrets in Key Vault, not in code
+- ✅ **Access control**: Use Azure RBAC to control who can access secrets
+- ✅ **Audit trail**: Key Vault logs all secret access
+- ✅ **Automatic rotation**: Update secrets without changing code
 
 ---
 

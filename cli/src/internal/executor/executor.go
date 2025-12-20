@@ -54,7 +54,22 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 	cmd.Dir = workingDir
 
 	// Inherit all environment variables (includes azd context)
-	cmd.Env = os.Environ()
+	envVars := os.Environ()
+
+	// Resolve Key Vault references if any exist
+	if e.hasKeyVaultReferences(envVars) {
+		resolvedEnvVars, err := e.resolveKeyVaultReferences(ctx, envVars)
+		if err != nil {
+			// Log warning but continue with unresolved variables
+			// This allows scripts to run even if Key Vault resolution fails
+			fmt.Fprintf(os.Stderr, "Warning: Failed to resolve Key Vault references: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Continuing with original environment variables...\n")
+		} else {
+			envVars = resolvedEnvVars
+		}
+	}
+
+	cmd.Env = envVars
 
 	// Set up stdio
 	if e.config.Interactive {
@@ -173,4 +188,25 @@ func (e *Executor) buildCommand(shell, scriptPath string) *exec.Cmd {
 	}
 
 	return exec.Command(cmdArgs[0], cmdArgs[1:]...) // #nosec G204 - cmdArgs are controlled by caller
+}
+
+// hasKeyVaultReferences checks if any environment variables contain Key Vault references.
+func (e *Executor) hasKeyVaultReferences(envVars []string) bool {
+	for _, envVar := range envVars {
+		parts := strings.SplitN(envVar, "=", 2)
+		if len(parts) == 2 && IsKeyVaultReference(parts[1]) {
+			return true
+		}
+	}
+	return false
+}
+
+// resolveKeyVaultReferences resolves all Key Vault references in environment variables.
+func (e *Executor) resolveKeyVaultReferences(ctx context.Context, envVars []string) ([]string, error) {
+	resolver, err := NewKeyVaultResolver()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create Key Vault resolver: %w", err)
+	}
+
+	return resolver.ResolveEnvironmentVariables(ctx, envVars)
 }
