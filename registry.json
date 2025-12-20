@@ -1,0 +1,112 @@
+{
+  "extensions": [
+    {
+      "id": "jongio.azd.exec",
+      "namespace": "exec",
+      "displayName": "Exec Extension",
+      "description": "Execute commands and scripts with Azure Developer CLI context and environment variables",
+      "versions": [
+        {
+          "version": "0.1.0",
+          "capabilities": [
+            "custom-commands"
+          ],
+          "usage": "azd exec \u003ccommand\u003e [options]",
+          "examples": [
+            {
+              "name": "run",
+              "description": "Execute a script file with azd context",
+              "usage": "azd exec run ./my-script.sh"
+            },
+            {
+              "name": "version",
+              "description": "Display extension version",
+              "usage": "azd exec version"
+            }
+          ],
+          "artifacts": {
+            "windows/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "0000000000000000000000000000000000000000000000000000000000000000"
+              },
+              "entryPoint": "jongio-azd-exec-windows-amd64.exe",
+              "url": "https://github.com/jongio/azd-exec/releases/download/v0.1.0/jongio-azd-exec-windows-amd64.exe"
+            }
+          }
+        },
+        {
+          "version": "0.1.18",
+          "capabilities": [
+            "custom-commands"
+          ],
+          "usage": "azd exec \u003ccommand\u003e [options]",
+          "examples": [
+            {
+              "name": "run",
+              "description": "Execute a script file with azd context",
+              "usage": "azd exec run ./my-script.sh"
+            },
+            {
+              "name": "listen",
+              "description": "Listen for script execution via named pipe",
+              "usage": "azd exec listen"
+            },
+            {
+              "name": "version",
+              "description": "Display extension version",
+              "usage": "azd exec version"
+            }
+          ],
+          "artifacts": {
+            "darwin/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "4849ee5f16e53789fb3f489cc2ae938f9b250333d7d5fa678f6f54c11f91c18e"
+              },
+              "entryPoint": "jongio-azd-exec-darwin-amd64",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.1.18/jongio-azd-exec-darwin-amd64.zip"
+            },
+            "darwin/arm64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "f68c1a0f53c2e2b13f83996822878acea2c0411da04510bbf046e5411072a616"
+              },
+              "entryPoint": "jongio-azd-exec-darwin-arm64",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.1.18/jongio-azd-exec-darwin-arm64.zip"
+            },
+            "linux/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "965e60feaa1903d564b0646761ddeaa5a42491b436be916006cd060e962b13ee"
+              },
+              "entryPoint": "jongio-azd-exec-linux-amd64",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.1.18/jongio-azd-exec-linux-amd64.tar.gz"
+            },
+            "linux/arm64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "501b11d8569cfb59071415bf96331755c547760cf9dc5552a2f8a2e0ac7f9f8a"
+              },
+              "entryPoint": "jongio-azd-exec-linux-arm64",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.1.18/jongio-azd-exec-linux-arm64.tar.gz"
+            },
+            "windows/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "018d84c574e9c09b5bc97bbdf600c2f4ed65d21b0228558003586da73c28505c"
+              },
+              "entryPoint": "jongio-azd-exec-windows-amd64.exe",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.1.18/jongio-azd-exec-windows-amd64.zip"
+            }
+          }
+        }
+      ],
+      "tags": [
+        "scripting",
+        "automation",
+        "developer-tools"
+      ]
+    }
+  ]
+}

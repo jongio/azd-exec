@@ -1,0 +1,23 @@
+id: jongio.azd.exec
+namespace: exec
+displayName: Exec Extension
+description: Execute commands and scripts with Azure Developer CLI context and environment variables
+usage: azd exec <command> [options]
+version: 0.0.0
+language: go
+capabilities:
+  - custom-commands
+examples:
+  - name: run
+    description: Execute a script file with azd context
+    usage: azd exec run ./my-script.sh
+  - name: listen
+    description: Listen for script execution via named pipe
+    usage: azd exec listen
+  - name: version
+    description: Display extension version
+    usage: azd exec version
+tags:
+  - scripting
+  - automation
+  - developer-tools
