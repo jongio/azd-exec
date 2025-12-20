@@ -313,12 +313,12 @@ func TestKeyVaultReferenceFormats(t *testing.T) {
 	for _, format := range ambiguousFormats {
 		isRef := IsKeyVaultReference(format)
 		matchesPattern := kvRefSecretURIPattern.MatchString(format) || kvRefVaultNamePattern.MatchString(format)
-		
+
 		// These should be detected as references (have the prefix/suffix)
 		if !isRef {
 			t.Errorf("Format with KV prefix/suffix not detected as reference: %s", format)
 		}
-		
+
 		// But they should NOT match the validation patterns
 		if matchesPattern {
 			t.Errorf("Invalid format should not match validation pattern: %s", format)
@@ -333,7 +333,7 @@ func TestNewKeyVaultResolver(t *testing.T) {
 	t.Run("Creation without Azure auth", func(t *testing.T) {
 		// This test documents that resolver creation requires Azure credentials
 		resolver, err := NewKeyVaultResolver()
-		
+
 		// In environments without Azure credentials, this should fail
 		// In environments with credentials, it should succeed
 		if err != nil {

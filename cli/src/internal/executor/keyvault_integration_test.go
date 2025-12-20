@@ -163,7 +163,7 @@ func TestExecutorWithKeyVaultReferences(t *testing.T) {
 
 	executor := New(Config{})
 	err := executor.Execute(context.Background(), scriptPath)
-	
+
 	// We expect this to work if Azure credentials are available
 	if err != nil {
 		t.Logf("Execution error (may be expected if no Azure credentials): %v", err)
