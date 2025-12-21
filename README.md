@@ -92,7 +92,7 @@ Comprehensive security scanning with CodeQL and gosec (0 vulnerabilities). 86%+ 
 - **Inline scripts**: Execute immediately—ensure you understand the command first
 - **Best practice**: Use file scripts for complex operations, inline for simple queries
 
-For detailed security information, see [Security Documentation](cli/docs/SECURITY-REVIEW.md) and [Threat Model](cli/docs/THREAT-MODEL.md).
+For detailed security information, see [Security Documentation](cli/docs/security-review.md) and [Threat Model](cli/docs/threat-model.md).
 
 ---
 
@@ -360,8 +360,8 @@ If Key Vault resolution fails (e.g., secret not found, no access, vault doesn't 
 ### Documentation
 
 - [CLI Reference](cli/docs/cli-reference.md) - Complete command and flag reference
-- [Security Review](cli/docs/SECURITY-REVIEW.md) - Security analysis and best practices
-- [Threat Model](cli/docs/THREAT-MODEL.md) - Security threat analysis
+- [Security Review](cli/docs/security-review.md) - Security analysis and best practices
+- [Threat Model](cli/docs/threat-model.md) - Security threat analysis
 
 ### Build from Source
 
@@ -388,8 +388,13 @@ Binary created in `cli/bin/exec`.
 # Build
 cd cli && ./build.sh
 
-# Test
-cd cli && go test ./...
+# Test - Run all tests (unit, integration, e2e)
+pnpm test
+
+# Test - Individual test suites
+pnpm test:cli:unit          # CLI unit tests only
+pnpm test:cli:integration   # CLI integration tests only  
+pnpm test:web              # Web e2e tests only
 
 # Lint
 cd cli && golangci-lint run
@@ -402,6 +407,8 @@ cspell "**/*.{go,md,yaml,yml}" --config cspell.json
 go install github.com/securego/gosec/v2/cmd/gosec@latest
 cd cli && gosec ./...
 ```
+
+For detailed testing information, see [TESTING.md](TESTING.md).
 
 ---
 

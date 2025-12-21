@@ -30,8 +30,8 @@ The site is automatically deployed to GitHub Pages on push to main via GitHub Ac
 ## Documentation
 
 - [CLI Reference](../cli/docs/cli-reference.md) - Complete command reference
-- [Security Review](../cli/docs/SECURITY-REVIEW.md) - Security documentation
-- [Threat Model](../cli/docs/THREAT-MODEL.md) - Security threat analysis
+- [Security Review](../cli/docs/security-review.md) - Security documentation
+- [Threat Model](../cli/docs/threat-model.md) - Security threat analysis
 
 ## Structure
 

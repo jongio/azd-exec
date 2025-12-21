@@ -471,8 +471,8 @@ azd env set MY_VAR "my-value"
 
 ## Related Documentation
 
-- [Security Review](./SECURITY-REVIEW.md) - Detailed security analysis and best practices
-- [Threat Model](./THREAT-MODEL.md) - Security threat analysis and mitigations
+- [Security Review](./security-review.md) - Detailed security analysis and best practices
+- [Threat Model](./threat-model.md) - Security threat analysis and mitigations
 - [Main README](../../README.md) - Getting started guide and examples
 - [Azure Developer CLI Docs](https://learn.microsoft.com/azure/developer/azure-developer-cli/) - azd documentation
 

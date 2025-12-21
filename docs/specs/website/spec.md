@@ -173,7 +173,7 @@ web/
 - Safe Practices
 - Dangerous Practices
 - Threat Model Overview
-- Link to full docs (SECURITY-REVIEW.md, THREAT-MODEL.md)
+- Link to full docs (security-review.md, threat-model.md)
 
 ## Components
 

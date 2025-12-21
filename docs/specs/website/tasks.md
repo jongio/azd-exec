@@ -405,8 +405,8 @@
      - Dangerous Practices (what NOT to do)
      - Threat Model Overview
      - Links to full docs:
-       - cli/docs/SECURITY-REVIEW.md (GitHub)
-       - cli/docs/THREAT-MODEL.md (GitHub)
+       - cli/docs/security-review.md (GitHub)
+       - cli/docs/threat-model.md (GitHub)
 
 2. Use callout boxes:
    - Green for safe practices
