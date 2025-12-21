@@ -25,12 +25,12 @@ func TestExecute_FileValidation(t *testing.T) {
 	t.Run("Valid script file", func(t *testing.T) {
 		projectsDir := testhelpers.GetTestProjectsDir(t)
 		scriptPath := filepath.Join(projectsDir, "bash", "simple.sh")
-		
+
 		// Skip on Windows if bash not available, or use different script
 		if _, err := os.Stat(scriptPath); os.IsNotExist(err) {
 			t.Skip("Test script not found, skipping")
 		}
-		
+
 		err := exec.Execute(context.Background(), scriptPath)
 		if err != nil {
 			t.Logf("Script execution error (may be expected): %v", err)
@@ -75,7 +75,7 @@ func TestPrepareEnvironment(t *testing.T) {
 		}()
 
 		os.Setenv("NORMAL_VAR", "value")
-		
+
 		envVars, err := exec.prepareEnvironment(context.Background())
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
@@ -97,7 +97,7 @@ func TestPrepareEnvironment(t *testing.T) {
 		}()
 
 		os.Setenv("KV_VAR", "@Microsoft.KeyVault(VaultName=test;SecretName=secret)")
-		
+
 		_, err := exec.prepareEnvironment(context.Background())
 		// Without Azure credentials, this should return an error
 		if err != nil {

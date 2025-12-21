@@ -43,7 +43,7 @@ Examples:
 			// Parse script arguments - everything after the script path
 			scriptArgs := []string{}
 			scriptInput := args[0]
-			
+
 			// Cobra doesn't parse args after -- automatically for us
 			// They're in cmd.Flags().Args() after the script path
 			if len(args) > 1 {
