@@ -1,10 +1,8 @@
 package executor
 
 import (
-	"bufio"
 	"context"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -49,26 +47,53 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 		workingDir = filepath.Dir(scriptPath)
 	}
 
-	// Build command
-	cmd := e.buildCommand(shell, scriptPath)
-	cmd.Dir = workingDir
+	return e.executeCommand(ctx, shell, workingDir, scriptPath, false)
+}
 
-	// Inherit all environment variables (includes azd context)
-	envVars := os.Environ()
+// ExecuteInline runs an inline script command with azd context.
+func (e *Executor) ExecuteInline(ctx context.Context, scriptContent string) error {
+	// Validate script content
+	if scriptContent == "" {
+		return fmt.Errorf("script content cannot be empty")
+	}
 
-	// Resolve Key Vault references if any exist
-	if e.hasKeyVaultReferences(envVars) {
-		resolvedEnvVars, err := e.resolveKeyVaultReferences(ctx, envVars)
-		if err != nil {
-			// Log warning but continue with unresolved variables
-			// This allows scripts to run even if Key Vault resolution fails
-			fmt.Fprintf(os.Stderr, "Warning: Failed to resolve Key Vault references: %v\n", err)
-			fmt.Fprintf(os.Stderr, "Continuing with original environment variables...\n")
+	// Auto-detect shell if not specified, default based on OS
+	shell := e.config.Shell
+	if shell == "" {
+		if runtime.GOOS == osWindows {
+			shell = shellPowerShell
 		} else {
-			envVars = resolvedEnvVars
+			shell = shellBash
 		}
 	}
 
+	// Determine working directory
+	workingDir := e.config.WorkingDir
+	if workingDir == "" {
+		var err error
+		workingDir, err = os.Getwd()
+		if err != nil {
+			return fmt.Errorf("failed to get working directory: %w", err)
+		}
+	}
+
+	return e.executeCommand(ctx, shell, workingDir, scriptContent, true)
+}
+
+// executeCommand is the common execution logic for both file and inline scripts.
+func (e *Executor) executeCommand(ctx context.Context, shell, workingDir, scriptOrPath string, isInline bool) error {
+	// Build command
+	cmd := e.buildCommand(shell, scriptOrPath, isInline)
+	cmd.Dir = workingDir
+
+	// Prepare environment with Key Vault resolution
+	envVars, err := e.prepareEnvironment(ctx)
+	if err != nil {
+		// Log warning but continue with unresolved variables
+		fmt.Fprintf(os.Stderr, "Warning: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Continuing with original environment variables...\n")
+		envVars = os.Environ()
+	}
 	cmd.Env = envVars
 
 	// Set up stdio
@@ -80,133 +105,65 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 
 	// Add debug output
 	if os.Getenv("AZD_SCRIPT_DEBUG") == "true" {
-		fmt.Fprintf(os.Stderr, "Executing: %s %s\n", shell, strings.Join(cmd.Args[1:], " "))
-		fmt.Fprintf(os.Stderr, "Working directory: %s\n", workingDir)
+		e.logDebugInfo(shell, workingDir, scriptOrPath, isInline, cmd.Args)
 	}
 
 	// Run the command
-	if err := cmd.Run(); err != nil {
-		if exitErr, ok := err.(*exec.ExitError); ok {
-			return fmt.Errorf("script exited with code %d", exitErr.ExitCode())
-		}
-		return fmt.Errorf("failed to execute script %q with shell %q: %w", filepath.Base(scriptPath), shell, err)
-	}
-
-	return nil
+	return e.runCommand(cmd, scriptOrPath, shell, isInline)
 }
 
-// detectShell auto-detects the appropriate shell based on the script extension.
-func (e *Executor) detectShell(scriptPath string) string {
-	ext := strings.ToLower(filepath.Ext(scriptPath))
+// prepareEnvironment prepares environment variables with Key Vault resolution.
+func (e *Executor) prepareEnvironment(ctx context.Context) ([]string, error) {
+	envVars := os.Environ()
 
-	switch ext {
-	case ".ps1":
-		if runtime.GOOS == osWindows {
-			return shellPowerShell
-		}
-		return shellPwsh
-	case ".cmd", ".bat":
-		return shellCmd
-	case ".sh":
-		return shellBash
-	case ".zsh":
-		return shellZsh
-	default:
-		// Check shebang line
-		if shebang := e.readShebang(scriptPath); shebang != "" {
-			return shebang
-		}
-
-		// Default based on OS
-		if runtime.GOOS == osWindows {
-			return shellCmd
-		}
-		return shellBash
-	}
-}
-
-// readShebang reads the shebang line from a script file.
-func (e *Executor) readShebang(scriptPath string) string {
-	file, err := os.Open(scriptPath) // #nosec G304 - scriptPath is validated by caller
-	if err != nil {
-		return ""
-	}
-	defer func() {
-		_ = file.Close()
-	}()
-
-	reader := bufio.NewReader(file)
-
-	// Read first bytes to check for shebang
-	buf := make([]byte, shebangReadSize)
-	if _, err := io.ReadFull(reader, buf); err != nil {
-		return ""
+	if !e.hasKeyVaultReferences(envVars) {
+		return envVars, nil
 	}
 
-	if string(buf) != shebangPrefix {
-		return ""
-	}
-
-	// Read the rest of the line
-	line, err := reader.ReadString('\n')
-	if err != nil && err != io.EOF {
-		return ""
-	}
-
-	line = strings.TrimSpace(line)
-	parts := strings.Fields(line)
-	if len(parts) > 0 {
-		// Handle "#!/usr/bin/env python3" style shebangs
-		if filepath.Base(parts[0]) == envCommand && len(parts) > 1 {
-			return filepath.Base(parts[1])
-		}
-		shellPath := parts[0]
-		return filepath.Base(shellPath)
-	}
-
-	return ""
-}
-
-// buildCommand builds the exec.Cmd for the given shell and script.
-func (e *Executor) buildCommand(shell, scriptPath string) *exec.Cmd {
-	var cmdArgs []string
-
-	switch strings.ToLower(shell) {
-	case shellBash, shellSh, shellZsh:
-		cmdArgs = []string{shell, scriptPath}
-	case shellPwsh, shellPowerShell:
-		cmdArgs = []string{shell, "-File", scriptPath}
-	case shellCmd:
-		cmdArgs = []string{shell, "/c", scriptPath}
-	default:
-		cmdArgs = []string{shell, scriptPath}
-	}
-
-	// Append script arguments
-	if len(e.config.Args) > 0 {
-		cmdArgs = append(cmdArgs, e.config.Args...)
-	}
-
-	return exec.Command(cmdArgs[0], cmdArgs[1:]...) // #nosec G204 - cmdArgs are controlled by caller
-}
-
-// hasKeyVaultReferences checks if any environment variables contain Key Vault references.
-func (e *Executor) hasKeyVaultReferences(envVars []string) bool {
-	for _, envVar := range envVars {
-		parts := strings.SplitN(envVar, "=", 2)
-		if len(parts) == 2 && IsKeyVaultReference(parts[1]) {
-			return true
-		}
-	}
-	return false
-}
-
-// resolveKeyVaultReferences resolves all Key Vault references in environment variables.
-func (e *Executor) resolveKeyVaultReferences(ctx context.Context, envVars []string) ([]string, error) {
 	resolver, err := NewKeyVaultResolver()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create Key Vault resolver: %w", err)
 	}
 
-	return resolver.ResolveEnvironmentVariables(ctx, envVars)
+	resolvedVars, err := resolver.ResolveEnvironmentVariables(ctx, envVars)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve Key Vault references: %w", err)
+	}
+
+	return resolvedVars, nil
+}
+
+// logDebugInfo logs debug information about script execution.
+func (e *Executor) logDebugInfo(shell, workingDir, scriptOrPath string, isInline bool, cmdArgs []string) {
+	if isInline {
+		fmt.Fprintf(os.Stderr, "Executing inline: %s\n", shell)
+		fmt.Fprintf(os.Stderr, "Script content: %s\n", scriptOrPath)
+	} else {
+		fmt.Fprintf(os.Stderr, "Executing: %s %s\n", shell, strings.Join(cmdArgs[1:], " "))
+	}
+	fmt.Fprintf(os.Stderr, "Working directory: %s\n", workingDir)
+}
+
+// runCommand executes the command and handles errors.
+func (e *Executor) runCommand(cmd *exec.Cmd, scriptOrPath, shell string, isInline bool) error {
+	if err := cmd.Run(); err != nil {
+		if exitErr, ok := err.(*exec.ExitError); ok {
+			return fmt.Errorf("script exited with code %d", exitErr.ExitCode())
+		}
+		if isInline {
+			return fmt.Errorf("failed to execute inline script with shell %q: %w", shell, err)
+		}
+		return fmt.Errorf("failed to execute script %q with shell %q: %w", filepath.Base(scriptOrPath), shell, err)
+	}
+	return nil
+}
+
+// hasKeyVaultReferences checks if any environment variables contain Key Vault references.
+func (e *Executor) hasKeyVaultReferences(envVars []string) bool {
+	for _, envVar := range envVars {
+		if parts := strings.SplitN(envVar, "=", 2); len(parts) == 2 && IsKeyVaultReference(parts[1]) {
+			return true
+		}
+	}
+	return false
 }

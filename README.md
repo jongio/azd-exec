@@ -70,20 +70,27 @@ Comprehensive security scanning with CodeQL and gosec (0 vulnerabilities). 86%+ 
 
 **✅ Safe Practices**
 - Only run scripts you trust and have reviewed
+- Review script contents before execution (`cat ./script.sh`)
+- Use inline scripts only for simple, trusted operations
 - Use HTTPS for downloads, never HTTP
 - Verify script sources from official Azure documentation or trusted repositories
-- Review script contents before execution
 
 **❌ Dangerous Practices**
 - Never pipe untrusted scripts: ~~`curl https://random-site.com/script.sh | azd exec -`~~
 - Don't run scripts from unknown sources
 - Avoid storing secrets in environment variables (use Azure Key Vault instead)
+- Don't blindly copy/paste inline commands without understanding them
 
 **What Scripts Can Access:**
 - 🔑 Azure authentication context (subscription, tenant, credentials)
 - 🌍 All environment variables (including secrets)
 - 📂 Full filesystem access
 - 🌐 Network access
+
+**Inline vs File-based Scripts:**
+- **File scripts**: Can be reviewed before execution with `cat` or editor
+- **Inline scripts**: Execute immediately—ensure you understand the command first
+- **Best practice**: Use file scripts for complex operations, inline for simple queries
 
 For detailed security information, see [Security Documentation](cli/docs/SECURITY-REVIEW.md) and [Threat Model](cli/docs/THREAT-MODEL.md).
 
@@ -152,13 +159,22 @@ azd exec ./deploy.sh
 ### Basic Execution
 
 ```bash
+# Execute a script file
 azd exec ./my-script.sh
+
+# Execute an inline command
+azd exec 'echo "Hello, $AZURE_ENV_NAME"'
 ```
+
+For complete command reference, see [CLI Reference](cli/docs/cli-reference.md).
 
 ### Specify Shell
 
 ```bash
 azd exec ./deploy.ps1 --shell pwsh
+
+# Inline with specific shell
+azd exec 'Write-Host $env:AZURE_ENV_NAME' --shell pwsh
 ```
 
 ### Pass Arguments
@@ -171,6 +187,9 @@ azd exec ./build.sh -- --verbose --config release
 
 ```bash
 azd exec ./scripts/setup.sh --cwd /path/to/project
+
+# Inline with working directory
+azd exec 'echo $(pwd)' --cwd /tmp
 ```
 
 ### Interactive Mode
@@ -187,7 +206,7 @@ azd exec ./interactive-setup.sh --interactive
 <tr>
 <td width="50%">
 
-**Bash Script**
+**Bash Script File**
 
 ```bash
 #!/bin/bash
@@ -200,10 +219,17 @@ echo "Location: $AZURE_LOCATION"
 azd deploy --all
 ```
 
+**Bash Inline**
+
+```bash
+azd exec 'echo "Deploying to $AZURE_ENV_NAME"'
+azd exec 'for i in {1..3}; do echo "Step $i"; done'
+```
+
 </td>
 <td width="50%">
 
-**PowerShell Script**
+**PowerShell Script File**
 
 ```powershell
 # setup.ps1
@@ -214,11 +240,18 @@ Write-Host "Resource Group: $env:AZURE_RESOURCE_GROUP"
 # Your setup logic here
 ```
 
+**PowerShell Inline**
+
+```bash
+azd exec 'Write-Host "Hello from $env:AZURE_ENV_NAME"' --shell pwsh
+azd exec 'Get-ChildItem Env: | Where-Object Name -like "AZURE_*"' --shell pwsh
+```
+
 </td>
 </tr>
 </table>
 
-**Run it:**
+**Run script files:**
 ```bash
 # First, review the script
 cat ./deploy.sh
@@ -323,6 +356,12 @@ If Key Vault resolution fails (e.g., secret not found, no access, vault doesn't 
 ---
 
 ## 🔧 Development
+
+### Documentation
+
+- [CLI Reference](cli/docs/cli-reference.md) - Complete command and flag reference
+- [Security Review](cli/docs/SECURITY-REVIEW.md) - Security analysis and best practices
+- [Threat Model](cli/docs/THREAT-MODEL.md) - Security threat analysis
 
 ### Build from Source
 

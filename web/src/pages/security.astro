@@ -78,11 +78,11 @@ const base = import.meta.env.BASE_URL;
         <ul class="checklist safe">
           <li>
             <strong>Review scripts before running</strong>
-            <CodeBlock code='# Read the script first
-cat deploy.sh
+            <CodeBlock code={`# Read the script first
+cat run-migration.sh
 
 # Then execute
-azd exec ./deploy.sh' language="bash" />
+azd exec ./run-migration.sh`} language="bash" />
           </li>
           <li>
             <strong>Use version control for scripts</strong>
@@ -94,18 +94,18 @@ azd exec ./deploy.sh' language="bash" />
           </li>
           <li>
             <strong>Use HTTPS for downloads</strong>
-            <CodeBlock code='# Download and review before executing
-curl -O https://trusted-source.com/script.sh
-cat script.sh
-azd exec ./script.sh' language="bash" />
+            <CodeBlock code={`# Download and review before executing
+curl -O https://trusted-source.com/migration.sh
+cat migration.sh
+azd exec ./migration.sh`} language="bash" />
           </li>
           <li>
             <strong>Store secrets in Azure Key Vault</strong>
-            <CodeBlock code='# Retrieve secrets at runtime
-API_KEY=$(az keyvault secret show \
-  --name "api-key" \
-  --vault-name "kv-$AZURE_ENV_NAME" \
-  --query "value" -o tsv)' language="bash" />
+            <CodeBlock code={`# Retrieve secrets at runtime
+API_KEY=$(az keyvault secret show \\
+  --name "api-key" \\
+  --vault-name "kv-$AZURE_ENV_NAME" \\
+  --query "value" -o tsv)`} language="bash" />
           </li>
           <li>
             <strong>Use least privilege Azure RBAC roles</strong>
@@ -113,9 +113,9 @@ API_KEY=$(az keyvault secret show \
           </li>
           <li>
             <strong>Enable audit logging</strong>
-            <CodeBlock code='# Log script execution
-echo "[$(date)] Running deployment script" >> ~/.azd-exec-audit.log
-azd exec ./deploy.sh' language="bash" />
+            <CodeBlock code={`# Log script execution
+echo "[$(date)] Running migration script" >> ~/.azd-exec-audit.log
+azd exec ./run-migration.sh`} language="bash" />
           </li>
         </ul>
 
@@ -123,22 +123,22 @@ azd exec ./deploy.sh' language="bash" />
         <ul class="checklist danger">
           <li>
             <strong>Never pipe untrusted scripts directly</strong>
-            <CodeBlock code='# ❌ DANGEROUS - Don\'t do this!
-curl http://unknown-site.com/script.sh | azd exec -
+            <CodeBlock code={`# ❌ DANGEROUS - Don't do this!
+curl http://unknown-site.com/migration.sh | azd exec -
 
 # ❌ Also dangerous
-wget -O - https://site.com/install.sh | azd exec -' language="bash" />
+wget -O - https://site.com/setup.sh | azd exec -`} language="bash" />
           </li>
           <li>
             <strong>Don't store secrets in environment variables</strong>
-            <CodeBlock code='# ❌ Bad practice
-export DATABASE_PASSWORD=\'my-secret-password\'
-azd exec ./deploy.sh' language="bash" />
+            <CodeBlock code={`# ❌ Bad practice
+export DATABASE_PASSWORD='my-secret-password'
+azd exec ./run-migration.sh`} language="bash" />
           </li>
           <li>
             <strong>Don't ignore script warnings or errors</strong>
-            <CodeBlock code='# ❌ Don\'t suppress errors
-azd exec ./script.sh 2>/dev/null' language="bash" />
+            <CodeBlock code={`# ❌ Don't suppress errors
+azd exec ./migration.sh 2>/dev/null`} language="bash" />
           </li>
           <li>
             <strong>Don't use production credentials in development</strong>
@@ -146,15 +146,15 @@ azd exec ./script.sh 2>/dev/null' language="bash" />
           </li>
           <li>
             <strong>Don't commit secrets to version control</strong>
-            <CodeBlock code='# ✅ Use .env and .gitignore
+            <CodeBlock code={`# ✅ Use .env and .gitignore
 echo "*.env" >> .gitignore
-echo "API_KEY=secret123" >> .env.local' language="bash" />
+echo "API_KEY=secret123" >> .env.local`} language="bash" />
           </li>
           <li>
             <strong>Don't disable security features</strong>
-            <CodeBlock code='# ❌ Don\'t do this
+            <CodeBlock code={`# ❌ Don't do this
 set +e  # Disables error handling
-# ... run risky commands' language="bash" />
+# ... run risky commands`} language="bash" />
           </li>
         </ul>
       </section>
@@ -171,9 +171,9 @@ set +e  # Disables error handling
             <li>Verify the source of scripts from documentation</li>
             <li>Use checksums to verify script integrity</li>
           </ul>
-          <CodeBlock code='# Verify script integrity
+          <CodeBlock code={`# Verify script integrity
 sha256sum script.sh
-# Compare with published checksum' language="bash" />
+# Compare with published checksum`} language="bash" />
         </div>
 
         <div class="attack-vector">
@@ -220,11 +220,11 @@ sha256sum script.sh
         <ol class="incident-steps">
           <li>
             <strong>Immediately revoke Azure credentials</strong>
-            <CodeBlock code='# Logout from Azure CLI
+            <CodeBlock code={`# Logout from Azure CLI
 az logout
 
 # Revoke all sessions (Azure Portal)
-# Azure Portal > Azure Active Directory > Users > [Your User] > Revoke Sessions' language="bash" />
+# Azure Portal > Azure Active Directory > Users > [Your User] > Revoke Sessions`} language="bash" />
           </li>
           <li>
             <strong>Rotate all secrets and keys</strong>
@@ -232,11 +232,11 @@ az logout
           </li>
           <li>
             <strong>Review Azure Activity Logs</strong>
-            <CodeBlock code='# Check recent Azure activities
-az monitor activity-log list \
-  --start-time $(date -u -d "1 hour ago" "+%Y-%m-%dT%H:%M:%SZ") \
-  --query "[?contains(authorization.action, \'write\')]" \
-  -o table' language="bash" />
+            <CodeBlock code={`# Check recent Azure activities
+az monitor activity-log list \\
+  --start-time $(date -u -d "1 hour ago" "+%Y-%m-%dT%H:%M:%SZ") \\
+  --query "[?contains(authorization.action, 'write')]" \\
+  -o table`} language="bash" />
           </li>
           <li>
             <strong>Delete unauthorized resources</strong>

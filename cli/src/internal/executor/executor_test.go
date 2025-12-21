@@ -66,3 +66,80 @@ func getPowerShellName() string {
 	}
 	return "pwsh"
 }
+
+// TestExecuteInlineIntegration tests inline script execution with various shells.
+func TestExecuteInlineIntegration(t *testing.T) {
+	if testing.Short() {
+		t.Skip("Skipping integration test in short mode")
+	}
+
+	tests := []struct {
+		name    string
+		script  string
+		shell   string
+		wantErr bool
+		skip    func() bool
+	}{
+		{
+			name:    "Bash inline echo",
+			script:  "echo 'Hello from inline'",
+			shell:   "bash",
+			wantErr: false,
+			skip:    func() bool { return runtime.GOOS == "windows" },
+		},
+		{
+			name:    "Bash inline with env var",
+			script:  "echo $HOME",
+			shell:   "bash",
+			wantErr: false,
+			skip:    func() bool { return runtime.GOOS == "windows" },
+		},
+		{
+			name:    "PowerShell inline echo",
+			script:  "Write-Host 'Hello from PowerShell'",
+			shell:   getPowerShellName(),
+			wantErr: false,
+			skip:    func() bool { return false },
+		},
+		{
+			name:    "PowerShell inline with env var",
+			script:  "Write-Host $env:USERPROFILE",
+			shell:   getPowerShellName(),
+			wantErr: false,
+			skip:    func() bool { return runtime.GOOS != "windows" },
+		},
+		{
+			name:    "Bash multi-line inline",
+			script:  "echo 'line 1'; echo 'line 2'",
+			shell:   "bash",
+			wantErr: false,
+			skip:    func() bool { return runtime.GOOS == "windows" },
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.skip() {
+				t.Skip("Skipping test on this platform")
+			}
+
+			exec := New(Config{
+				Shell: tt.shell,
+			})
+
+			err := exec.ExecuteInline(context.Background(), tt.script)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ExecuteInline() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+// TestExecuteInlineEmptyScript tests that empty inline scripts return an error.
+func TestExecuteInlineEmptyScript(t *testing.T) {
+	exec := New(Config{})
+	err := exec.ExecuteInline(context.Background(), "")
+	if err == nil {
+		t.Error("ExecuteInline() with empty script should return an error")
+	}
+}

@@ -27,6 +27,12 @@ The site is automatically deployed to GitHub Pages on push to main via GitHub Ac
 
 **Live Site**: https://jongio.github.io/azd-exec/
 
+## Documentation
+
+- [CLI Reference](../cli/docs/cli-reference.md) - Complete command reference
+- [Security Review](../cli/docs/SECURITY-REVIEW.md) - Security documentation
+- [Threat Model](../cli/docs/THREAT-MODEL.md) - Security threat analysis
+
 ## Structure
 
 - `src/components/` - Reusable Astro components

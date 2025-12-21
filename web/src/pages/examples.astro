@@ -17,35 +17,45 @@ const base = import.meta.env.BASE_URL;
     <div class="content">
       <section class="example">
         <div class="example-header">
-          <h2>🚀 Deploy to Azure with Custom Steps</h2>
-          <p>Run a custom deployment script that uses Azure environment variables for configuration.</p>
+          <h2>� Run Database Migrations</h2>
+          <p>Execute SQL migrations against your Azure SQL database with proper authentication and error handling.</p>
         </div>
 
         <h3>Bash Script</h3>
         <CodeBlock code={`#!/bin/bash
 set -e
 
-echo "Deploying to Azure environment: \$AZURE_ENV_NAME"
+echo "Running database migration for: \$AZURE_ENV_NAME"
 
-# Build the application
-npm run build
+# Get database connection details
+DB_SERVER="sql-\$AZURE_ENV_NAME.database.windows.net"
+DB_NAME="db-\$AZURE_ENV_NAME"
+RESOURCE_GROUP="rg-\$AZURE_ENV_NAME"
 
-# Deploy to Azure Static Web Apps
-az staticwebapp deploy \\
-  --name "\$AZURE_ENV_NAME-web" \\
-  --resource-group "rg-\$AZURE_ENV_NAME" \\
-  --source ./dist
+# Get current user for Azure AD authentication
+CURRENT_USER=$(az account show --query user.name -o tsv)
+echo "Connecting as: \$CURRENT_USER"
 
-# Update app settings with environment info
-az webapp config appsettings set \\
-  --name "\$AZURE_ENV_NAME-api" \\
-  --resource-group "rg-\$AZURE_ENV_NAME" \\
-  --settings "ENVIRONMENT=\$AZURE_ENV_NAME" "LOCATION=\$AZURE_LOCATION"
+# Run migrations in order
+for migration in migrations/*.sql; do
+  echo "Applying migration: \$migration"
+  sqlcmd -S "\$DB_SERVER" \\
+    -d "\$DB_NAME" \\
+    -G \\
+    -i "\$migration"
+  
+  if [ \$? -eq 0 ]; then
+    echo "✅ \$migration applied successfully"
+  else
+    echo "❌ Failed to apply \$migration"
+    exit 1
+  fi
+done
 
-echo "Deployment complete!"`} language="bash" />
+echo "All migrations completed successfully!"`} language="bash" />
 
         <h3>Usage</h3>
-        <CodeBlock code="azd exec ./deploy.sh" language="bash" />
+        <CodeBlock code={`azd exec ./run-migrations.sh`} language="bash" />
       </section>
 
       <section class="example">
@@ -75,7 +85,7 @@ if (\$apiKey) {
 }`} language="powershell" />
 
         <h3>Usage</h3>
-        <CodeBlock code="azd exec ./env-config.ps1" language="powershell" />
+        <CodeBlock code={`azd exec ./env-config.ps1`} language="powershell" />
       </section>
 
       <section class="example">
@@ -126,7 +136,7 @@ az storage blob upload-batch \\\\
 log "Build pipeline completed successfully!"`} language="bash" />
 
         <h3>Usage</h3>
-        <CodeBlock code="azd exec ./build-pipeline.sh" language="bash" />
+        <CodeBlock code={`azd exec ./build-pipeline.sh`} language="bash" />
       </section>
 
       <section class="example">
@@ -175,7 +185,7 @@ if __name__ == "__main__":
     main()`} language="python" />
 
         <h3>Usage</h3>
-        <CodeBlock code="azd exec ./setup.py" language="bash" />
+        <CodeBlock code={`azd exec ./setup.py`} language="bash" />
       </section>
 
       <section class="example">
@@ -236,7 +246,7 @@ echo ""
 echo "Resource created successfully!"`} language="bash" />
 
         <h3>Usage</h3>
-        <CodeBlock code="azd exec ./setup-wizard.sh --interactive" language="bash" />
+        <CodeBlock code={`azd exec ./setup-wizard.sh --interactive`} language="bash" />
       </section>
 
       <section class="example">
@@ -317,7 +327,7 @@ az webapp deployment source config-zip \\
 echo "✅ Deployment completed successfully!"`} language="bash" />
 
         <h3>Usage</h3>
-        <CodeBlock code="azd exec ./deploy-with-rollback.sh" language="bash" />
+        <CodeBlock code={`azd exec ./deploy-with-rollback.sh`} language="bash" />
       </section>
 
       <section class="section">

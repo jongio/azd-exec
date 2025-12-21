@@ -117,7 +117,7 @@ const base = import.meta.env.BASE_URL;
           <div class="step-number">2</div>
           <div class="step-content">
             <h3 class="step-title">Verify Installation</h3>
-            <CodeBlock code="azd exec version" language="bash" />
+            <CodeBlock code={`azd exec version`} language="bash" />
           </div>
         </div>
 
@@ -126,10 +126,10 @@ const base = import.meta.env.BASE_URL;
           <div class="step-content">
             <h3 class="step-title">Run Your Script</h3>
             <CodeBlock code={`# Review the script first
-cat ./deploy.sh
+cat ./run-migration.sh
 
 # Then execute
-azd exec ./deploy.sh`} language="bash" />
+azd exec ./run-migration.sh`} language="bash" />
           </div>
         </div>
       </div>
@@ -145,13 +145,22 @@ azd exec ./deploy.sh`} language="bash" />
         <div class="tab-content">
           <h3>Bash Script</h3>
           <CodeBlock code={`#!/bin/bash
-# deploy.sh
+# run-migration.sh
 
-echo "Environment: \$AZURE_ENV_NAME"
-echo "Subscription: \$AZURE_SUBSCRIPTION_ID"
-echo "Location: \$AZURE_LOCATION"
+echo "Running database migration for: \$AZURE_ENV_NAME"
 
-azd deploy --all`} language="bash" />
+# Get database connection string from Azure SQL
+CONN_STRING=$(az sql db show-connection-string \\
+  --server "sql-\$AZURE_ENV_NAME" \\
+  --name "db-\$AZURE_ENV_NAME" \\
+  --client sqlcmd -o tsv)
+
+# Run migration using sqlcmd or your migration tool
+sqlcmd -S "sql-\$AZURE_ENV_NAME.database.windows.net" \\
+  -d "db-\$AZURE_ENV_NAME" \\
+  -G -i ./migrations/001_add_users_table.sql
+
+echo "Migration completed!"`} language="bash" />
         </div>
 
         <div class="tab-content">

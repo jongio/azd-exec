@@ -36,7 +36,7 @@ const base = import.meta.env.BASE_URL;
       <section class="section">
         <h2>Verify Installation</h2>
         <p>Confirm that azd exec is installed correctly:</p>
-        <CodeBlock code="azd exec version" language="bash" />
+        <CodeBlock code={`azd exec version`} language="bash" />
         <p>You should see output similar to:</p>
         <CodeBlock code={`azd exec version 0.1.0`} language="text" showCopy={false} />
       </section>
@@ -101,19 +101,19 @@ azd exec ./test-script.ps1`} language="powershell" />
         <h2>Common Commands</h2>
         
         <h3>Basic Execution</h3>
-        <CodeBlock code="azd exec ./my-script.sh" language="bash" />
+        <CodeBlock code={`azd exec ./my-script.sh`} language="bash" />
 
         <h3>Pass Arguments</h3>
-        <CodeBlock code="azd exec ./build.sh -- --verbose --config release" language="bash" />
+        <CodeBlock code={`azd exec ./build.sh -- --verbose --config release`} language="bash" />
 
         <h3>Specify Shell</h3>
-        <CodeBlock code="azd exec ./deploy.ps1 --shell pwsh" language="bash" />
+        <CodeBlock code={`azd exec ./deploy.ps1 --shell pwsh`} language="bash" />
 
         <h3>Set Working Directory</h3>
-        <CodeBlock code="azd exec ./setup.sh --cwd /path/to/project" language="bash" />
+        <CodeBlock code={`azd exec ./setup.sh --cwd /path/to/project`} language="bash" />
 
         <h3>Interactive Mode</h3>
-        <CodeBlock code="azd exec ./interactive-setup.sh --interactive" language="bash" />
+        <CodeBlock code={`azd exec ./interactive-setup.sh --interactive`} language="bash" />
       </section>
 
       <section class="section">

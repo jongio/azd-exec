@@ -32,7 +32,7 @@ func TestBuildCommandWithCustomShell(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			exec := New(Config{Shell: tt.shell, Args: tt.args})
-			cmd := exec.buildCommand(tt.shell, tt.scriptPath)
+			cmd := exec.buildCommand(tt.shell, tt.scriptPath, false)
 
 			// Check if command was built
 			if cmd == nil {
@@ -76,7 +76,7 @@ func TestBuildCommandShellVariations(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.shell, func(t *testing.T) {
 			exec := New(Config{Shell: tt.shell})
-			cmd := exec.buildCommand(tt.shell, tt.scriptPath)
+			cmd := exec.buildCommand(tt.shell, tt.scriptPath, false)
 
 			if cmd == nil {
 				t.Fatal("buildCommand returned nil")
@@ -88,7 +88,7 @@ func TestBuildCommandShellVariations(t *testing.T) {
 func TestBuildCommandLookPath(t *testing.T) {
 	// Test that buildCommand creates a valid exec.Cmd
 	exec := New(Config{})
-	cmd := exec.buildCommand("cmd", "test.bat")
+	cmd := exec.buildCommand("cmd", "test.bat", false)
 
 	// On Windows, cmd should be findable
 	if cmd.Path == "" {

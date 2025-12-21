@@ -38,13 +38,6 @@ const base = import.meta.env.BASE_URL;
             <p>Show azd exec version information</p>
             <span class="command-example">azd exec version</span>
           </a>
-
-          <div class="command-card disabled">
-            <h3><code>listen</code></h3>
-            <p>Start MCP server for editor integration</p>
-            <span class="command-example">azd exec listen</span>
-            <div class="badge">Experimental</div>
-          </div>
         </div>
       </section>
 
@@ -170,25 +163,24 @@ const base = import.meta.env.BASE_URL;
         <h2>Examples</h2>
         
         <h3>Basic Usage</h3>
-        <CodeBlock code="# Run a script
-azd exec ./deploy.sh
+        <CodeBlock code={`# Run a script
+azd exec ./run-migration.sh
 
 # Show help
 azd exec --help
-azd exec --help
 
 # Check version
-azd exec version" language="bash" />
+azd exec version`} language="bash" />
 
         <h3>Advanced Usage</h3>
-        <CodeBlock code="# Run with custom working directory
+        <CodeBlock code={`# Run with custom working directory
 azd exec ./build.sh --cwd /path/to/project
 
 # Pass arguments to script
 azd exec ./script.sh -- arg1 arg2 --flag
 
 # Run with debug output
-azd exec ./deploy.sh --debug" language="bash" />
+azd exec ./run-migration.sh --debug`} language="bash" />
       </section>
 
       <section class="section">

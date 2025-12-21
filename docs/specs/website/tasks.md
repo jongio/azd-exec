@@ -320,7 +320,6 @@
    - Command list:
      - azd exec run (link to run.astro)
      - azd exec version (link to version.astro)
-     - azd exec listen (brief note, internal)
 
 2. Each command in list:
    - Name, description

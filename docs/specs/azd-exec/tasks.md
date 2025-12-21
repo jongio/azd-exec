@@ -1,4 +1,4 @@
-<!-- NEXT: 3 -->
+<!-- NEXT: 2 -->
 # azd-exec Tasks
 
 ## TODO: Code Review
@@ -15,6 +15,13 @@
 **Assigned**: Developer (fix)
 **Number**: 4
 **Description**: Build, run tests, and fix all errors. Repeat until compilation and all tests pass cleanly.
+
+## DONE
+
+### 1. Add Inline Script Execution ✓
+**Assigned**: Developer
+**Completed**: 2025-12-20
+**Description**: Implemented inline script execution with `azd exec 'echo foo'` syntax. Added ExecuteInline method to executor, modified main.go to detect inline vs file scripts, supports all shells (bash, pwsh, cmd). Updated README with examples and security warnings. Includes comprehensive tests for both unit and integration scenarios. Build and tests verified passing.
 
 ## IN PROGRESS
 

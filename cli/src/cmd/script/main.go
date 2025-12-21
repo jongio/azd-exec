@@ -27,31 +27,27 @@ var (
 
 func main() {
 	rootCmd := &cobra.Command{
-		Use:   "exec [script-file] [-- script-args...]",
+		Use:   "exec [script-file-or-command] [-- script-args...]",
 		Short: "Exec - Execute commands/scripts with Azure Developer CLI context",
 		Long: `Exec is an Azure Developer CLI extension that executes commands and scripts with full access to azd environment variables and configuration.
 
 Examples:
-	azd exec ./setup.sh
-	azd exec ./deploy.ps1 --shell pwsh
-	azd exec ./build.sh -- --verbose --config release
-	azd exec ./init.sh -i  # Interactive mode`,
-		Args: cobra.MaximumNArgs(1),
+\tazd exec ./setup.sh                           # Execute script file
+\tazd exec 'echo $AZURE_ENV_NAME'               # Inline bash (Linux/macOS)
+\tazd exec "Write-Host 'Hello'" --shell pwsh   # Inline PowerShell
+\tazd exec ./deploy.ps1 --shell pwsh            # Script with shell
+\tazd exec ./build.sh -- --verbose              # Script with args
+\tazd exec ./init.sh -i                         # Interactive mode`,
+		Args: cobra.MinimumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if len(args) == 0 {
-				return cmd.Help()
-			}
-
-			// Resolve script path
-			scriptPath := args[0]
-			absPath, err := filepath.Abs(scriptPath)
-			if err != nil {
-				return fmt.Errorf("failed to resolve script path: %w", err)
-			}
-
-			// Check if script exists
-			if _, err := os.Stat(absPath); os.IsNotExist(err) {
-				return fmt.Errorf("script file not found: %s", scriptPath)
+			// Parse script arguments - everything after the script path
+			scriptArgs := []string{}
+			scriptInput := args[0]
+			
+			// Cobra doesn't parse args after -- automatically for us
+			// They're in cmd.Flags().Args() after the script path
+			if len(args) > 1 {
+				scriptArgs = args[1:]
 			}
 
 			// Create executor
@@ -59,11 +55,21 @@ Examples:
 				Shell:       shell,
 				WorkingDir:  workingDir,
 				Interactive: interactive,
-				Args:        []string{}, // TODO: Handle args after --
+				Args:        scriptArgs,
 			})
 
-			// Execute the script
-			return exec.Execute(context.Background(), absPath)
+			// Check if input is a file or inline script
+			// Try to resolve as file path first
+			absPath, err := filepath.Abs(scriptInput)
+			if err == nil {
+				if _, statErr := os.Stat(absPath); statErr == nil {
+					// It's a file that exists, execute as file
+					return exec.Execute(context.Background(), absPath)
+				}
+			}
+
+			// Not a file, treat as inline script
+			return exec.ExecuteInline(context.Background(), scriptInput)
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// Handle working directory change

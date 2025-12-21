@@ -306,6 +306,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Features
 - `azd exec run` - Execute script files with azd context
 - `azd exec version` - Display extension version
-- `azd exec listen` - Internal extension framework communication
 
 [0.1.0]: https://github.com/jongio/azd-exec/releases/tag/v0.1.0

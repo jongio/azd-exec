@@ -19,7 +19,7 @@ Create a documentation website for azd-exec extension using Astro, styled with T
 
 - **Home Page**: Overview, features, quick start, security notice
 - **Getting Started**: Detailed installation and first-time setup
-- **CLI Reference**: Command documentation (run, version, listen)
+- **CLI Reference**: Command documentation (run, version)
 - **Examples**: Common use cases with full scripts
 - **Changelog**: Full version history
 - **Components**: Reusable UI elements (code blocks, install tabs, layout)
@@ -123,7 +123,6 @@ web/
 **Commands to Document**:
 - `azd exec run` - Execute scripts with azd context
 - `azd exec version` - Show version
-- `azd exec listen` - Internal (brief mention)
 
 **Auto-generation**:
 - Read from `cli/docs/commands/*.md` (future)
