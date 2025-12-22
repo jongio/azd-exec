@@ -29,7 +29,7 @@ if ($env:API_KEY) {
     Write-Host "     azd env set API_KEY '@Microsoft.KeyVault(VaultName=myvault;SecretName=api-key)'"
     Write-Host ""
     Write-Host "  3. Run this script:"
-    Write-Host "     azd exec run examples/keyvault-demo.ps1"
+    Write-Host "     azd exec examples/keyvault-demo.ps1"
 }
 
 Write-Host ""

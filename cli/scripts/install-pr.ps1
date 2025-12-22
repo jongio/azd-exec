@@ -96,7 +96,7 @@ if ($LASTEXITCODE -eq 0) {
 Write-Host ""
 Write-Host "Try these commands:" -ForegroundColor Cyan
 Write-Host "  azd exec version" -ForegroundColor White
-Write-Host "  azd exec run ./my-script.sh" -ForegroundColor White
+Write-Host "  azd exec ./my-script.sh" -ForegroundColor White
 Write-Host ""
 Write-Host "To restore stable version, run:" -ForegroundColor Gray
 Write-Host "  iex `"& { `$(irm https://raw.githubusercontent.com/$repo/main/cli/scripts/restore-stable.ps1) }`"" -ForegroundColor White

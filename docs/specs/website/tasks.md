@@ -318,7 +318,7 @@
    - Page title: "CLI Reference"
    - Introduction paragraph
    - Command list:
-     - azd exec run (link to run.astro)
+     - azd exec (link to index.astro)
      - azd exec version (link to version.astro)
 
 2. Each command in list:
@@ -336,7 +336,7 @@
 
 ## TODO: Create CLI Reference - run
 
-**Description**: Detailed documentation for `azd exec run`.
+**Description**: Detailed documentation for `azd exec`.
 
 **Tasks**:
 1. Create `web/src/pages/reference/cli/run.astro`:

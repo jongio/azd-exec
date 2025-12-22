@@ -29,7 +29,7 @@ else
     echo "     azd env set DATABASE_PASSWORD '@Microsoft.KeyVault(VaultName=myvault;SecretName=db-password)'"
     echo ""
     echo "  3. Run this script:"
-    echo "     azd exec run examples/keyvault-demo.sh"
+    echo "     azd exec examples/keyvault-demo.sh"
 fi
 
 echo ""

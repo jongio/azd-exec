@@ -72,7 +72,7 @@ function parseChangelog(content: string): ChangelogEntry[] {
 
 function generateAstroPage(entries: ChangelogEntry[]): string {
   const astroContent = `---
-import Layout from '../../components/Layout.astro';
+import Layout from '../../../components/Layout.astro';
 ---
 
 <Layout title="Changelog" description="Release history and changes for azd exec">

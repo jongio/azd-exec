@@ -12,11 +12,7 @@ export default defineConfig({
     mdx()
   ],
   vite: {
-    plugins: [tailwindcss()],
-    build: {
-      target: 'esnext',
-      minify: false
-    }
+    plugins: [tailwindcss()]
   },
   output: 'static'
 });

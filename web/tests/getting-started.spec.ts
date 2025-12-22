@@ -10,7 +10,7 @@ test.describe('Getting Started Page', () => {
 
   test('should have installation section', async ({ page }) => {
     await page.goto(`${BASE_URL}/getting-started`);
-    const installHeading = page.getByRole('heading', { name: /install/i });
+    const installHeading = page.getByRole('heading', { name: /^install azd exec$/i });
     await expect(installHeading).toBeVisible();
   });
 

@@ -101,8 +101,8 @@ azd exec ./migration.sh`} language="bash" />
           </li>
           <li>
             <strong>Store secrets in Azure Key Vault</strong>
-            <CodeBlock code={`# Retrieve secrets at runtime
-API_KEY=$(az keyvault secret show \\
+            <CodeBlock code={`# Retrieve secrets at runtime using azd exec
+API_KEY=$(azd exec -- az keyvault secret show \\
   --name "api-key" \\
   --vault-name "kv-$AZURE_ENV_NAME" \\
   --query "value" -o tsv)`} language="bash" />
@@ -221,7 +221,7 @@ sha256sum script.sh
           <li>
             <strong>Immediately revoke Azure credentials</strong>
             <CodeBlock code={`# Logout from Azure CLI
-az logout
+azd auth logout
 
 # Revoke all sessions (Azure Portal)
 # Azure Portal > Azure Active Directory > Users > [Your User] > Revoke Sessions`} language="bash" />
@@ -233,7 +233,7 @@ az logout
           <li>
             <strong>Review Azure Activity Logs</strong>
             <CodeBlock code={`# Check recent Azure activities
-az monitor activity-log list \\
+azd exec -- az monitor activity-log list \\
   --start-time $(date -u -d "1 hour ago" "+%Y-%m-%dT%H:%M:%SZ") \\
   --query "[?contains(authorization.action, 'write')]" \\
   -o table`} language="bash" />
@@ -381,7 +381,11 @@ az monitor activity-log list \\
 
   .access-card li {
     margin: 0.5rem 0;
-    color: var(--color-text-secondary);
+    color: #4b5563;
+  }
+
+  [data-theme="dark"] .access-card li {
+    color: #e2e8f0;
   }
 
   .checklist {

@@ -9,7 +9,8 @@ export default defineConfig({
   reporter: 'html',
   
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:4321/azd-exec',
+    // Note: Trailing slash is required for proper URL resolution with relative paths
+    baseURL: process.env.BASE_URL || 'http://localhost:4321/azd-exec/',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
   },

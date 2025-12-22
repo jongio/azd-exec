@@ -121,7 +121,7 @@ web/
 **Purpose**: Complete command documentation
 
 **Commands to Document**:
-- `azd exec run` - Execute scripts with azd context
+- `azd exec` - Execute scripts with azd context
 - `azd exec version` - Show version
 
 **Auto-generation**:

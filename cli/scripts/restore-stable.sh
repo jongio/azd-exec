@@ -76,4 +76,4 @@ fi
 echo ""
 echo -e "${CYAN}Try these commands:${NC}"
 echo -e "${WHITE}  azd exec version${NC}"
-echo -e "${WHITE}  azd exec run ./my-script.sh${NC}"
+echo -e "${WHITE}  azd exec ./my-script.sh${NC}"

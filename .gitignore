@@ -58,3 +58,5 @@ Thumbs.db
 *.test
 testdata/tmp/
 cli/build-debug.txt
+
+.playwright-mcp

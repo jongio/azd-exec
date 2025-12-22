@@ -14,9 +14,9 @@
           "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
-              "name": "run",
+              "name": "script",
               "description": "Execute a script file with azd context",
-              "usage": "azd exec run ./my-script.sh"
+              "usage": "azd exec ./my-script.sh"
             },
             {
               "name": "version",
@@ -43,9 +43,9 @@
           "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
-              "name": "run",
+              "name": "script",
               "description": "Execute a script file with azd context",
-              "usage": "azd exec run ./my-script.sh"
+              "usage": "azd exec ./my-script.sh"
             },
             {
               "name": "listen",
