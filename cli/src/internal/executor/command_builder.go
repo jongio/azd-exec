@@ -40,11 +40,7 @@ func (e *Executor) buildCommand(shell, scriptOrPath string, isInline bool) *exec
 			cmdArgs = []string{shell, "-File", scriptOrPath}
 		}
 	case shellCmd:
-		if isInline {
-			cmdArgs = []string{shell, "/c", scriptOrPath}
-		} else {
-			cmdArgs = []string{shell, "/c", scriptOrPath}
-		}
+		cmdArgs = []string{shell, "/c", scriptOrPath}
 	default:
 		if isInline {
 			cmdArgs = []string{shell, "-c", scriptOrPath}

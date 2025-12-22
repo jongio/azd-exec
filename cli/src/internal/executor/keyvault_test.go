@@ -15,8 +15,7 @@ func TestKeyVaultResolver_Creation(t *testing.T) {
 		}
 		if resolver == nil {
 			t.Error("Expected non-nil resolver when no error")
-		}
-		if resolver.clients == nil {
+		} else if resolver.clients == nil {
 			t.Error("Expected clients map to be initialized")
 		}
 	})

@@ -69,6 +69,7 @@
     "unusedparams",
     "unusedwrite",
     "useany",
+    "USERPROFILE",
     "varnamelen",
     "vaultname",
     "waitgroups",

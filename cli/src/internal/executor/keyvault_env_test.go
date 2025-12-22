@@ -123,12 +123,13 @@ func TestNewKeyVaultResolver(t *testing.T) {
 
 		// In environments without Azure credentials, this should fail
 		// In environments with credentials, it should succeed
-		if err != nil {
+		switch {
+		case err != nil:
 			// Expected in CI/CD without Azure auth
 			t.Logf("NewKeyVaultResolver failed as expected without Azure credentials: %v", err)
-		} else if resolver == nil {
+		case resolver == nil:
 			t.Error("NewKeyVaultResolver returned nil resolver without error")
-		} else {
+		default:
 			t.Log("NewKeyVaultResolver succeeded with available Azure credentials")
 		}
 	})

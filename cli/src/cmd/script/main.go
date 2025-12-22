@@ -18,7 +18,7 @@ var (
 	environment  string
 	traceLogFile string
 	traceLogURL  string
-	// Root command flags for direct script execution
+	// Root command flags for direct script execution.
 	shell       string
 	workingDir  string
 	interactive bool

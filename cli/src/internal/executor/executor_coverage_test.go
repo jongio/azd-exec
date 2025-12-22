@@ -69,12 +69,12 @@ func TestPrepareEnvironment(t *testing.T) {
 			os.Clearenv()
 			for _, env := range origEnv {
 				if idx := findEqualsSign(env); idx > 0 {
-					os.Setenv(env[:idx], env[idx+1:])
+					_ = os.Setenv(env[:idx], env[idx+1:])
 				}
 			}
 		}()
 
-		os.Setenv("NORMAL_VAR", "value")
+		_ = os.Setenv("NORMAL_VAR", "value")
 
 		envVars, err := exec.prepareEnvironment(context.Background())
 		if err != nil {
@@ -91,12 +91,12 @@ func TestPrepareEnvironment(t *testing.T) {
 			os.Clearenv()
 			for _, env := range origEnv {
 				if idx := findEqualsSign(env); idx > 0 {
-					os.Setenv(env[:idx], env[idx+1:])
+					_ = os.Setenv(env[:idx], env[idx+1:])
 				}
 			}
 		}()
 
-		os.Setenv("KV_VAR", "@Microsoft.KeyVault(VaultName=test;SecretName=secret)")
+		_ = os.Setenv("KV_VAR", "@Microsoft.KeyVault(VaultName=test;SecretName=secret)")
 
 		_, err := exec.prepareEnvironment(context.Background())
 		// Without Azure credentials, this should return an error
@@ -199,13 +199,13 @@ func TestExecutorWithDebugMode(t *testing.T) {
 	origDebug := os.Getenv("AZD_SCRIPT_DEBUG")
 	defer func() {
 		if origDebug != "" {
-			os.Setenv("AZD_SCRIPT_DEBUG", origDebug)
+			_ = os.Setenv("AZD_SCRIPT_DEBUG", origDebug)
 		} else {
-			os.Unsetenv("AZD_SCRIPT_DEBUG")
+			_ = os.Unsetenv("AZD_SCRIPT_DEBUG")
 		}
 	}()
 
-	os.Setenv("AZD_SCRIPT_DEBUG", "true")
+	_ = os.Setenv("AZD_SCRIPT_DEBUG", "true")
 
 	exec := New(Config{})
 	err := exec.ExecuteInline(context.Background(), "echo 'debug test'")

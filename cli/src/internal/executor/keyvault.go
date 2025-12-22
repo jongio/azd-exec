@@ -12,12 +12,12 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/security/keyvault/azsecrets"
 )
 
-// Key Vault reference patterns
+// Key Vault reference patterns.
 var (
-	// Pattern: @Microsoft.KeyVault(SecretUri=https://vault.vault.azure.net/secrets/name[/version])
+	// Pattern: @Microsoft.KeyVault(SecretUri=https://vault.vault.azure.net/secrets/name[/version]).
 	kvRefSecretURIPattern = regexp.MustCompile(`^@Microsoft\.KeyVault\(SecretUri=(.+)\)$`)
 
-	// Pattern: @Microsoft.KeyVault(VaultName=vault;SecretName=name[;SecretVersion=version])
+	// Pattern: @Microsoft.KeyVault(VaultName=vault;SecretName=name[;SecretVersion=version]).
 	kvRefVaultNamePattern = regexp.MustCompile(`^@Microsoft\.KeyVault\(VaultName=([^;]+);SecretName=([^;)]+)(?:;SecretVersion=([^;)]+))?\)$`)
 )
 

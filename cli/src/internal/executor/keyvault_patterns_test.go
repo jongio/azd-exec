@@ -152,10 +152,8 @@ func TestKeyVaultReferencePatterns(t *testing.T) {
 						t.Errorf("Part %d: expected %q, got %q", i, expected, matches[i])
 					}
 				}
-			} else {
-				if matches != nil {
-					t.Errorf("Expected pattern not to match, but got: %v", matches)
-				}
+			} else if matches != nil {
+				t.Errorf("Expected pattern not to match, but got: %v", matches)
 			}
 		})
 	}
