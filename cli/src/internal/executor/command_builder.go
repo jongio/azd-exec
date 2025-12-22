@@ -1,12 +1,29 @@
 package executor
 
 import (
+	"fmt"
+	"os"
 	"os/exec"
 	"strings"
 )
 
+// validShells maps known shell names to whether they're valid.
+var validShells = map[string]bool{
+	shellBash:       true,
+	shellSh:         true,
+	shellZsh:        true,
+	shellPwsh:       true,
+	shellPowerShell: true,
+	shellCmd:        true,
+}
+
 // buildCommand builds the exec.Cmd for the given shell and script.
 func (e *Executor) buildCommand(shell, scriptOrPath string, isInline bool) *exec.Cmd {
+	// Validate shell parameter
+	if !validShells[strings.ToLower(shell)] {
+		fmt.Fprintf(os.Stderr, "Warning: unknown shell '%s', execution may fail\n", shell)
+	}
+
 	var cmdArgs []string
 
 	switch strings.ToLower(shell) {

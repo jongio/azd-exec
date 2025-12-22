@@ -21,6 +21,7 @@ const (
 	shebangPrefix = "#!"
 
 	// shebangReadSize is the number of bytes to read for shebang detection.
+	// Must match the length of shebangPrefix (2 bytes for "#!").
 	shebangReadSize = 2
 
 	// envCommand is the common env wrapper in shebangs.

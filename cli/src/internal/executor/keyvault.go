@@ -6,6 +6,7 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/azure-sdk-for-go/sdk/security/keyvault/azsecrets"
@@ -24,6 +25,7 @@ var (
 type KeyVaultResolver struct {
 	credential *azidentity.DefaultAzureCredential
 	clients    map[string]*azsecrets.Client
+	mu         sync.RWMutex // protects clients map
 }
 
 // NewKeyVaultResolver creates a new Key Vault resolver.
@@ -117,6 +119,19 @@ func (r *KeyVaultResolver) resolveByVaultNameAndSecret(ctx context.Context, vaul
 
 // getClient gets or creates a Key Vault client for the specified vault URL.
 func (r *KeyVaultResolver) getClient(vaultURL string) (*azsecrets.Client, error) {
+	// Check if client exists (read lock)
+	r.mu.RLock()
+	if client, ok := r.clients[vaultURL]; ok {
+		r.mu.RUnlock()
+		return client, nil
+	}
+	r.mu.RUnlock()
+
+	// Create new client (write lock)
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	// Double-check after acquiring write lock (another goroutine may have created it)
 	if client, ok := r.clients[vaultURL]; ok {
 		return client, nil
 	}

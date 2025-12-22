@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -64,12 +63,12 @@ Examples:
 			if err == nil {
 				if _, statErr := os.Stat(absPath); statErr == nil {
 					// It's a file that exists, execute as file
-					return exec.Execute(context.Background(), absPath)
+					return exec.Execute(cmd.Context(), absPath)
 				}
 			}
 
 			// Not a file, treat as inline script
-			return exec.ExecuteInline(context.Background(), scriptInput)
+			return exec.ExecuteInline(cmd.Context(), scriptInput)
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// Handle working directory change

@@ -76,7 +76,7 @@ if ($outputPath) {
     # IMPORTANT: azd x pack expects binaries with platform-specific names
     # Copy the binary with the correct naming convention for pack to find it
     $extensionIdSafe = $extensionId -replace '\.', '-'
-    $namespace = "exec"  # from extension.yaml
+
     $binaryExt = if ($targetOS -eq "windows") { ".exe" } else { "" }
     $platformSpecificName = "$extensionIdSafe-$targetOS-$targetArch$binaryExt"
     

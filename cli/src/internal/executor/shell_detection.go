@@ -2,6 +2,7 @@ package executor
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -46,7 +47,10 @@ func (e *Executor) readShebang(scriptPath string) string {
 		return ""
 	}
 	defer func() {
-		_ = file.Close()
+		if err := file.Close(); err != nil {
+			// Log error but don't fail - we may have already read what we needed
+			fmt.Fprintf(os.Stderr, "warning: failed to close file %s: %v\n", scriptPath, err)
+		}
 	}()
 
 	reader := bufio.NewReader(file)
