@@ -179,11 +179,31 @@ jobs:
         with:
           ref: ${{ steps.pr.outputs.sha }}
 
-      - name: Set up Go
+      - name: Set up Go (bootstrap)
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: cli/go.sum
+          go-version: 'stable'
+          cache: false
+
+      - name: Install Go ${{ env.GO_VERSION }}
+        run: |
+          go install golang.org/dl/go${{ env.GO_VERSION }}@latest
+          go${{ env.GO_VERSION }} download
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          ln -sf $(which go${{ env.GO_VERSION }}) $(go env GOPATH)/bin/go
+
+      - name: Verify Go version
+        run: go version
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
 
       - name: Calculate PR version
         id: version
@@ -207,6 +227,20 @@ jobs:
           # Add the official azd extensions registry source
           azd extension source add azd --location https://aka.ms/azd/extensions/registry --type url 2>/dev/null || true
           azd extension install microsoft.azd.extensions --source azd
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('web/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+
+      - name: Build website assets
+        working-directory: web
+        run: |
+          pnpm install
+          pnpm run build
 
       - name: Update extension.yaml with PR version
         working-directory: cli
