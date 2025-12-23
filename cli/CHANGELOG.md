@@ -1,3 +1,7 @@
+## [0.2.9] - 2025-12-23
+
+
+
 ## [0.2.8] - 2025-12-23
 
 - feat: update binary naming for multi-platform builds to match expected format (d9392c7)
