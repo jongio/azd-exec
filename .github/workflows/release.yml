@@ -522,6 +522,7 @@ jobs:
         run: |
           export EXTENSION_ID="jongio.azd.exec"
           export EXTENSION_VERSION="${{ steps.version.outputs.next }}"
+          export BUILD_ALL=true
           azd x build --all
           
           # Verify binaries were created
