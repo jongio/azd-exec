@@ -26,6 +26,10 @@ go build -ldflags "${LDFLAGS}" -o bin/exec ./src/cmd/script
 # Build for multiple platforms if requested
 if [ "${BUILD_ALL:-false}" = "true" ]; then
         echo "Building for multiple platforms..."
+        
+        # Create platform-specific directories
+        mkdir -p bin/linux-amd64 bin/linux-arm64 bin/darwin-amd64 bin/darwin-arm64 bin/windows-amd64
+        
         # Linux AMD64
         GOOS=linux GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/linux-amd64/exec ./src/cmd/script
 
@@ -42,6 +46,10 @@ if [ "${BUILD_ALL:-false}" = "true" ]; then
         GOOS=windows GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/windows-amd64/exec.exe ./src/cmd/script
 
         echo "All builds complete!"
+        echo "Verifying binaries:"
+        find bin -type f -name "exec*" | while read -r file; do
+            echo "  - ${file} ($(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "?") bytes)"
+        done
 fi
 
 echo "Build complete!"

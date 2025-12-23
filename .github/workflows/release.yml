@@ -517,26 +517,48 @@ jobs:
           pnpm install
           pnpm run build
 
-      - name: Build binaries
+      - name: Build binaries for all platforms
         working-directory: cli
         run: |
-          export EXTENSION_ID="jongio.azd.exec"
-          export EXTENSION_VERSION="${{ steps.version.outputs.next }}"
-          export BUILD_ALL=true
-          azd x build --all
+          VERSION="${{ steps.version.outputs.next }}"
+          BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+          LDFLAGS="-X main.version=${VERSION} -X main.buildDate=${BUILD_DATE} -X main.gitCommit=${GIT_COMMIT}"
           
-          # Verify binaries were created
-          echo "Binaries created:"
-          ls -la bin/ || echo "No bin directory found!"
+          echo "Building binaries for version $VERSION"
+          
+          # Create platform directories
+          mkdir -p bin/windows-amd64 bin/windows-arm64 bin/linux-amd64 bin/linux-arm64 bin/darwin-amd64 bin/darwin-arm64
+          
+          # Build for all platforms
+          GOOS=windows GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/windows-amd64/exec.exe ./src/cmd/script
+          GOOS=windows GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/windows-arm64/exec.exe ./src/cmd/script
+          GOOS=linux GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/linux-amd64/exec ./src/cmd/script
+          GOOS=linux GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/linux-arm64/exec ./src/cmd/script
+          GOOS=darwin GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/darwin-amd64/exec ./src/cmd/script
+          GOOS=darwin GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/darwin-arm64/exec ./src/cmd/script
+          
+          # Verify
+          echo "Built binaries:"
+          find bin -type f -name "exec*"
 
       - name: Package
         working-directory: cli
         run: |
+          export EXTENSION_ID="jongio.azd.exec"
+          export EXTENSION_VERSION="${{ steps.version.outputs.next }}"
           azd x pack
           
           # Verify packages were created
           echo "Checking registry location:"
-          ls -la ~/.azd/registry/jongio.azd.exec/${{ steps.version.outputs.next }}/ || echo "No packages found!"
+          REGISTRY_PATH="$HOME/.azd/registry/jongio.azd.exec/${{ steps.version.outputs.next }}"
+          echo "Registry path: $REGISTRY_PATH"
+          ls -la "$REGISTRY_PATH" || echo "No packages found!"
+          
+          # Also check what azd x pack actually created
+          echo ""
+          echo "All files in registry:"
+          find "$HOME/.azd/registry/jongio.azd.exec/" -type f 2>/dev/null || echo "No registry files!"
 
       - name: Extract release notes
         id: release_notes
