@@ -1,3 +1,7 @@
+## [0.2.7] - 2025-12-23
+
+- feat: enhance build process to support multi-platform binaries and add verification steps (bdd71b9)
+
 ## [0.2.6] - 2025-12-23
 
 - feat: add test scripts for azd x release flow and update release workflow to build all binaries (cf24401)
