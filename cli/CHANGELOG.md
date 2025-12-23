@@ -1,3 +1,7 @@
+## [0.2.13] - 2025-12-23
+
+- fix: place binaries directly in bin/ folder, not subdirectories (77f75c3)
+
 ## [0.2.12] - 2025-12-23
 
 - fix: use full extension ID pattern for binary names (jongio-azd-exec-{os}-{arch}) (59c1a36)
