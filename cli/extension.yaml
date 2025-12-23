@@ -3,7 +3,7 @@ namespace: exec
 displayName: Exec Extension
 description: Execute commands and scripts with Azure Developer CLI context and environment variables
 usage: azd exec <command> [options]
-version: 0.2.8
+version: 0.2.9
 language: go
 capabilities:
   - custom-commands
