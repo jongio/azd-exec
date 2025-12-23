@@ -1,3 +1,11 @@
+## [0.2.1] - 2025-12-23
+
+- feat: update GitHub token for release workflow to use RELEASE_PAT (bdbf836)
+- feat: add permissions for actions in release workflow (00c6594)
+- feat: update Open Graph image for azd exec (515ee8e)
+- feat: add script to generate Open Graph image for azd exec (a349920)
+- Initial commit (5ecc1c5)
+
 # Changelog
 
 All notable changes to the azd exec extension will be documented in this file.
