@@ -466,10 +466,12 @@ jobs:
       - name: Release
         working-directory: cli
         run: |
+          REGISTRY_PATH="$HOME/.azd/registry/jongio.azd.exec/${{ steps.version.outputs.next }}"
           azd x release \
             --repo "${{ github.repository }}" \
             --version "${{ steps.version.outputs.next }}" \
             --notes-file /tmp/release-notes.md \
+            --artifacts "$REGISTRY_PATH/*.zip,$REGISTRY_PATH/*.tar.gz" \
             --confirm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
