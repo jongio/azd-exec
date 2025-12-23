@@ -1,3 +1,8 @@
+## [0.2.8] - 2025-12-23
+
+- feat: update binary naming for multi-platform builds to match expected format (d9392c7)
+- refactor: remove Node.js setup and website build steps from release workflow (a580dc4)
+
 ## [0.2.7] - 2025-12-23
 
 - feat: enhance build process to support multi-platform binaries and add verification steps (bdd71b9)
