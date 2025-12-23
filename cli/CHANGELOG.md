@@ -1,3 +1,7 @@
+## [0.2.12] - 2025-12-23
+
+- fix: use full extension ID pattern for binary names (jongio-azd-exec-{os}-{arch}) (59c1a36)
+
 ## [0.2.11] - 2025-12-23
 
 
