@@ -411,18 +411,16 @@ jobs:
           
           echo "Building binaries for version $VERSION"
           
-          # Create platform directories
-          mkdir -p bin/windows-amd64 bin/windows-arm64 bin/linux-amd64 bin/linux-arm64 bin/darwin-amd64 bin/darwin-arm64
-          
           # Build for all platforms
           # Binary names must match the pattern: {extension-id with dots replaced by dashes}-{os}-{arch}
           # For jongio.azd.exec, this becomes: jongio-azd-exec-{os}-{arch}
-          GOOS=windows GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/windows-amd64/jongio-azd-exec-windows-amd64.exe ./src/cmd/script
-          GOOS=windows GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/windows-arm64/jongio-azd-exec-windows-arm64.exe ./src/cmd/script
-          GOOS=linux GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/linux-amd64/jongio-azd-exec-linux-amd64 ./src/cmd/script
-          GOOS=linux GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/linux-arm64/jongio-azd-exec-linux-arm64 ./src/cmd/script
-          GOOS=darwin GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/darwin-amd64/jongio-azd-exec-darwin-amd64 ./src/cmd/script
-          GOOS=darwin GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/darwin-arm64/jongio-azd-exec-darwin-arm64 ./src/cmd/script
+          # They must be placed directly in bin/ folder, NOT in subdirectories
+          GOOS=windows GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-windows-amd64.exe ./src/cmd/script
+          GOOS=windows GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-windows-arm64.exe ./src/cmd/script
+          GOOS=linux GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-linux-amd64 ./src/cmd/script
+          GOOS=linux GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-linux-arm64 ./src/cmd/script
+          GOOS=darwin GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-darwin-amd64 ./src/cmd/script
+          GOOS=darwin GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-darwin-arm64 ./src/cmd/script
           
           # Verify
           echo "Built binaries:"
