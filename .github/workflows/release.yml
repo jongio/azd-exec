@@ -523,10 +523,19 @@ jobs:
           export EXTENSION_ID="jongio.azd.exec"
           export EXTENSION_VERSION="${{ steps.version.outputs.next }}"
           azd x build --all
+          
+          # Verify binaries were created
+          echo "Binaries created:"
+          ls -la bin/ || echo "No bin directory found!"
 
       - name: Package
         working-directory: cli
-        run: azd x pack
+        run: |
+          azd x pack
+          
+          # Verify packages were created
+          echo "Checking registry location:"
+          ls -la ~/.azd/registry/jongio.azd.exec/${{ steps.version.outputs.next }}/ || echo "No packages found!"
 
       - name: Extract release notes
         id: release_notes
