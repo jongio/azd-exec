@@ -1,3 +1,7 @@
+## [0.2.2] - 2025-12-23
+
+
+
 ## [0.2.1] - 2025-12-23
 
 - feat: update GitHub token for release workflow to use RELEASE_PAT (bdbf836)
