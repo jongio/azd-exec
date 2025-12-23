@@ -1,3 +1,8 @@
+## [0.2.6] - 2025-12-23
+
+- feat: add test scripts for azd x release flow and update release workflow to build all binaries (cf24401)
+- feat: add verification steps for binaries and packages in release workflow (2b42cf5)
+
 ## [0.2.5] - 2025-12-23
 
 
