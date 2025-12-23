@@ -1,0 +1,365 @@
+---
+import Layout from '../../../components/Layout.astro';
+import CodeBlock from '../../../components/CodeBlock.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="CLI Reference" description="Complete reference for azd exec command-line interface">
+  <div class="page-container">
+    <div class="page-header">
+      <h1>CLI Reference</h1>
+      <p class="page-intro">
+        Complete command-line interface documentation for azd exec.
+      </p>
+    </div>
+
+    <div class="content">
+      <section class="section">
+        <h2>Overview</h2>
+        <p>
+          The azd exec extension provides commands to execute scripts with Azure Developer CLI environment context.
+        </p>
+        <CodeBlock code="azd exec [command] [flags]" language="bash" />
+      </section>
+
+      <section class="section">
+        <h2>Available Commands</h2>
+        
+        <div class="command-grid">
+          <div class="command-card">
+            <h3><code>exec &lt;script&gt;</code></h3>
+            <p>Execute a script with Azure environment variables</p>
+            <span class="command-example">azd exec ./script.sh</span>
+          </div>
+
+          <a href={`${base}reference/cli/version`} class="command-card">
+            <h3><code>version</code></h3>
+            <p>Show azd exec version information</p>
+            <span class="command-example">azd exec version</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Global Flags</h2>
+        <p>These flags are available for all commands:</p>
+        
+        <div class="flags-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Flag</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--help</code>, <code>-h</code></td>
+                <td>Show help for any command</td>
+              </tr>
+              <tr>
+                <td><code>--cwd</code></td>
+                <td>Set working directory for command execution</td>
+              </tr>
+              <tr>
+                <td><code>--debug</code></td>
+                <td>Enable debug logging</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Environment Variables</h2>
+        <p>azd exec automatically provides these environment variables to your scripts:</p>
+        
+        <div class="env-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Variable</th>
+                <th>Description</th>
+                <th>Example</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>AZURE_ENV_NAME</code></td>
+                <td>Azure environment name from azd</td>
+                <td>dev, staging, prod</td>
+              </tr>
+              <tr>
+                <td><code>AZURE_SUBSCRIPTION_ID</code></td>
+                <td>Active Azure subscription ID</td>
+                <td>12345678-1234-...</td>
+              </tr>
+              <tr>
+                <td><code>AZURE_LOCATION</code></td>
+                <td>Azure region for resources</td>
+                <td>eastus, westeurope</td>
+              </tr>
+              <tr>
+                <td><code>AZURE_RESOURCE_GROUP</code></td>
+                <td>Resource group name (if configured)</td>
+                <td>rg-myapp-dev</td>
+              </tr>
+              <tr>
+                <td><code>AZURE_TENANT_ID</code></td>
+                <td>Azure AD tenant ID</td>
+                <td>87654321-4321-...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <p>Additionally, all variables from your <code>.env</code> file are loaded.</p>
+      </section>
+
+      <section class="section">
+        <h2>Exit Codes</h2>
+        <p>azd exec uses these exit codes:</p>
+        
+        <div class="exit-codes">
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>0</code></td>
+                <td>Success - script executed without errors</td>
+              </tr>
+              <tr>
+                <td><code>1</code></td>
+                <td>Script execution failed</td>
+              </tr>
+              <tr>
+                <td><code>2</code></td>
+                <td>Invalid arguments or command syntax</td>
+              </tr>
+              <tr>
+                <td><code>126</code></td>
+                <td>Script not executable</td>
+              </tr>
+              <tr>
+                <td><code>127</code></td>
+                <td>Script not found</td>
+              </tr>
+              <tr>
+                <td><code>130</code></td>
+                <td>Script terminated by Ctrl+C</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Examples</h2>
+        
+        <h3>Basic Usage</h3>
+        <CodeBlock code={`# Run a script
+azd exec ./run-migration.sh
+
+# Show help
+azd exec --help
+
+# Check version
+azd exec version`} language="bash" />
+
+        <h3>Advanced Usage</h3>
+        <CodeBlock code={`# Run with custom working directory
+azd exec ./build.sh --cwd /path/to/project
+
+# Pass arguments to script
+azd exec ./script.sh -- arg1 arg2 --flag
+
+# Run with debug output
+azd exec ./run-migration.sh --debug`} language="bash" />
+      </section>
+
+      <section class="section">
+        <h2>Related Documentation</h2>
+        <div class="related-links">
+          <a href={`${base}getting-started`}>Getting Started</a>
+          <a href={`${base}examples`}>Examples</a>
+          <a href={`${base}security`}>Security Guidelines</a>
+        </div>
+      </section>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .page-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+  }
+
+  .page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .page-intro {
+    font-size: 1.25rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .content {
+    line-height: 1.7;
+  }
+
+  .section {
+    margin-bottom: 3rem;
+  }
+
+  .section h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .section h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .section p {
+    margin: 0 0 1rem;
+    color: var(--color-text-secondary);
+  }
+
+  .command-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  .command-card {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border-default);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-decoration: none;
+    background-color: var(--color-bg-primary);
+    transition: border-color 0.2s;
+    position: relative;
+  }
+
+  .command-card:not(.disabled):hover {
+    border-color: var(--color-interactive-default);
+  }
+
+  .command-card.disabled {
+    opacity: 0.6;
+    cursor: default;
+  }
+
+  .command-card h3 {
+    font-size: 1.25rem;
+    margin: 0 0 0.5rem;
+    color: var(--color-text-primary);
+  }
+
+  .command-card h3 code {
+    color: var(--color-interactive-default);
+  }
+
+  .command-card p {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    flex-grow: 1;
+  }
+
+  .command-example {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-text-tertiary);
+    background-color: var(--color-bg-secondary);
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+  }
+
+  .badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background-color: var(--color-interactive-default);
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    font-weight: 600;
+  }
+
+  .flags-table, .env-table, .exit-codes {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+
+  thead {
+    background-color: var(--color-bg-secondary);
+  }
+
+  th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    border-bottom: 2px solid var(--color-border-default);
+  }
+
+  td {
+    padding: 0.75rem 1rem;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  td code {
+    background-color: var(--color-bg-secondary);
+    padding: 0.125rem 0.375rem;
+    border-radius: 0.25rem;
+    font-size: 0.875rem;
+  }
+
+  .related-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .related-links a {
+    color: var(--color-interactive-default);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .related-links a:hover {
+    text-decoration: underline;
+  }
+</style>

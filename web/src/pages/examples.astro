@@ -1,0 +1,458 @@
+---
+import Layout from '../components/Layout.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+
+const base = import.meta.env.BASE_URL;
+---
+
+<Layout title="Examples" description="Real-world examples of using azd exec for various scenarios">
+  <div class="page-container">
+    <div class="page-header">
+      <h1>Examples</h1>
+      <p class="page-intro">
+        Learn how to use azd exec in real-world scenarios with these practical examples.
+      </p>
+    </div>
+
+    <div class="content">
+      <section class="example">
+        <div class="example-header">
+          <h2>🛢️ Run Database Migrations</h2>
+          <p>Execute SQL migrations against your Azure SQL database with proper authentication and error handling.</p>
+        </div>
+
+        <h3>Bash Script</h3>
+        <CodeBlock code={`#!/bin/bash
+set -e
+
+echo "Running database migration for: \$AZURE_ENV_NAME"
+
+# Get database connection details
+DB_SERVER="sql-\$AZURE_ENV_NAME.database.windows.net"
+DB_NAME="db-\$AZURE_ENV_NAME"
+RESOURCE_GROUP="rg-\$AZURE_ENV_NAME"
+
+# Get current user for Azure AD authentication
+CURRENT_USER=$(az account show --query user.name -o tsv)
+echo "Connecting as: \$CURRENT_USER"
+
+# Run migrations in order
+for migration in migrations/*.sql; do
+  echo "Applying migration: \$migration"
+  sqlcmd -S "\$DB_SERVER" \\
+    -d "\$DB_NAME" \\
+    -G \\
+    -i "\$migration"
+  
+  if [ \$? -eq 0 ]; then
+    echo "✅ \$migration applied successfully"
+  else
+    echo "❌ Failed to apply \$migration"
+    exit 1
+  fi
+done
+
+echo "All migrations completed successfully!"`} language="bash" />
+
+        <h3>Usage</h3>
+        <CodeBlock code={`azd exec ./run-migrations.sh`} language="bash" />
+      </section>
+
+      <section class="example">
+        <div class="example-header">
+          <h2>🔐 Access Environment Variables</h2>
+          <p>Read Azure configuration and custom environment variables in your scripts.</p>
+        </div>
+
+        <h3>PowerShell Script</h3>
+        <CodeBlock code={`# List all Azure-related environment variables
+Write-Host "Azure Environment Configuration:"
+Write-Host "================================"
+Get-ChildItem env: | Where-Object { \$_.Name -like "AZURE_*" } | Format-Table Name, Value
+
+# Use specific variables
+\$resourceGroup = "rg-\$(\$env:AZURE_ENV_NAME)"
+\$location = \$env:AZURE_LOCATION
+
+Write-Host ""
+Write-Host "Creating resource group: \$resourceGroup"
+az group create --name \$resourceGroup --location \$location
+
+# Access custom environment variables from .env
+\$apiKey = \$env:MY_API_KEY
+if (\$apiKey) {
+    Write-Host "API Key configured: \$(\$apiKey.Substring(0, 4))****"
+}`} language="powershell" />
+
+        <h3>Usage</h3>
+        <CodeBlock code={`azd exec ./env-config.ps1`} language="powershell" />
+      </section>
+
+      <section class="example">
+        <div class="example-header">
+          <h2>🔨 Multi-Step Build Pipeline</h2>
+          <p>Orchestrate multiple build steps with proper error handling and logging.</p>
+        </div>
+
+        <h3>Bash Script</h3>
+        <CodeBlock code={`#!/bin/bash
+set -euo pipefail
+
+log() {
+    echo "[\\\$(date +'%Y-%m-%d %H:%M:%S')] \\\$*"
+}
+
+log "Starting build pipeline for \\\$AZURE_ENV_NAME"
+
+# Step 1: Clean
+log "Cleaning previous builds..."
+rm -rf dist/ build/ || true
+
+# Step 2: Install dependencies
+log "Installing dependencies..."
+npm ci
+
+# Step 3: Run linter
+log "Running linter..."
+npm run lint
+
+# Step 4: Run tests
+log "Running tests..."
+npm run test -- --ci --coverage
+
+# Step 5: Build for production
+log "Building for production..."
+export NODE_ENV=production
+export API_ENDPOINT="https://\\\$AZURE_ENV_NAME-api.azurewebsites.net"
+npm run build
+
+# Step 6: Upload coverage to Azure Storage
+log "Uploading test coverage..."
+az storage blob upload-batch \\\\
+  --destination "coverage-\\\$AZURE_ENV_NAME" \\\\
+  --source ./coverage \\\\
+  --account-name "\\\${AZURE_STORAGE_ACCOUNT:-azdexecstorage}"
+
+log "Build pipeline completed successfully!"`} language="bash" />
+
+        <h3>Usage</h3>
+        <CodeBlock code={`azd exec ./build-pipeline.sh`} language="bash" />
+      </section>
+
+      <section class="example">
+        <div class="example-header">
+          <h2>🌍 Cross-Platform Script</h2>
+          <p>Write scripts that work on both Windows and Unix systems.</p>
+        </div>
+
+        <h3>Python Script</h3>
+        <CodeBlock code={`#!/usr/bin/env python3
+import os
+import platform
+import subprocess
+
+def main():
+    # Access Azure environment variables
+    env_name = os.getenv('AZURE_ENV_NAME', 'dev')
+    location = os.getenv('AZURE_LOCATION', 'eastus')
+    subscription_id = os.getenv('AZURE_SUBSCRIPTION_ID')
+    
+    print(f"Environment: {env_name}")
+    print(f"Location: {location}")
+    print(f"Platform: {platform.system()}")
+    
+    # Cross-platform Azure CLI usage
+    resource_group = f"rg-{env_name}"
+    
+    # Create resource group
+    cmd = [
+        "az", "group", "create",
+        "--name", resource_group,
+        "--location", location,
+        "--subscription", subscription_id
+    ]
+    
+    print(f"\\nCreating resource group: {resource_group}")
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    
+    if result.returncode == 0:
+        print("✅ Resource group created successfully")
+    else:
+        print(f"❌ Error: {result.stderr}")
+        exit(1)
+
+if __name__ == "__main__":
+    main()`} language="python" />
+
+        <h3>Usage</h3>
+        <CodeBlock code={`azd exec ./setup.py`} language="bash" />
+      </section>
+
+      <section class="example">
+        <div class="example-header">
+          <h2>💬 Interactive Setup Wizard</h2>
+          <p>Create interactive scripts that prompt for user input.</p>
+        </div>
+
+        <h3>Bash Script</h3>
+        <CodeBlock code={`#!/bin/bash
+
+echo "Azure Resource Setup Wizard"
+echo "============================"
+echo ""
+echo "Environment: \$AZURE_ENV_NAME"
+echo "Location: \$AZURE_LOCATION"
+echo ""
+
+# Prompt for resource type
+echo "What type of resource would you like to create?"
+echo "1) Azure Function App"
+echo "2) Azure Static Web App"
+echo "3) Azure Container App"
+read -p "Select option (1-3): " choice
+
+case \$choice in
+    1)
+        read -p "Enter function app name: " app_name
+        az functionapp create \\
+          --name "\$app_name" \\
+          --resource-group "rg-\$AZURE_ENV_NAME" \\
+          --consumption-plan-location "\$AZURE_LOCATION" \\
+          --runtime node
+        ;;
+    2)
+        read -p "Enter static web app name: " app_name
+        az staticwebapp create \\
+          --name "\$app_name" \\
+          --resource-group "rg-\$AZURE_ENV_NAME" \\
+          --location "\$AZURE_LOCATION"
+        ;;
+    3)
+        read -p "Enter container app name: " app_name
+        read -p "Enter container image: " image
+        az containerapp create \\
+          --name "\$app_name" \\
+          --resource-group "rg-\$AZURE_ENV_NAME" \\
+          --environment "env-\$AZURE_ENV_NAME" \\
+          --image "\$image"
+        ;;
+    *)
+        echo "Invalid option"
+        exit 1
+        ;;
+esac
+
+echo ""
+echo "Resource created successfully!"`} language="bash" />
+
+        <h3>Usage</h3>
+        <CodeBlock code={`azd exec ./setup-wizard.sh --interactive`} language="bash" />
+      </section>
+
+      <section class="example">
+        <div class="example-header">
+          <h2>⚠️ Error Handling & Rollback</h2>
+          <p>Implement robust error handling with automatic rollback on failure.</p>
+        </div>
+
+        <h3>Bash Script</h3>
+        <CodeBlock code={`#!/bin/bash
+
+# Cleanup function for rollback
+cleanup() {
+    local exit_code=\$?
+    if [ \$exit_code -ne 0 ]; then
+        echo "❌ Error detected (exit code: \$exit_code). Rolling back..."
+        
+        # Rollback: Delete created resources
+        if [ -n "\$CREATED_APP_SERVICE" ]; then
+            echo "Deleting app service: \$CREATED_APP_SERVICE"
+            az webapp delete --name "\$CREATED_APP_SERVICE" \\
+              --resource-group "rg-\$AZURE_ENV_NAME" || true
+        fi
+        
+        if [ -n "\$CREATED_DB" ]; then
+            echo "Deleting database: \$CREATED_DB"
+            az sql db delete --name "\$CREATED_DB" \\
+              --server "sql-\$AZURE_ENV_NAME" \\
+              --resource-group "rg-\$AZURE_ENV_NAME" \\
+              --yes || true
+        fi
+        
+        echo "Rollback complete"
+    fi
+}
+
+# Register cleanup function
+trap cleanup EXIT
+
+# Enable strict error handling
+set -euo pipefail
+
+echo "Deploying application to \$AZURE_ENV_NAME"
+
+# Step 1: Create database
+echo "Creating database..."
+CREATED_DB="db-\$AZURE_ENV_NAME-\$(date +%s)"
+az sql db create \\
+  --name "\$CREATED_DB" \\
+  --server "sql-\$AZURE_ENV_NAME" \\
+  --resource-group "rg-\$AZURE_ENV_NAME" \\
+  --service-objective S0
+
+# Step 2: Create app service
+echo "Creating app service..."
+CREATED_APP_SERVICE="app-\$AZURE_ENV_NAME"
+az webapp create \\
+  --name "\$CREATED_APP_SERVICE" \\
+  --resource-group "rg-\$AZURE_ENV_NAME" \\
+  --plan "plan-\$AZURE_ENV_NAME" \\
+  --runtime "NODE:18-lts"
+
+# Step 3: Configure connection string
+echo "Configuring app settings..."
+az webapp config connection-string set \\
+  --name "\$CREATED_APP_SERVICE" \\
+  --resource-group "rg-\$AZURE_ENV_NAME" \\
+  --settings "DefaultConnection=Server=sql-\$AZURE_ENV_NAME.database.windows.net;Database=\$CREATED_DB;" \\
+  --connection-string-type SQLAzure
+
+# Step 4: Deploy code
+echo "Deploying application code..."
+az webapp deployment source config-zip \\
+  --name "\$CREATED_APP_SERVICE" \\
+  --resource-group "rg-\$AZURE_ENV_NAME" \\
+  --src ./app.zip
+
+echo "✅ Deployment completed successfully!"`} language="bash" />
+
+        <h3>Usage</h3>
+        <CodeBlock code={`azd exec ./deploy-with-rollback.sh`} language="bash" />
+      </section>
+
+      <section class="section">
+        <h2>More Resources</h2>
+        <div class="resources">
+          <a href={`${base}getting-started`} class="resource-card">
+            <h3>📚 Getting Started</h3>
+            <p>Learn the basics of azd exec</p>
+          </a>
+          <a href={`${base}reference/cli/`} class="resource-card">
+            <h3>📖 CLI Reference</h3>
+            <p>Complete command documentation</p>
+          </a>
+          <a href={`${base}security`} class="resource-card">
+            <h3>🔒 Security Guide</h3>
+            <p>Best practices for safe script execution</p>
+          </a>
+        </div>
+      </section>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .page-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .page-header {
+    margin-bottom: 3rem;
+  }
+
+  .page-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .page-intro {
+    font-size: 1.25rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .content {
+    line-height: 1.7;
+  }
+
+  .example {
+    margin-bottom: 4rem;
+    padding-bottom: 3rem;
+    border-bottom: 1px solid var(--color-border-default);
+  }
+
+  .example:last-of-type {
+    border-bottom: none;
+  }
+
+  .example-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .example-header h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem;
+    color: var(--color-text-primary);
+  }
+
+  .example-header p {
+    font-size: 1.125rem;
+    color: var(--color-text-secondary);
+    margin: 0;
+  }
+
+  .example h3 {
+    font-size: 1.125rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem;
+    color: var(--color-text-primary);
+  }
+
+  .section {
+    margin-top: 4rem;
+  }
+
+  .section h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin: 0 0 1.5rem;
+    color: var(--color-text-primary);
+  }
+
+  .resources {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .resource-card {
+    display: block;
+    border: 1px solid var(--color-border-default);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    background-color: var(--color-bg-primary);
+    text-decoration: none;
+    transition: border-color 0.2s;
+  }
+
+  .resource-card:hover {
+    border-color: var(--color-interactive-default);
+  }
+
+  .resource-card h3 {
+    font-size: 1.125rem;
+    margin: 0 0 0.5rem;
+    color: var(--color-text-primary);
+  }
+
+  .resource-card p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+  }
+</style>
