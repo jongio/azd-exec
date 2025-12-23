@@ -19,6 +19,9 @@ pnpm run preview
 
 # Generate changelog page
 pnpm run generate:changelog
+
+# Generate OG image for social media
+pnpm run generate:og-image
 ```
 
 ## Deployment

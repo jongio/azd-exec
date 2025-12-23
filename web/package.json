@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "tsx scripts/generate-changelog.ts && astro build",
+    "build": "tsx scripts/generate-og-image.ts && tsx scripts/generate-changelog.ts && astro build",
     "preview": "astro preview",
     "generate:changelog": "tsx scripts/generate-changelog.ts",
+    "generate:og-image": "tsx scripts/generate-og-image.ts",
     "test": "playwright test",
     "test:headed": "playwright test --headed",
     "test:debug": "playwright test --debug",

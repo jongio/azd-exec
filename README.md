@@ -2,7 +2,7 @@
 
 # azd exec
 
-### **Run Scripts with Azure Context**
+### **Execute Scripts with azd Environment Context**
 
 Execute any script with full access to your Azure Developer CLI environment variables and Azure credentials.
 
