@@ -340,7 +340,7 @@ jobs:
         id: version_pr
         working-directory: cli
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
           VERSION="${{ steps.version.outputs.next }}"
           BRANCH="release/v${VERSION}"
@@ -408,7 +408,7 @@ jobs:
 
       - name: Enable auto-merge and wait for merge
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PAT }}
         run: |
           PR_NUMBER="${{ steps.version_pr.outputs.pr_number }}"
           
