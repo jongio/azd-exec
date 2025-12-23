@@ -1,3 +1,7 @@
+## [0.2.14] - 2025-12-23
+
+- fix: add artifacts flag to azd x release (818543a)
+
 ## [0.2.13] - 2025-12-23
 
 - fix: place binaries directly in bin/ folder, not subdirectories (77f75c3)
