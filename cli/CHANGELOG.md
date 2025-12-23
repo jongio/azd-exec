@@ -1,3 +1,7 @@
+## [0.2.15] - 2025-12-23
+
+- fix: remove --artifacts flag from azd x release - it auto-discovers packaged files (e125fe3)
+
 ## [0.2.14] - 2025-12-23
 
 - fix: add artifacts flag to azd x release (818543a)
