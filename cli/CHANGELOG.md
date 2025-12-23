@@ -1,3 +1,7 @@
+## [0.2.10] - 2025-12-23
+
+- fix: use correct binary naming for azd x pack (namespace-based) (7744157)
+
 ## [0.2.9] - 2025-12-23
 
 
