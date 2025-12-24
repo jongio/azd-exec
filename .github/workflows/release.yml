@@ -1,5 +1,16 @@
 name: Release
 
+# =============================================================================
+# REQUIRED REPOSITORY SETTINGS (see .github/WORKFLOWS.md for details):
+#
+# 1. Settings → Actions → General → Workflow permissions:
+#    - Select "Read and write permissions"
+#    - ✅ Check "Allow GitHub Actions to create and approve pull requests"
+#
+# 2. Settings → General → Pull Requests:
+#    - ✅ Check "Allow auto-merge"
+# =============================================================================
+
 on:
   workflow_dispatch:
     inputs:
