@@ -1,3 +1,8 @@
+## [0.2.16] - 2025-12-24
+
+- feat: add local test script to simulate the release workflow (9e97f20)
+- fix: use azd x build instead of manual go build commands to match azd-app pattern (5e47771)
+
 ## [0.2.15] - 2025-12-23
 
 - fix: remove --artifacts flag from azd x release - it auto-discovers packaged files (e125fe3)
