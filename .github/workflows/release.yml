@@ -401,48 +401,16 @@ jobs:
           azd extension source add azd --location https://aka.ms/azd/extensions/registry --type url 2>/dev/null || true
           azd extension install microsoft.azd.extensions --source azd
 
-      - name: Build binaries for all platforms
-        working-directory: cli
-        run: |
-          VERSION="${{ steps.version.outputs.next }}"
-          BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-          LDFLAGS="-X main.version=${VERSION} -X main.buildDate=${BUILD_DATE} -X main.gitCommit=${GIT_COMMIT}"
-          
-          echo "Building binaries for version $VERSION"
-          
-          # Build for all platforms
-          # Binary names must match the pattern: {extension-id with dots replaced by dashes}-{os}-{arch}
-          # For jongio.azd.exec, this becomes: jongio-azd-exec-{os}-{arch}
-          # They must be placed directly in bin/ folder, NOT in subdirectories
-          GOOS=windows GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-windows-amd64.exe ./src/cmd/script
-          GOOS=windows GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-windows-arm64.exe ./src/cmd/script
-          GOOS=linux GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-linux-amd64 ./src/cmd/script
-          GOOS=linux GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-linux-arm64 ./src/cmd/script
-          GOOS=darwin GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-darwin-amd64 ./src/cmd/script
-          GOOS=darwin GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/jongio-azd-exec-darwin-arm64 ./src/cmd/script
-          
-          # Verify
-          echo "Built binaries:"
-          find bin -type f
-
-      - name: Package
+      - name: Build binaries
         working-directory: cli
         run: |
           export EXTENSION_ID="jongio.azd.exec"
           export EXTENSION_VERSION="${{ steps.version.outputs.next }}"
-          azd x pack
-          
-          # Verify packages were created
-          echo "Checking registry location:"
-          REGISTRY_PATH="$HOME/.azd/registry/jongio.azd.exec/${{ steps.version.outputs.next }}"
-          echo "Registry path: $REGISTRY_PATH"
-          ls -la "$REGISTRY_PATH" || echo "No packages found!"
-          
-          # Also check what azd x pack actually created
-          echo ""
-          echo "All files in registry:"
-          find "$HOME/.azd/registry/jongio.azd.exec/" -type f 2>/dev/null || echo "No registry files!"
+          azd x build --all
+
+      - name: Package
+        working-directory: cli
+        run: azd x pack
 
       - name: Extract release notes
         id: release_notes
