@@ -10,12 +10,15 @@ Successfully implemented automatic Azure Key Vault reference resolution for the 
 1. **cli/src/internal/executor/keyvault.go** (184 lines)
    - Core Key Vault resolution implementation
    - `KeyVaultResolver` struct with Azure SDK integration
-   - Support for two reference formats:
+    - Support for three reference formats:
      - `@Microsoft.KeyVault(SecretUri=https://vault.vault.azure.net/secrets/name[/version])`
      - `@Microsoft.KeyVault(VaultName=vault;SecretName=name[;SecretVersion=version])`
+       - `akvs://<guid>/<vault>/<secret>[/<version>]` (azd format; guid is informational)
    - Uses `DefaultAzureCredential` for authentication
    - Caches Key Vault clients for performance
    - Graceful error handling with fallback to original values
+
+    Note: values are normalized before parsing (trim whitespace; strip a single pair of wrapper quotes) to handle azd-exported env vars.
 
 2. **cli/src/internal/executor/keyvault_test.go** (367 lines)
    - Comprehensive unit tests for pattern matching
@@ -338,7 +341,7 @@ $env:API_KEY = '@Microsoft.KeyVault(VaultName=test;SecretName=demo)'
 The Key Vault reference resolution feature is fully implemented, tested, and documented. It provides:
 
 ✅ **Automatic resolution** of Key Vault references  
-✅ **Two reference formats** supported  
+✅ **Three reference formats** supported  
 ✅ **Graceful error handling** with fallback  
 ✅ **Azure SDK integration** with DefaultAzureCredential  
 ✅ **Comprehensive tests** with 45.4% coverage  

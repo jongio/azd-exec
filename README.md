@@ -295,6 +295,14 @@ Scripts executed by `azd exec` have access to all azd environment variables:
 @Microsoft.KeyVault(VaultName=myvault;SecretName=my-secret;SecretVersion=abc123)
 ```
 
+**Format 3: azd akvs URI**
+```bash
+akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/myvault/my-secret
+akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/myvault/my-secret/abc123
+```
+
+Note: `azd` may export environment variables with quotes; `azd exec` trims whitespace and strips a single pair of wrapper quotes before detecting/parsing Key Vault references.
+
 ### Usage Example
 
 **1. Store a secret in Azure Key Vault:**

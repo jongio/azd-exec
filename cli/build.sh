@@ -7,7 +7,8 @@ VERSION="${VERSION:-0.1.0}"
 BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
-LDFLAGS="-X main.version=${VERSION} -X main.buildDate=${BUILD_DATE} -X main.gitCommit=${GIT_COMMIT}"
+VERSION_IMPORT_PATH="github.com/jongio/azd-exec/cli/src/internal/version"
+LDFLAGS="-X ${VERSION_IMPORT_PATH}.Version=${VERSION} -X ${VERSION_IMPORT_PATH}.BuildDate=${BUILD_DATE} -X ${VERSION_IMPORT_PATH}.GitCommit=${GIT_COMMIT}"
 
 echo "Building azd-exec ${VERSION} (${GIT_COMMIT})"
 

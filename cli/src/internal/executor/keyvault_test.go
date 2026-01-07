@@ -71,6 +71,8 @@ func TestKeyVaultResolver_MockResolution(t *testing.T) {
 			"@Microsoft.KeyVault(SecretUri=https://vault.vault.azure.net/secrets/test)",
 			"@Microsoft.KeyVault(VaultName=vault;SecretName=secret)",
 			"@Microsoft.KeyVault(VaultName=vault;SecretName=secret;SecretVersion=v1)",
+			"akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/vault/secret",
+			"akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/vault/secret/v1",
 		}
 
 		for _, ref := range validReferences {
@@ -82,8 +84,9 @@ func TestKeyVaultResolver_MockResolution(t *testing.T) {
 
 				matchesSecretURI := kvRefSecretURIPattern.MatchString(ref)
 				matchesVaultName := kvRefVaultNamePattern.MatchString(ref)
+				matchesAkvs := kvRefAzdAkvsPattern.MatchString(normalizeKeyVaultReferenceValue(ref))
 
-				if !matchesSecretURI && !matchesVaultName {
+				if !matchesSecretURI && !matchesVaultName && !matchesAkvs {
 					t.Errorf("Valid reference doesn't match any pattern: %s", ref)
 				}
 			})

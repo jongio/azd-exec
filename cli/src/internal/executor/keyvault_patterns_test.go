@@ -26,6 +26,26 @@ func TestIsKeyVaultReference(t *testing.T) {
 			want:  true,
 		},
 		{
+			name:  "Valid azd akvs format",
+			value: "akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD",
+			want:  true,
+		},
+		{
+			name:  "Valid azd akvs format with version",
+			value: "akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD/abc123",
+			want:  true,
+		},
+		{
+			name:  "Valid azd akvs format with double quotes",
+			value: "\"akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD\"",
+			want:  true,
+		},
+		{
+			name:  "Valid azd akvs format with single quotes and whitespace",
+			value: "  'akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD'  ",
+			want:  true,
+		},
+		{
 			name:  "Regular string",
 			value: "just-a-regular-value",
 			want:  false,
@@ -166,6 +186,8 @@ func TestKeyVaultReferenceFormats(t *testing.T) {
 		"@Microsoft.KeyVault(SecretUri=https://prod-vault.vault.azure.net/secrets/api-key/abc123)",
 		"@Microsoft.KeyVault(VaultName=dev-vault;SecretName=connection-string)",
 		"@Microsoft.KeyVault(VaultName=prod;SecretName=secret;SecretVersion=v1)",
+		"akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD",
+		"akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD/abc123",
 	}
 
 	for _, format := range validFormats {
@@ -173,7 +195,7 @@ func TestKeyVaultReferenceFormats(t *testing.T) {
 			t.Errorf("Valid format not recognized: %s", format)
 		}
 		// Also verify it matches one of the patterns
-		if !kvRefSecretURIPattern.MatchString(format) && !kvRefVaultNamePattern.MatchString(format) {
+		if !kvRefSecretURIPattern.MatchString(format) && !kvRefVaultNamePattern.MatchString(format) && !kvRefAzdAkvsPattern.MatchString(normalizeKeyVaultReferenceValue(format)) {
 			t.Errorf("Valid format doesn't match any pattern: %s", format)
 		}
 	}

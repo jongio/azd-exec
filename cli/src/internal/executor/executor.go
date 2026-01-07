@@ -35,6 +35,13 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 		return fmt.Errorf("script path cannot be empty")
 	}
 
+	// Ensure script exists before attempting to execute it.
+	if info, err := os.Stat(scriptPath); err != nil {
+		return fmt.Errorf("script path does not exist: %w", err)
+	} else if info.IsDir() {
+		return fmt.Errorf("script path must be a file")
+	}
+
 	// Auto-detect shell if not specified
 	shell := e.config.Shell
 	if shell == "" {

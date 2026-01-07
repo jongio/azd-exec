@@ -46,7 +46,9 @@ $gitCommit = try {
 }
 
 # Build flags with version info
-$ldflags = "-X main.version=$extensionVersion -X main.buildDate=$buildDate -X main.gitCommit=$gitCommit"
+# NOTE: `azd exec version` reads from cli/src/internal/version, so inject values there.
+$versionImportPath = "github.com/jongio/azd-exec/cli/src/internal/version"
+$ldflags = "-X $versionImportPath.Version=$extensionVersion -X $versionImportPath.BuildDate=$buildDate -X $versionImportPath.GitCommit=$gitCommit"
 
 Write-Host "Building $extensionId v$extensionVersion" -ForegroundColor Cyan
 

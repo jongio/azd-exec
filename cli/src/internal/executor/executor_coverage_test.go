@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/jongio/azd-exec/cli/src/internal/testhelpers"
@@ -24,7 +25,12 @@ func TestExecute_FileValidation(t *testing.T) {
 
 	t.Run("Valid script file", func(t *testing.T) {
 		projectsDir := testhelpers.GetTestProjectsDir(t)
+
+		// Use OS-appropriate scripts to avoid Windows path translation issues.
 		scriptPath := filepath.Join(projectsDir, "bash", "simple.sh")
+		if runtime.GOOS == osWindows {
+			scriptPath = filepath.Join(projectsDir, "powershell", "simple.ps1")
+		}
 
 		// Skip on Windows if bash not available, or use different script
 		if _, err := os.Stat(scriptPath); os.IsNotExist(err) {
@@ -169,26 +175,37 @@ func TestLogDebugInfo(t *testing.T) {
 func TestRunCommand_ErrorHandling(t *testing.T) {
 	exec := New(Config{})
 
+	shell := "bash"
+	exitCmd := "exit 1"
+	missingCmd := "nonexistent-command-xyz"
+	missingFile := "/nonexistent/file.sh"
+	if runtime.GOOS == osWindows {
+		shell = shellCmd
+		exitCmd = "exit /b 1"
+		missingCmd = "nonexistent-command-xyz"
+		missingFile = "C:\\nonexistent\\file.cmd"
+	}
+
 	t.Run("Exit code error", func(t *testing.T) {
 		// Create a command that will fail
-		cmd := exec.buildCommand("bash", "exit 1", true)
-		err := exec.runCommand(cmd, "test", "bash", true)
+		cmd := exec.buildCommand(shell, exitCmd, true)
+		err := exec.runCommand(cmd, "test", shell, true)
 		if err == nil {
 			t.Error("Expected error for exit code 1")
 		}
 	})
 
 	t.Run("Inline script error formatting", func(t *testing.T) {
-		cmd := exec.buildCommand("bash", "nonexistent-command-xyz", true)
-		err := exec.runCommand(cmd, "nonexistent-command-xyz", "bash", true)
+		cmd := exec.buildCommand(shell, missingCmd, true)
+		err := exec.runCommand(cmd, missingCmd, shell, true)
 		if err == nil {
 			t.Error("Expected error for nonexistent command")
 		}
 	})
 
 	t.Run("File script error formatting", func(t *testing.T) {
-		cmd := exec.buildCommand("bash", "/nonexistent/file.sh", false)
-		err := exec.runCommand(cmd, "/nonexistent/file.sh", "bash", false)
+		cmd := exec.buildCommand(shell, missingFile, false)
+		err := exec.runCommand(cmd, missingFile, shell, false)
 		if err == nil {
 			t.Error("Expected error for nonexistent file")
 		}
@@ -228,14 +245,20 @@ func TestExecutorWithWorkingDir(t *testing.T) {
 
 func TestExecutorWithArgs(t *testing.T) {
 	projectsDir := testhelpers.GetTestProjectsDir(t)
+
 	scriptPath := filepath.Join(projectsDir, "bash", "with-args.sh")
+	args := []string{"arg1", "arg2"}
+	if runtime.GOOS == osWindows {
+		scriptPath = filepath.Join(projectsDir, "powershell", "with-params.ps1")
+		args = []string{"-Name", "Test", "-Greeting", "Hi"}
+	}
 
 	if _, err := os.Stat(scriptPath); os.IsNotExist(err) {
 		t.Skip("Test script not found, skipping")
 	}
 
 	exec := New(Config{
-		Args: []string{"arg1", "arg2"},
+		Args: args,
 	})
 
 	err := exec.Execute(context.Background(), scriptPath)

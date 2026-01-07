@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jongio/azd-exec/cli/src/internal/version"
 	"github.com/jongio/azd-exec/cli/src/internal/testhelpers"
 )
 
@@ -34,7 +35,7 @@ func TestVersionCommandIntegration(t *testing.T) {
 		{
 			name:       "Quiet output",
 			outputFlag: "",
-			wantText:   "0.1.0",
+			wantText:   version.Version,
 		},
 	}
 

@@ -145,9 +145,135 @@ func TestResolveReference_InvalidFormats(t *testing.T) {
 	}
 
 	for _, ref := range invalidRefs {
-		if IsKeyVaultReference(ref) && !kvRefSecretURIPattern.MatchString(ref) && !kvRefVaultNamePattern.MatchString(ref) {
+		if IsKeyVaultReference(ref) && !kvRefSecretURIPattern.MatchString(ref) && !kvRefVaultNamePattern.MatchString(ref) && !kvRefAzdAkvsPattern.MatchString(normalizeKeyVaultReferenceValue(ref)) {
 			t.Logf("Reference %q would fail validation", ref)
 		}
+	}
+}
+
+func TestNormalizeKeyVaultReferenceValue(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		want string
+	}{
+		{
+			name: "Trim whitespace",
+			in:   "  akvs://guid/vault/secret  ",
+			want: "akvs://guid/vault/secret",
+		},
+		{
+			name: "Strip double quotes",
+			in:   "\"akvs://guid/vault/secret\"",
+			want: "akvs://guid/vault/secret",
+		},
+		{
+			name: "Strip single quotes",
+			in:   "'@Microsoft.KeyVault(VaultName=v;SecretName=s)'",
+			want: "@Microsoft.KeyVault(VaultName=v;SecretName=s)",
+		},
+		{
+			name: "Do not strip mismatched quotes",
+			in:   "\"not-a-ref'",
+			want: "\"not-a-ref'",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := normalizeKeyVaultReferenceValue(tt.in); got != tt.want {
+				t.Errorf("normalizeKeyVaultReferenceValue() = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestParseAzdAkvsURI(t *testing.T) {
+	tests := []struct {
+		name        string
+		in          string
+		wantGuid    string
+		wantVault   string
+		wantSecret  string
+		wantVersion string
+		wantErr     bool
+	}{
+		{
+			name:        "Without version",
+			in:          "akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD",
+			wantGuid:    "c3b3091e-400e-43a7-8ee5-e6e8cefdbebf",
+			wantVault:   "fookv",
+			wantSecret:  "REDIS-CACHE-PASSWORD",
+			wantVersion: "",
+			wantErr:     false,
+		},
+		{
+			name:        "With version",
+			in:          "akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD/abc123",
+			wantGuid:    "c3b3091e-400e-43a7-8ee5-e6e8cefdbebf",
+			wantVault:   "fookv",
+			wantSecret:  "REDIS-CACHE-PASSWORD",
+			wantVersion: "abc123",
+			wantErr:     false,
+		},
+		{
+			name:    "Missing segments",
+			in:      "akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/onlyvault",
+			wantErr: true,
+		},
+		{
+			name:    "Too many segments",
+			in:      "akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/vault/secret/ver/extra",
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			guid, vault, secret, version, err := parseAzdAkvsURI(tt.in)
+			if tt.wantErr {
+				if err == nil {
+					t.Fatal("expected error, got nil")
+				}
+				return
+			}
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if guid != tt.wantGuid {
+				t.Errorf("guid = %q, want %q", guid, tt.wantGuid)
+			}
+			if vault != tt.wantVault {
+				t.Errorf("vault = %q, want %q", vault, tt.wantVault)
+			}
+			if secret != tt.wantSecret {
+				t.Errorf("secret = %q, want %q", secret, tt.wantSecret)
+			}
+			if version != tt.wantVersion {
+				t.Errorf("version = %q, want %q", version, tt.wantVersion)
+			}
+		})
+	}
+}
+
+func TestResolveEnvironmentVariables_WithAkvsReferences_DetectionOnly(t *testing.T) {
+	envVars := []string{
+		"NORMAL_VAR=value1",
+		"AKVS_UNQUOTED=akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD",
+		"AKVS_DQUOTED=\"akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD\"",
+		"AKVS_SQUOTED='akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD/abc123'",
+	}
+
+	count := 0
+	for _, envVar := range envVars {
+		parts := splitEnvVar(envVar)
+		if len(parts) == 2 && IsKeyVaultReference(parts[1]) {
+			count++
+		}
+	}
+
+	if count != 3 {
+		t.Errorf("Expected to find 3 Key Vault references, found %d", count)
 	}
 }
 

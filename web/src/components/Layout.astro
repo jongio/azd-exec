@@ -60,7 +60,9 @@ const ogImage = `${siteUrl}${base}og-image.png`;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
     <meta name="description" content={description} />
-    <meta name="them/ Facebook / LinkedIn -->
+    <meta name="theme-color" content="#ffffff" />
+
+    <!-- Open Graph / Facebook / LinkedIn -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content={currentUrl} />
     <meta property="og:title" content={fullTitle} />
@@ -76,10 +78,7 @@ const ogImage = `${siteUrl}${base}og-image.png`;
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     <meta name="twitter:image:alt" content="azd exec - Execute scripts with Azure identity" />
-    <meta name="twitter:creator" content="@jongallant"
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:title" content={fullTitle} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:creator" content="@jongallant" />
     
     <!-- Prevent flash of wrong theme -->
     <script is:inline>

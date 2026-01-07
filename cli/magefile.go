@@ -163,6 +163,9 @@ func Setup() error {
 
 	// Step 4: Install
 	fmt.Println("\n[4/4] Installing...")
+	// azd may skip installing if the same version is already installed.
+	// Uninstall first to ensure the local build is actually refreshed.
+	_ = sh.RunV("azd", "extension", "uninstall", extensionID)
 	if err := sh.RunV("azd", "extension", "install", extensionID, "--source", "local", "--force"); err != nil {
 		return fmt.Errorf("installation failed: %w", err)
 	}

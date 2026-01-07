@@ -19,7 +19,27 @@ var (
 
 	// Pattern: @Microsoft.KeyVault(VaultName=vault;SecretName=name[;SecretVersion=version]).
 	kvRefVaultNamePattern = regexp.MustCompile(`^@Microsoft\.KeyVault\(VaultName=([^;]+);SecretName=([^;)]+)(?:;SecretVersion=([^;)]+))?\)$`)
+
+	// Pattern: akvs://<guid>/<vault>/<secret>[/<version>]
+	// Note: guid is informational; <vault> is used to construct https://<vault>.vault.azure.net
+	kvRefAzdAkvsPattern = regexp.MustCompile(`^akvs://([^/]+)/([^/]+)/([^/]+)(?:/([^/]+))?$`)
 )
+
+func normalizeKeyVaultReferenceValue(value string) string {
+	normalized := strings.TrimSpace(value)
+	if len(normalized) < 2 {
+		return normalized
+	}
+
+	first := normalized[0]
+	last := normalized[len(normalized)-1]
+	if (first == '"' && last == '"') || (first == '\'' && last == '\'') {
+		// Strip wrapper quotes only when they wrap the entire value.
+		normalized = strings.TrimSpace(normalized[1 : len(normalized)-1])
+	}
+
+	return normalized
+}
 
 // KeyVaultResolver resolves Key Vault references in environment variables.
 type KeyVaultResolver struct {
@@ -43,14 +63,22 @@ func NewKeyVaultResolver() (*KeyVaultResolver, error) {
 
 // IsKeyVaultReference checks if a value is a Key Vault reference.
 func IsKeyVaultReference(value string) bool {
-	return strings.HasPrefix(value, "@Microsoft.KeyVault(") && strings.HasSuffix(value, ")")
+	normalized := normalizeKeyVaultReferenceValue(value)
+
+	if strings.HasPrefix(normalized, "akvs://") {
+		return true
+	}
+
+	return strings.HasPrefix(normalized, "@Microsoft.KeyVault(") && strings.HasSuffix(normalized, ")")
 }
 
 // ResolveReference resolves a single Key Vault reference to its secret value.
 func (r *KeyVaultResolver) ResolveReference(ctx context.Context, reference string) (string, error) {
+	reference = normalizeKeyVaultReferenceValue(reference)
+
 	// Try SecretUri pattern first
 	if matches := kvRefSecretURIPattern.FindStringSubmatch(reference); matches != nil {
-		secretURI := matches[1]
+		secretURI := strings.TrimSpace(matches[1])
 		return r.resolveBySecretURI(ctx, secretURI)
 	}
 
@@ -65,7 +93,54 @@ func (r *KeyVaultResolver) ResolveReference(ctx context.Context, reference strin
 		return r.resolveByVaultNameAndSecret(ctx, vaultName, secretName, version)
 	}
 
-	return "", fmt.Errorf("invalid Key Vault reference format: %s", reference)
+	// Try azd akvs format: akvs://<guid>/<vault>/<secret>[/<version>]
+	if strings.HasPrefix(reference, "akvs://") {
+		if !kvRefAzdAkvsPattern.MatchString(reference) {
+			return "", fmt.Errorf("invalid akvs URI format")
+		}
+
+		guid, vaultName, secretName, version, err := parseAzdAkvsURI(reference)
+		_ = guid // informational only
+		if err != nil {
+			return "", err
+		}
+		return r.resolveByVaultNameAndSecret(ctx, vaultName, secretName, version)
+	}
+
+	// Avoid returning the full reference value (could include sensitive context).
+	return "", fmt.Errorf("invalid Key Vault reference format")
+}
+
+func parseAzdAkvsURI(akvsURI string) (guid, vaultName, secretName, version string, err error) {
+	parsed, err := url.Parse(akvsURI)
+	if err != nil {
+		return "", "", "", "", fmt.Errorf("invalid akvs URI: %w", err)
+	}
+
+	if parsed.Scheme != "akvs" {
+		return "", "", "", "", fmt.Errorf("invalid akvs URI scheme")
+	}
+
+	guid = parsed.Host
+	pathParts := strings.Split(strings.Trim(parsed.Path, "/"), "/")
+	if len(pathParts) < 2 {
+		return "", "", "", "", fmt.Errorf("invalid akvs URI path")
+	}
+	if len(pathParts) > 3 {
+		return "", "", "", "", fmt.Errorf("invalid akvs URI path")
+	}
+
+	vaultName = pathParts[0]
+	secretName = pathParts[1]
+	if len(pathParts) == 3 {
+		version = pathParts[2]
+	}
+
+	if guid == "" || vaultName == "" || secretName == "" {
+		return "", "", "", "", fmt.Errorf("invalid akvs URI")
+	}
+
+	return guid, vaultName, secretName, version, nil
 }
 
 // resolveBySecretURI resolves a secret using a full secret URI.
