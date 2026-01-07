@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jongio/azd-exec/cli/src/internal/version"
 	"github.com/jongio/azd-exec/cli/src/internal/testhelpers"
+	"github.com/jongio/azd-exec/cli/src/internal/version"
 )
 
 func TestVersionCommandIntegration(t *testing.T) {
