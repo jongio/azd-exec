@@ -2,6 +2,7 @@
   "version": "0.2",
   "language": "en",
   "words": [
+    "akvs",
     "azd",
     "azcore",
     "azidentity",
@@ -11,6 +12,7 @@
     "codeql",
     "coverprofile",
     "cyclop",
+    "dquoted",
     "errcheck",
     "Errorf",
     "exce",
@@ -20,6 +22,7 @@
     "exfiltration",
     "exhaustruct",
     "Fatalf",
+    "fookv",
     "Fprintf",
     "funlen",
     "Getenv",
@@ -72,9 +75,11 @@
     "USERPROFILE",
     "varnamelen",
     "vaultname",
+    "onlyvault",
     "waitgroups",
     "winget",
-    "wrapcheck"
+    "wrapcheck",
+    "squoted"
   ],
   "ignorePaths": [
     "node_modules",
