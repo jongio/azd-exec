@@ -1,3 +1,8 @@
+## [0.2.17] - 2025-12-24
+
+- Update perms (30f6b3e)
+- chore: update CI workflows to improve Go setup and add Node.js and pnpm installation (f767da2)
+
 ## [0.2.16] - 2025-12-24
 
 - feat: add local test script to simulate the release workflow (9e97f20)
