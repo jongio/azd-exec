@@ -12,6 +12,9 @@ const description = "azd exec - Run any script with azd environment and Azure cr
   <section class="hero">
     <div class="hero-container">
       <h1 class="hero-title">Run scripts with azd environment context</h1>
+      <div class="hero-command">
+        <code>azd exec ./script.sh</code>
+      </div>
       <p class="hero-subtitle">
         Database migrations, setup automation, CI/CD workflows - with seamless access to Azure credentials and Key Vault secrets.
       </p>
@@ -224,6 +227,22 @@ Write-Host "Resource Group: \$env:AZURE_RESOURCE_GROUP"
     .hero-title {
       font-size: 3.5rem;
     }
+  }
+
+  .hero-command {
+    background-color: rgba(255, 255, 255, 0.95);
+    border-radius: 0.5rem;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem auto;
+    max-width: 400px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  .hero-command code {
+    color: #0078d4;
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-family: 'Consolas', 'Monaco', monospace;
   }
 
   .hero-subtitle {
