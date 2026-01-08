@@ -58,7 +58,7 @@ const html = `
   <div class="container">
     <div class="title">azd exec</div>
     <div class="command">azd exec ./script.sh</div>
-    <div class="description">Execute scripts with your azd env context!</div>
+    <div class="description">Run scripts with azd env context</div>
   </div>
   <div class="logo">jongio.github.io/azd-exec</div>
 </body>
