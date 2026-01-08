@@ -1,3 +1,9 @@
+## [0.2.27] - 2026-01-08
+
+- Merge branch 'main' of https://github.com/jongio/azd-exec (058b01d)
+- feat: update descriptions across multiple files for clarity and consistency; enhance messaging for azd exec functionality (d6451d8)
+- chore: update registry for v0.2.26 (185d09e)
+
 ## [0.2.26] - 2026-01-08
 
 - Merge branch 'main' of https://github.com/jongio/azd-exec (0f7db99)
