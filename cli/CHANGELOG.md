@@ -1,3 +1,9 @@
+## [0.2.28] - 2026-01-08
+
+- fix: update Open Graph and Twitter meta tags to reflect correct context for azd exec (62954e6)
+- feat: enhance release process by adding repository parameter and updating download URLs in registry.json (88da0b6)
+- chore: update registry for v0.2.27 (b8c3799)
+
 ## [0.2.27] - 2026-01-08
 
 - Merge branch 'main' of https://github.com/jongio/azd-exec (058b01d)
