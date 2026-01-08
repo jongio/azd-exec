@@ -322,6 +322,80 @@
               "url": "/home/runner/.azd/registry/jongio.azd.exec/0.2.26/jongio-azd-exec-windows-arm64.zip"
             }
           }
+        },
+        {
+          "version": "0.2.27",
+          "capabilities": [
+            "custom-commands"
+          ],
+          "usage": "azd exec \u003ccommand\u003e [options]",
+          "examples": [
+            {
+              "name": "execute script",
+              "description": "Execute a script file with azd context",
+              "usage": "azd exec ./my-script.sh"
+            },
+            {
+              "name": "with shell",
+              "description": "Execute with specific shell",
+              "usage": "azd exec ./deploy.ps1 --shell pwsh"
+            },
+            {
+              "name": "version",
+              "description": "Display extension version",
+              "usage": "azd exec version"
+            }
+          ],
+          "artifacts": {
+            "darwin/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "c9f8469c01922cba53f7216259bdd56c279c5e6e5f99a3b5b04c4c282da94ef9"
+              },
+              "entryPoint": "jongio-azd-exec-darwin-amd64",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.2.27/jongio-azd-exec-darwin-amd64.zip"
+            },
+            "darwin/arm64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "2b2e2fedca0e3307a391ef201043ab0bdf226b18bb3e70cbc4c2153ffd82a64b"
+              },
+              "entryPoint": "jongio-azd-exec-darwin-arm64",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.2.27/jongio-azd-exec-darwin-arm64.zip"
+            },
+            "linux/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "3b5c9f460a30978f274fa69fddbde46285e36a64ddb40351ded978d64bf6f8bc"
+              },
+              "entryPoint": "jongio-azd-exec-linux-amd64",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.2.27/jongio-azd-exec-linux-amd64.tar.gz"
+            },
+            "linux/arm64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "5c691877dc4a497e59e97712451a8099aa94f7eb0b3242e0ecb7418a7574cac0"
+              },
+              "entryPoint": "jongio-azd-exec-linux-arm64",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.2.27/jongio-azd-exec-linux-arm64.tar.gz"
+            },
+            "windows/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "a6cadf9314c3e3820eb579bfa8154a3e8fa0167ee46a7a130ac2a5267532c3f0"
+              },
+              "entryPoint": "jongio-azd-exec-windows-amd64.exe",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.2.27/jongio-azd-exec-windows-amd64.zip"
+            },
+            "windows/arm64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "392967cd0dfaa408238b9457cf68add25786c13c2a543b6223d3875a8307abd4"
+              },
+              "entryPoint": "jongio-azd-exec-windows-arm64.exe",
+              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.2.27/jongio-azd-exec-windows-arm64.zip"
+            }
+          }
         }
       ],
       "tags": [
