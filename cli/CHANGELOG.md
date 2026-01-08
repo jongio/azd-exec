@@ -1,4 +1,4 @@
-## [0.2.28] - 2026-01-08
+## [0.2.29] - 2026-01-08
 
 ### Added
 - Initial public release of azd exec
