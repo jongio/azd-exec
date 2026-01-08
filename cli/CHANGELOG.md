@@ -1,3 +1,11 @@
+## [0.2.18] - 2026-01-08
+
+- fix: normalize paths in test for macOS symlink compatibility (1049f48)
+- refactor: streamline CI workflows by removing Node.js setup and pnpm installation; enhance release process with multi-platform builds and artifact uploads (de3f47f)
+- fix: add missing words to cspell configuration for improved spell checking (707fe28)
+- fix: reorder import statements for consistency in version integration tests (4c9263c)
+- feat: enhance Key Vault reference resolution with new akvs format and improve error handling (2a39d11)
+
 ## [0.2.17] - 2025-12-24
 
 - Update perms (30f6b3e)
