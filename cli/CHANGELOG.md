@@ -1,3 +1,7 @@
+## [0.2.21] - 2026-01-08
+
+- debug: add comprehensive artifact logging to release workflow (27e9913)
+
 ## [0.2.20] - 2026-01-08
 
 - fix: build binaries with platform-specific names directly instead of copying (7f99e9d)
