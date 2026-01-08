@@ -1,3 +1,12 @@
+## [0.2.23] - 2026-01-08
+
+- feat: add dynamic title to Layout component and improve theme handling logic (a7cef66)
+- fix: disable auto-open of Playwright HTML report (9e0c01d)
+- refactor: rename src/cmd/script to src/cmd/exec across entire codebase (de4bb82)
+- chore: bump version to 0.2.22 (766510d)
+- feat: add release-test workflow and use azd-app build scripts (5782bb6)
+- fix: rewrite build.sh to handle azd x build environment variables like build.ps1 (182178c)
+
 ## [0.2.22] - 2026-01-08
 
 - feat: add release-test workflow and use azd-app build scripts (5782bb6)
