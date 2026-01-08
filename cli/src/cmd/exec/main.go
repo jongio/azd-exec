@@ -23,6 +23,8 @@ var (
 	shell       string
 	workingDir  string
 	interactive bool
+	// Key Vault resolution behavior flags.
+	stopOnKeyVaultError bool
 )
 
 type scriptExecutor interface {
@@ -69,10 +71,11 @@ Examples:
 
 			// Create executor
 			exec := newScriptExecutor(executor.Config{
-				Shell:       shell,
-				WorkingDir:  workingDir,
-				Interactive: interactive,
-				Args:        scriptArgs,
+				Shell:               shell,
+				WorkingDir:          workingDir,
+				Interactive:         interactive,
+				StopOnKeyVaultError: stopOnKeyVaultError,
+				Args:                scriptArgs,
 			})
 
 			// Check if input is a file or inline script
@@ -130,6 +133,7 @@ Examples:
 	rootCmd.Flags().StringVarP(&shell, "shell", "s", "", "Shell to use for execution (bash, sh, zsh, pwsh, powershell, cmd). Auto-detected if not specified.")
 	rootCmd.Flags().StringVarP(&workingDir, "working-dir", "w", "", "Working directory for script execution (defaults to script directory)")
 	rootCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "Run script in interactive mode")
+	rootCmd.Flags().BoolVar(&stopOnKeyVaultError, "stop-on-keyvault-error", false, "Fail-fast: stop execution when any Key Vault reference fails to resolve")
 
 	// Add azd global flags
 	// These flags match the global flags available in azd to ensure compatibility

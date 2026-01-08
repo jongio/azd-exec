@@ -82,10 +82,11 @@ func TestPrepareEnvironment(t *testing.T) {
 
 		_ = os.Setenv("NORMAL_VAR", "value")
 
-		envVars, err := exec.prepareEnvironment(context.Background())
+		envVars, _, err := exec.prepareEnvironment(context.Background())
 		if err != nil {
 			t.Errorf("Unexpected error: %v", err)
 		}
+		// warnings are allowed but should be empty for non-KV env
 		if len(envVars) == 0 {
 			t.Error("Expected non-empty environment")
 		}
@@ -104,12 +105,15 @@ func TestPrepareEnvironment(t *testing.T) {
 
 		_ = os.Setenv("KV_VAR", "@Microsoft.KeyVault(VaultName=test;SecretName=secret)")
 
-		_, err := exec.prepareEnvironment(context.Background())
-		// Without Azure credentials, this should return an error
+		_, warnings, err := exec.prepareEnvironment(context.Background())
+		// Default behavior is continue-on-error; errors should be reserved for strict mode.
 		if err != nil {
-			t.Logf("Expected error without Azure credentials: %v", err)
+			t.Fatalf("Unexpected error in continue-on-error mode: %v", err)
+		}
+		if len(warnings) == 0 {
+			t.Log("No warnings emitted (credentials+secret may have resolved successfully)")
 		} else {
-			t.Log("Azure credentials available, KV resolution succeeded")
+			t.Logf("Warnings emitted for Key Vault resolution as expected: %d", len(warnings))
 		}
 	})
 }

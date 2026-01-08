@@ -12,10 +12,21 @@ import (
 
 // Config holds the configuration for script execution.
 type Config struct {
-	Shell       string   // Shell to use for execution
-	WorkingDir  string   // Working directory
-	Interactive bool     // Interactive mode
-	Args        []string // Arguments to pass to the script
+	Shell       string // Shell to use for execution
+	WorkingDir  string // Working directory
+	Interactive bool   // Interactive mode
+	// StopOnKeyVaultError causes azd exec to fail-fast when any Key Vault reference fails to resolve.
+	// Default is false (continue resolving other references and run with unresolved values left as-is).
+	StopOnKeyVaultError bool
+	Args                []string // Arguments to pass to the script
+}
+
+type keyVaultEnvResolver interface {
+	ResolveEnvironmentVariables(ctx context.Context, envVars []string, options ResolveEnvironmentOptions) ([]string, []KeyVaultResolutionWarning, error)
+}
+
+var newKeyVaultEnvResolver = func() (keyVaultEnvResolver, error) {
+	return NewKeyVaultResolver()
 }
 
 // Executor executes scripts with azd context.
@@ -94,12 +105,16 @@ func (e *Executor) executeCommand(ctx context.Context, shell, workingDir, script
 	cmd.Dir = workingDir
 
 	// Prepare environment with Key Vault resolution
-	envVars, err := e.prepareEnvironment(ctx)
+	envVars, warnings, err := e.prepareEnvironment(ctx)
 	if err != nil {
-		// Log warning but continue with unresolved variables
-		fmt.Fprintf(os.Stderr, "Warning: %v\n", err)
-		fmt.Fprintf(os.Stderr, "Continuing with original environment variables...\n")
-		envVars = os.Environ()
+		return err
+	}
+	for _, w := range warnings {
+		if w.Key != "" {
+			fmt.Fprintf(os.Stderr, "Warning: failed to resolve Key Vault reference for %s: %v\n", w.Key, w.Err)
+		} else {
+			fmt.Fprintf(os.Stderr, "Warning: %v\n", w.Err)
+		}
 	}
 	cmd.Env = envVars
 
@@ -120,24 +135,29 @@ func (e *Executor) executeCommand(ctx context.Context, shell, workingDir, script
 }
 
 // prepareEnvironment prepares environment variables with Key Vault resolution.
-func (e *Executor) prepareEnvironment(ctx context.Context) ([]string, error) {
+
+func (e *Executor) prepareEnvironment(ctx context.Context) ([]string, []KeyVaultResolutionWarning, error) {
 	envVars := os.Environ()
 
 	if !e.hasKeyVaultReferences(envVars) {
-		return envVars, nil
+		return envVars, nil, nil
 	}
 
-	resolver, err := NewKeyVaultResolver()
+	resolver, err := newKeyVaultEnvResolver()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create Key Vault resolver: %w", err)
+		if e.config.StopOnKeyVaultError {
+			return nil, nil, fmt.Errorf("failed to create Key Vault resolver: %w", err)
+		}
+		return envVars, []KeyVaultResolutionWarning{{Err: fmt.Errorf("failed to create Key Vault resolver: %w", err)}}, nil
 	}
 
-	resolvedVars, err := resolver.ResolveEnvironmentVariables(ctx, envVars)
+	resolvedVars, warnings, err := resolver.ResolveEnvironmentVariables(ctx, envVars, ResolveEnvironmentOptions{StopOnError: e.config.StopOnKeyVaultError})
 	if err != nil {
-		return nil, fmt.Errorf("failed to resolve Key Vault references: %w", err)
+		// Fail-fast mode returns an error and should prevent script execution.
+		return nil, warnings, fmt.Errorf("failed to resolve Key Vault references: %w", err)
 	}
 
-	return resolvedVars, nil
+	return resolvedVars, warnings, nil
 }
 
 // logDebugInfo logs debug information about script execution.

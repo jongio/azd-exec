@@ -78,7 +78,7 @@ func TestKeyVaultIntegration(t *testing.T) {
 			"ANOTHER_VAR=another_value",
 		}
 
-		resolved, err := resolver.ResolveEnvironmentVariables(context.Background(), envVars)
+		resolved, _, err := resolver.ResolveEnvironmentVariables(context.Background(), envVars, ResolveEnvironmentOptions{})
 		if err != nil {
 			t.Fatalf("Failed to resolve environment variables: %v", err)
 		}

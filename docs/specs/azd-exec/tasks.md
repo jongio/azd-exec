@@ -3,6 +3,11 @@
 
 ## DONE
 
+### 5. Continue-on-error Key Vault resolution ✓
+**Assigned**: Developer
+**Completed**: 2026-01-08
+**Description**: Default Key Vault reference resolution now continues after individual failures (successful secrets substituted; failures kept as original `akvs://`/`@Microsoft.KeyVault(...)` values) with warnings. Added `--stop-on-keyvault-error` for fail-fast/all-or-nothing behavior. Updated docs (README + cli/docs/cli-reference.md) and tests.
+
 ### 4. Preflight Verification ✓
 **Assigned**: Developer (pf)
 **Completed**: 2025-12-22
@@ -28,14 +33,10 @@
 **Completed**: 2025-12-20
 **Description**: Implemented inline script execution with `azd exec 'echo foo'` syntax. Added ExecuteInline method to executor, modified main.go to detect inline vs file scripts, supports all shells (bash, pwsh, cmd). Updated README with examples and security warnings. Includes comprehensive tests for both unit and integration scenarios. Build and tests verified passing.
 
-## IN PROGRESS
-
 ### 2. Remove legacy run command ✓
 **Assigned**: Developer
 **Completed**: 2025-12-20
 **Description**: Removed run.go and its associated tests since the command was simplified to direct execution. Updated README and all website pages to remove 'run' references and show the cleaner 'azd exec ./script.sh' syntax throughout. Build and tests verified passing.
-
-## DONE
 
 ### 1. Add Key Vault Reference Resolution ✓
 **Assigned**: Developer

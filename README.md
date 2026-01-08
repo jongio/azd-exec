@@ -347,9 +347,16 @@ Key Vault resolution uses the same Azure credentials that `azd` uses:
 ### Error Handling
 
 If Key Vault resolution fails (e.g., secret not found, no access, vault doesn't exist):
-- A warning is displayed to stderr
-- Script continues with the original Key Vault reference string
-- This allows scripts to handle missing secrets gracefully
+- A warning is displayed to stderr (secret values are never printed)
+- `azd exec` continues resolving other Key Vault references
+- Successfully resolved secrets are substituted with their values
+- Failed references remain unchanged (still `akvs://...` or `@Microsoft.KeyVault(...)`)
+
+To fail-fast (abort on the first Key Vault resolution error), use:
+
+```bash
+azd exec ./script.sh --stop-on-keyvault-error
+```
 
 ### Security Benefits
 

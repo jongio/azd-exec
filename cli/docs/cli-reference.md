@@ -91,6 +91,7 @@ azd exec ./deploy.sh --environment production
 | `--shell` | `-s` | string | (auto-detect) | Shell to use for execution. Options: `bash`, `sh`, `zsh`, `pwsh`, `powershell`, `cmd`. Auto-detected from file extension or shebang if not specified. |
 | `--working-dir` | `-w` | string | (script directory) | Working directory for script execution. Defaults to the directory containing the script. |
 | `--interactive` | `-i` | bool | false | Run script in interactive mode, enabling user input and prompts. |
+| `--stop-on-keyvault-error` |  | bool | false | Fail-fast: stop execution when any Key Vault reference fails to resolve. |
 
 #### Global Flags (inherited from azd)
 
@@ -253,9 +254,12 @@ Uses the same Azure credentials as `azd`:
 
 **Error Handling:**
 If resolution fails (secret not found, no access, etc.):
-- Warning displayed to stderr
-- Script continues with original Key Vault reference string
-- Script can handle missing secrets gracefully
+- Warning displayed to stderr (secret values are never printed)
+- `azd exec` continues resolving other Key Vault references
+- Successfully resolved secrets are substituted with their values
+- Failed references remain unchanged (still `akvs://...` or `@Microsoft.KeyVault(...)`)
+
+To fail-fast (abort on the first Key Vault resolution error), use `--stop-on-keyvault-error`.
 
 ---
 

@@ -89,37 +89,19 @@ func Pack() error {
 		return fmt.Errorf("azd x build failed: %w", err)
 	}
 
-	// Now rename/copy the binary to the format azd x pack expects
+	// azd x build now creates the platform-specific binary directly
 	// Format: {extension-id-with-dashes}-{os}-{arch}{ext}
-	fmt.Println("Creating platform-specific binary names...")
+	fmt.Println("Verifying platform-specific binary exists...")
 
-	binPath := filepath.Join(binDir, binaryName+".exe")
+	extensionIdSafe := strings.ReplaceAll(extensionID, ".", "-")
+	platformName := fmt.Sprintf("%s-windows-amd64.exe", extensionIdSafe)
+	binPath := filepath.Join(binDir, platformName)
+	
 	if _, err := os.Stat(binPath); err != nil {
 		return fmt.Errorf("binary not found at %s: %w", binPath, err)
 	}
-
-	// Create copies with platform-specific names
-	extensionIdSafe := strings.ReplaceAll(extensionID, ".", "-")
-	platforms := []struct {
-		os, arch, ext string
-	}{
-		{"windows", "amd64", ".exe"},
-	}
-
-	for _, platform := range platforms {
-		platformName := fmt.Sprintf("%s-%s-%s%s", extensionIdSafe, platform.os, platform.arch, platform.ext)
-		platformPath := filepath.Join(binDir, platformName)
-
-		fmt.Printf("  Creating %s\n", platformName)
-		data, err := os.ReadFile(binPath)
-		if err != nil {
-			return fmt.Errorf("failed to read binary: %w", err)
-		}
-
-		if err := os.WriteFile(platformPath, data, 0755); err != nil {
-			return fmt.Errorf("failed to write platform binary: %w", err)
-		}
-	}
+	
+	fmt.Printf("  ✅ Found %s\n", platformName)
 
 	// Now pack
 	fmt.Println("Creating packages...")

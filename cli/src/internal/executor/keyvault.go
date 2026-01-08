@@ -48,6 +48,20 @@ type KeyVaultResolver struct {
 	mu         sync.RWMutex // protects clients map
 }
 
+// ResolveEnvironmentOptions controls how environment variable resolution behaves.
+type ResolveEnvironmentOptions struct {
+	// StopOnError causes ResolveEnvironmentVariables to stop at the first resolution error.
+	// When true, it returns a non-nil error and does not return partial results.
+	StopOnError bool
+}
+
+// KeyVaultResolutionWarning represents a non-fatal resolution failure for a single environment variable.
+// The secret value is never included.
+type KeyVaultResolutionWarning struct {
+	Key string
+	Err error
+}
+
 // NewKeyVaultResolver creates a new Key Vault resolver.
 func NewKeyVaultResolver() (*KeyVaultResolver, error) {
 	cred, err := azidentity.NewDefaultAzureCredential(nil)
@@ -243,8 +257,18 @@ func (r *KeyVaultResolver) getSecretValue(ctx context.Context, client *azsecrets
 }
 
 // ResolveEnvironmentVariables resolves all Key Vault references in the provided environment variables.
-func (r *KeyVaultResolver) ResolveEnvironmentVariables(ctx context.Context, envVars []string) ([]string, error) {
+func (r *KeyVaultResolver) ResolveEnvironmentVariables(ctx context.Context, envVars []string, options ResolveEnvironmentOptions) ([]string, []KeyVaultResolutionWarning, error) {
+	return resolveEnvironmentVariables(ctx, envVars, r.ResolveReference, options)
+}
+
+func resolveEnvironmentVariables(
+	ctx context.Context,
+	envVars []string,
+	resolve func(context.Context, string) (string, error),
+	options ResolveEnvironmentOptions,
+) ([]string, []KeyVaultResolutionWarning, error) {
 	resolved := make([]string, 0, len(envVars))
+	warnings := make([]KeyVaultResolutionWarning, 0)
 
 	for _, envVar := range envVars {
 		// Split into key=value
@@ -257,17 +281,24 @@ func (r *KeyVaultResolver) ResolveEnvironmentVariables(ctx context.Context, envV
 		key := parts[0]
 		value := parts[1]
 
-		// Check if value is a Key Vault reference
-		if IsKeyVaultReference(value) {
-			secretValue, err := r.ResolveReference(ctx, value)
-			if err != nil {
-				return nil, fmt.Errorf("failed to resolve Key Vault reference for %s: %w", key, err)
-			}
-			resolved = append(resolved, fmt.Sprintf("%s=%s", key, secretValue))
-		} else {
+		if !IsKeyVaultReference(value) {
 			resolved = append(resolved, envVar)
+			continue
 		}
+
+		secretValue, err := resolve(ctx, value)
+		if err != nil {
+			warnings = append(warnings, KeyVaultResolutionWarning{Key: key, Err: err})
+			if options.StopOnError {
+				return nil, warnings, fmt.Errorf("failed to resolve Key Vault reference for %s: %w", key, err)
+			}
+			// Keep original (unresolved) reference value and continue.
+			resolved = append(resolved, envVar)
+			continue
+		}
+
+		resolved = append(resolved, fmt.Sprintf("%s=%s", key, secretValue))
 	}
 
-	return resolved, nil
+	return resolved, warnings, nil
 }
