@@ -235,7 +235,6 @@ func TestExecutorWithDebugMode(t *testing.T) {
 	}
 }
 
-
 func TestExecutorWithArgs(t *testing.T) {
 	projectsDir := testhelpers.GetTestProjectsDir(t)
 
