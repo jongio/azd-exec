@@ -154,8 +154,6 @@ azd exec ./deploy.sh
 
 ## 📚 Usage Examples
 
-## 📚 Usage Examples
-
 ### Basic Execution
 
 ```bash
@@ -301,7 +299,7 @@ akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/myvault/my-secret
 akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/myvault/my-secret/abc123
 ```
 
-Note: `azd` may export environment variables with quotes; `azd exec` trims whitespace and strips a single pair of wrapper quotes before detecting/parsing Key Vault references.
+Note: `azd` may export environment variables with quotes; `azd exec` trims whitespace and strips a single pair of wrapper quotes before detecting/parsing Key Vault references. The akvs:// format (Format 3) is used internally by azd and includes a subscription/tenant GUID, vault name, secret name, and optional version.
 
 ### Usage Example
 
@@ -390,8 +388,6 @@ Binary created in `cli/bin/exec`.
 
 ### Commands
 
-### Commands
-
 ```bash
 # Build
 cd cli && ./build.sh
@@ -453,8 +449,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## 🔖 Release Notes
 
 **Latest**: [View releases](https://github.com/jongio/azd-exec/releases)
-
-### For Maintainers
 
 ### For Maintainers
 

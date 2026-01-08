@@ -225,6 +225,10 @@ All azd environment variables are available to your scripts:
 # Format 2: VaultName and SecretName
 @Microsoft.KeyVault(VaultName=myvault;SecretName=my-secret)
 @Microsoft.KeyVault(VaultName=myvault;SecretName=my-secret;SecretVersion=abc123)
+
+# Format 3: azd akvs URI (used internally by azd)
+akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/myvault/my-secret
+akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/myvault/my-secret/abc123
 ```
 
 **Example Workflow:**
