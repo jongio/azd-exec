@@ -65,35 +65,25 @@ if ($outputPath) {
     Write-Host "  OS/Arch: $targetOS/$targetArch" -ForegroundColor Gray
     Write-Host "  Output: $outputPath" -ForegroundColor Gray
     
-    $env:GOOS = $targetOS
-    $env:GOARCH = $targetArch
-    
-    go build -ldflags $ldflags -o $outputPath ./src/cmd/script
-    
-    if ($LASTEXITCODE -ne 0) {
-        Write-Host "ERROR: Build failed" -ForegroundColor Red
-        exit $LASTEXITCODE
-    }
-    
     # IMPORTANT: azd x pack expects binaries with platform-specific names
-    # Copy the binary with the correct naming convention for pack to find it
+    # Build DIRECTLY to the platform-specific name that pack expects
     $extensionIdSafe = $extensionId -replace '\.', '-'
-
     $binaryExt = if ($targetOS -eq "windows") { ".exe" } else { "" }
     $platformSpecificName = "$extensionIdSafe-$targetOS-$targetArch$binaryExt"
     
     $binDir = Split-Path -Parent $outputPath
     $platformSpecificPath = Join-Path $binDir $platformSpecificName
     
-    Write-Host "  Creating platform-specific copy: $platformSpecificName" -ForegroundColor Magenta
-    Write-Host "    From: $outputPath" -ForegroundColor DarkGray
-    Write-Host "    To: $platformSpecificPath" -ForegroundColor DarkGray
+    Write-Host "  Building to: $platformSpecificPath" -ForegroundColor Magenta
     
-    if (Test-Path $outputPath) {
-        Copy-Item $outputPath $platformSpecificPath -Force
-        Write-Host "    ✓ Copy successful" -ForegroundColor Green
-    } else {
-        Write-Host "    ✗ Source file not found!" -ForegroundColor Red
+    $env:GOOS = $targetOS
+    $env:GOARCH = $targetArch
+    
+    go build -ldflags $ldflags -o $platformSpecificPath ./src/cmd/script
+    
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "ERROR: Build failed" -ForegroundColor Red
+        exit $LASTEXITCODE
     }
     
     Write-Host "✅ Build successful!" -ForegroundColor Green
