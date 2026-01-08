@@ -1,105 +1,205 @@
-#!/usr/bin/env bash
-set -euo pipefail
-
+#!/bin/bash
 # Build script called by azd x build
-# This script is invoked by `azd x build` with specific environment variables:
-# - EXTENSION_ID: The extension identifier (e.g., jongio.azd.exec)
-# - EXTENSION_VERSION: The extension version (e.g., 0.1.0)
-# - GOOS: Target operating system
-# - GOARCH: Target architecture
-# - OUTPUT_PATH: Where to write the binary
+# This handles pre-build steps like dashboard compilation
 
-# Get environment variables set by azd x build
-EXTENSION_ID="${EXTENSION_ID:-}"
-EXTENSION_VERSION="${EXTENSION_VERSION:-0.1.0}"
-TARGET_OS="${GOOS:-}"
-TARGET_ARCH="${GOARCH:-}"
-OUTPUT_PATH="${OUTPUT_PATH:-}"
+set -e
 
-if [ -z "$EXTENSION_ID" ]; then
-    echo "ERROR: EXTENSION_ID environment variable not set" >&2
-    exit 1
-fi
+# Get the directory of the script (cli folder)
+EXTENSION_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-if [ -z "$EXTENSION_VERSION" ]; then
-    echo "ERROR: EXTENSION_VERSION environment variable not set" >&2
-    exit 1
-fi
+# Change to the script directory
+cd "$EXTENSION_DIR" || exit
 
-# Build metadata
-BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-GIT_COMMIT=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
-
-# Build flags with version info
-VERSION_IMPORT_PATH="github.com/jongio/azd-exec/cli/src/internal/version"
-LDFLAGS="-X ${VERSION_IMPORT_PATH}.Version=${EXTENSION_VERSION} -X ${VERSION_IMPORT_PATH}.BuildDate=${BUILD_DATE} -X ${VERSION_IMPORT_PATH}.GitCommit=${GIT_COMMIT}"
-
-echo "Building $EXTENSION_ID v$EXTENSION_VERSION"
-
-# If OUTPUT_PATH is set, this is a targeted build for azd x build
-if [ -n "$OUTPUT_PATH" ]; then
-    # Default OS/Arch if not explicitly set by azd x build
-    if [ -z "$TARGET_OS" ]; then
-        TARGET_OS=$(uname -s | tr '[:upper:]' '[:lower:]')
-        case "$TARGET_OS" in
-            darwin) TARGET_OS="darwin" ;;
-            linux) TARGET_OS="linux" ;;
-            *) TARGET_OS="linux" ;;
-        esac
-    fi
-    if [ -z "$TARGET_ARCH" ]; then
-        TARGET_ARCH=$(uname -m)
-        case "$TARGET_ARCH" in
-            x86_64) TARGET_ARCH="amd64" ;;
-            aarch64|arm64) TARGET_ARCH="arm64" ;;
-            *) TARGET_ARCH="amd64" ;;
-        esac
-    fi
-    
-    echo "  OS/Arch: $TARGET_OS/$TARGET_ARCH"
-    echo "  Output: $OUTPUT_PATH"
-    
-    # IMPORTANT: azd x pack expects binaries with platform-specific names
-    # Build DIRECTLY to the platform-specific name that pack expects
-    EXTENSION_ID_SAFE="${EXTENSION_ID//./-}"
-    BINARY_EXT=""
-    if [ "$TARGET_OS" = "windows" ]; then
-        BINARY_EXT=".exe"
-    fi
-    PLATFORM_SPECIFIC_NAME="${EXTENSION_ID_SAFE}-${TARGET_OS}-${TARGET_ARCH}${BINARY_EXT}"
-    
-    BIN_DIR=$(dirname "$OUTPUT_PATH")
-    PLATFORM_SPECIFIC_PATH="${BIN_DIR}/${PLATFORM_SPECIFIC_NAME}"
-    
-    echo "  Building to: $PLATFORM_SPECIFIC_PATH"
-    
-    GOOS=$TARGET_OS GOARCH=$TARGET_ARCH go build -ldflags "$LDFLAGS" -o "$PLATFORM_SPECIFIC_PATH" ./src/cmd/script
-    
-    if [ $? -ne 0 ]; then
-        echo "ERROR: Build failed" >&2
-        exit $?
-    fi
-    
-    echo "✅ Build successful!"
-else
-    # Fallback: build for current platform to bin/
-    echo "  Building for current platform..."
-    
-    mkdir -p bin
-    
+# Helper function to kill extension processes
+# This prevents "file in use" errors when azd x watch copies to ~/.azd/extensions/
+stop_extension_processes() {
     BINARY_NAME="exec"
-    if [ "${GOOS:-}" = "windows" ]; then
-        BINARY_NAME="${BINARY_NAME}.exe"
+    EXTENSION_ID_FOR_KILL="jongio.azd.exec"
+    EXTENSION_BINARY_PREFIX="${EXTENSION_ID_FOR_KILL//./-}"
+
+    # Kill processes by name silently (ignore errors if not running)
+    pkill -f "$BINARY_NAME" 2>/dev/null || true
+    pkill -f "$EXTENSION_BINARY_PREFIX" 2>/dev/null || true
+    
+    # Also kill any processes running from the installed extension directory
+    INSTALLED_EXT_DIR="$HOME/.azd/extensions/$EXTENSION_ID_FOR_KILL"
+    if [ -d "$INSTALLED_EXT_DIR" ]; then
+        pkill -f "$INSTALLED_EXT_DIR" 2>/dev/null || true
     fi
     
-    OUTPUT_PATH="bin/${BINARY_NAME}"
+    # Give processes time to fully terminate and release file handles
+    sleep 0.5
+}
+
+# Check if we need to rebuild the Go binary
+# This happens when: Go files changed OR embedded dashboard dist changed
+NEEDS_GO_BUILD=false
+
+if [ -d "bin" ]; then
+    # Find newest binary (excluding .old files)
+    NEWEST_BINARY_TIME=$(find bin -type f ! -name "*.old" -exec stat -c %Y {} \; 2>/dev/null | sort -n | tail -1 || \
+                         find bin -type f ! -name "*.old" -exec stat -f %m {} \; 2>/dev/null | sort -n | tail -1)
     
-    go build -ldflags "$LDFLAGS" -o "$OUTPUT_PATH" ./src/cmd/script
-    
-    if [ $? -ne 0 ]; then
-        echo "ERROR: Build failed" >&2
-        exit $?
+    if [ -z "$NEWEST_BINARY_TIME" ]; then
+        NEEDS_GO_BUILD=true
+        echo "No existing binary found, will build"
+    else
+        # Check Go source files
+        if [ -d "src" ]; then
+            NEWEST_GO_TIME=$(find src -name "*.go" -type f -exec stat -c %Y {} \; 2>/dev/null | sort -n | tail -1 || \
+                             find src -name "*.go" -type f -exec stat -f %m {} \; 2>/dev/null | sort -n | tail -1)
+            if [ -n "$NEWEST_GO_TIME" ] && [ "$NEWEST_GO_TIME" -gt "$NEWEST_BINARY_TIME" ]; then
+                NEEDS_GO_BUILD=true
+                echo "Go source files changed, will rebuild"
+            fi
+        fi
+        
+        # Check embedded dashboard dist (it's compiled into the binary)
+        DASHBOARD_DIST_PATH="src/internal/dashboard/dist"
+        if [ -d "$DASHBOARD_DIST_PATH" ]; then
+            NEWEST_DIST_TIME=$(find "$DASHBOARD_DIST_PATH" -type f -exec stat -c %Y {} \; 2>/dev/null | sort -n | tail -1 || \
+                               find "$DASHBOARD_DIST_PATH" -type f -exec stat -f %m {} \; 2>/dev/null | sort -n | tail -1)
+            if [ -n "$NEWEST_DIST_TIME" ] && [ "$NEWEST_DIST_TIME" -gt "$NEWEST_BINARY_TIME" ]; then
+                NEEDS_GO_BUILD=true
+                echo "Embedded dashboard dist changed, will rebuild"
+            fi
+        fi
     fi
-    
-    echo "✅ Build successful: $OUTPUT_PATH"
+else
+    NEEDS_GO_BUILD=true
+    echo "No bin directory found, will build"
 fi
+
+# Only kill extension processes if we're actually going to rebuild the binary
+if [ "$NEEDS_GO_BUILD" = true ]; then
+    echo "Stopping extension processes before rebuild..."
+    stop_extension_processes
+else
+    # Nothing to rebuild - exit early to prevent azd x watch from trying to install
+    echo "  ✓ Binary up to date, skipping build"
+    exit 0
+fi
+
+echo "Building App Extension..."
+
+# Build dashboard first (if needed)
+DASHBOARD_DIST_PATH="src/internal/dashboard/dist"
+DASHBOARD_SRC_PATH="dashboard/src"
+
+SHOULD_BUILD_DASHBOARD=false
+
+if [ ! -d "$DASHBOARD_DIST_PATH" ]; then
+    SHOULD_BUILD_DASHBOARD=true
+    echo "Dashboard not built yet"
+elif [ -d "$DASHBOARD_SRC_PATH" ]; then
+    DIST_TIME=$(stat -c %Y "$DASHBOARD_DIST_PATH" 2>/dev/null || stat -f %m "$DASHBOARD_DIST_PATH" 2>/dev/null)
+    NEWEST_SRC=$(find "$DASHBOARD_SRC_PATH" -type f -printf '%T@\n' 2>/dev/null | sort -n | tail -1 || find "$DASHBOARD_SRC_PATH" -type f -exec stat -f %m {} \; 2>/dev/null | sort -n | tail -1)
+    
+    if [ -n "$NEWEST_SRC" ] && [ "${NEWEST_SRC%.*}" -gt "$DIST_TIME" ]; then
+        SHOULD_BUILD_DASHBOARD=true
+        echo "Dashboard source changed, rebuild needed"
+    fi
+fi
+
+if [ "$SHOULD_BUILD_DASHBOARD" = true ]; then
+    echo "Building dashboard..."
+    pushd dashboard > /dev/null
+    
+    if [ ! -d "node_modules" ]; then
+        echo "  Installing dashboard dependencies..."
+        npm install --silent
+        if [ $? -ne 0 ]; then
+            echo "ERROR: npm install failed"
+            exit 1
+        fi
+    fi
+
+    echo "  Building dashboard bundle..."
+    npm run build --silent
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Dashboard build failed"
+        exit 1
+    fi
+    echo "  ✓ Dashboard built successfully"
+    
+    popd > /dev/null
+else
+    echo "  ✓ Dashboard up to date"
+fi
+
+# Create a safe version of EXTENSION_ID replacing dots with dashes
+EXTENSION_ID_SAFE="${EXTENSION_ID//./-}"
+
+# Define output directory
+OUTPUT_DIR="${OUTPUT_DIR:-$EXTENSION_DIR/bin}"
+
+# Create output directory if it doesn't exist
+mkdir -p "$OUTPUT_DIR"
+
+# Get Git commit hash and build date
+COMMIT=$(git rev-parse HEAD 2>/dev/null || echo "unknown")
+BUILD_DATE=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+# Read version from extension.yaml if EXTENSION_VERSION not set
+if [ -z "$EXTENSION_VERSION" ]; then
+    if [ -f "extension.yaml" ]; then
+        EXTENSION_VERSION=$(grep -E '^version:' extension.yaml | awk '{print $2}' | tr -d '[:space:]')
+        if [ -z "$EXTENSION_VERSION" ]; then
+            EXTENSION_VERSION="0.0.0-dev"
+        fi
+    else
+        EXTENSION_VERSION="0.0.0-dev"
+    fi
+fi
+
+echo "Building version $EXTENSION_VERSION"
+
+# List of OS and architecture combinations
+if [ -n "$EXTENSION_PLATFORM" ]; then
+    PLATFORMS=("$EXTENSION_PLATFORM")
+else
+    PLATFORMS=(
+        "windows/amd64"
+        "windows/arm64"
+        "darwin/amd64"
+        "darwin/arm64"
+        "linux/amd64"
+        "linux/arm64"
+    )
+fi
+
+APP_PATH="github.com/jongio/azd-exec/cli/src/internal/version"
+
+# Loop through platforms and build
+for PLATFORM in "${PLATFORMS[@]}"; do
+    OS=$(echo "$PLATFORM" | cut -d'/' -f1)
+    ARCH=$(echo "$PLATFORM" | cut -d'/' -f2)
+
+    OUTPUT_NAME="$OUTPUT_DIR/$EXTENSION_ID_SAFE-$OS-$ARCH"
+
+    if [ "$OS" = "windows" ]; then
+        OUTPUT_NAME+='.exe'
+    fi
+
+    echo "  Building for $OS/$ARCH..."
+
+    # Delete the output file if it already exists
+    [ -f "$OUTPUT_NAME" ] && rm -f "$OUTPUT_NAME"
+
+    LDFLAGS="-s -w -X '$APP_PATH.Version=$EXTENSION_VERSION' -X '$APP_PATH.BuildTime=$BUILD_DATE' -X '$APP_PATH.Commit=$COMMIT'"
+
+    # Set environment variables for Go build
+    GOOS=$OS GOARCH=$ARCH go build \
+        -ldflags="$LDFLAGS" \
+        -o "$OUTPUT_NAME" \
+        ./src/cmd/script
+
+    if [ $? -ne 0 ]; then
+        echo "ERROR: Build failed for $OS/$ARCH"
+        exit 1
+    fi
+done
+
+echo ""
+echo "✓ Build completed successfully!"
+echo "  Binaries are located in the $OUTPUT_DIR directory."

@@ -1,0 +1,197 @@
+name: Release Test
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: 'Version bump type'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+defaults:
+  run:
+    shell: bash
+    working-directory: cli
+
+env:
+  GO_VERSION: '1.25.5'
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Calculate next version
+        id: version
+        run: |
+          # Get current version from extension.yaml
+          CURRENT_VERSION=$(grep '^version:' extension.yaml | awk '{print $2}')
+          echo "Current version: $CURRENT_VERSION"
+          
+          # Parse version
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+          
+          # Bump version based on input
+          case "${{ github.event.inputs.bump }}" in
+            major)
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            minor)
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            patch)
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEXT_VERSION="${MAJOR}.${MINOR}.${PATCH}"
+          echo "Next version: $NEXT_VERSION"
+          echo "next=$NEXT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Update version in extension.yaml
+        run: |
+          sed -i "s/^version: .*/version: ${{ steps.version.outputs.next }}/" extension.yaml
+          cat extension.yaml | grep version
+
+      - name: Generate changelog
+        run: |
+          VERSION="${{ steps.version.outputs.next }}"
+          echo "## [$VERSION] - $(date +%Y-%m-%d)" > /tmp/new-changelog.md
+          echo "" >> /tmp/new-changelog.md
+          
+          # Get commits since last tag
+          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          if [ -n "$LAST_TAG" ]; then
+            git log ${LAST_TAG}..HEAD --pretty=format:"- %s (%h)" >> /tmp/new-changelog.md
+          else
+            git log --pretty=format:"- %s (%h)" >> /tmp/new-changelog.md
+          fi
+          
+          echo "" >> /tmp/new-changelog.md
+          echo "" >> /tmp/new-changelog.md
+          
+          # Prepend to CHANGELOG.md
+          if [ -f CHANGELOG.md ]; then
+            cat CHANGELOG.md >> /tmp/new-changelog.md
+          fi
+          mv /tmp/new-changelog.md CHANGELOG.md
+
+      - name: Commit version bump
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add extension.yaml CHANGELOG.md
+          git commit -m "chore: bump version to ${{ steps.version.outputs.next }}"
+          git push
+
+      - name: Install azd
+        working-directory: cli
+        run: curl -fsSL https://aka.ms/install-azd.sh | bash
+
+      - name: Install azd extensions
+        working-directory: cli
+        run: |
+          azd extension source add azd --location https://aka.ms/azd/extensions/registry --type url 2>/dev/null || true
+          azd extension install microsoft.azd.extensions --source azd
+
+      - name: Build binaries
+        working-directory: cli
+        run: |
+          export EXTENSION_ID="jongio.azd.exec"
+          export EXTENSION_VERSION="${{ steps.version.outputs.next }}"
+          azd x build --all
+
+      - name: Package
+        working-directory: cli
+        run: |
+          echo "=== Running azd x pack ==="
+          azd x pack
+          echo ""
+          echo "=== Pack command completed ==="
+
+      - name: Debug - List build artifacts
+        run: |
+          echo "=== Checking bin/ directory ==="
+          ls -lah cli/bin/ || echo "bin/ directory not found"
+          echo ""
+          echo "=== Checking registry directory ==="
+          ls -lah ~/.azd/registry/jongio.azd.exec/ || echo "Registry directory not found"
+          echo ""
+          echo "=== Checking version directory ==="
+          ls -lah ~/.azd/registry/jongio.azd.exec/${{ steps.version.outputs.next }}/ || echo "Version directory not found"
+          echo ""
+          echo "=== Full tree of registry ==="
+          find ~/.azd/registry/jongio.azd.exec/ -type f 2>/dev/null || echo "No files found in registry"
+
+      - name: Extract release notes
+        id: release_notes
+        working-directory: cli
+        run: |
+          VERSION="${{ steps.version.outputs.next }}"
+          
+          awk '
+            BEGIN { in_section = 0 }
+            /^## \['"$VERSION"'\]/ { in_section = 1; next }
+            /^## \[/ { in_section = 0 }
+            in_section && NF > 0 { print }
+          ' CHANGELOG.md > /tmp/release-notes.md
+          
+          echo "Release notes for v$VERSION:"
+          cat /tmp/release-notes.md
+
+      - name: Release
+        working-directory: cli
+        run: |
+          azd x release \
+            --repo "${{ github.repository }}" \
+            --version "${{ steps.version.outputs.next }}" \
+            --notes-file /tmp/release-notes.md \
+            --confirm
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update registry
+        working-directory: cli
+        run: |
+          cd ..
+          git pull
+          cd cli
+          
+          azd x publish \
+            --registry ../registry.json \
+            --version "${{ steps.version.outputs.next }}"
+          
+          cd ..
+          
+          if git diff --quiet registry.json; then
+            echo "No changes to registry.json"
+          else
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add registry.json
+            git commit -m "chore: update registry for v${{ steps.version.outputs.next }}"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
