@@ -1,3 +1,7 @@
+## [0.2.20] - 2026-01-08
+
+- fix: build binaries with platform-specific names directly instead of copying (7f99e9d)
+
 ## [0.2.19] - 2026-01-08
 
 - refactor: enhance multi-platform build process by consolidating platform-specific logic and improving output naming (3764603)
