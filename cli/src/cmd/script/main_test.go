@@ -70,8 +70,17 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Getwd failed: %v", err)
 	}
-	if gotWd != newWd {
-		t.Fatalf("expected cwd %q, got %q", newWd, gotWd)
+	// Normalize paths for comparison (macOS has /var -> /private/var symlink)
+	gotWdNorm, err := filepath.EvalSymlinks(gotWd)
+	if err != nil {
+		t.Fatalf("EvalSymlinks failed for %q: %v", gotWd, err)
+	}
+	newWdNorm, err := filepath.EvalSymlinks(newWd)
+	if err != nil {
+		t.Fatalf("EvalSymlinks failed for %q: %v", newWd, err)
+	}
+	if gotWdNorm != newWdNorm {
+		t.Fatalf("expected cwd %q, got %q", newWdNorm, gotWdNorm)
 	}
 
 	if os.Getenv("AZD_SCRIPT_DEBUG") != "true" {
