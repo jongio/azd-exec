@@ -1,3 +1,9 @@
+## [0.2.25] - 2026-01-08
+
+- Merge branch 'main' of https://github.com/jongio/azd-exec (540fd09)
+- chore: update release workflow for Go setup and versioning process; enhance documentation for CLI reference (4ffb145)
+- chore: update registry for v0.2.24 (7807f9a)
+
 ## [0.2.24] - 2026-01-08
 
 - refactor: remove dashboard build steps from build scripts (4ca2e2f)
