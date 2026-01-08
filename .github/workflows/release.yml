@@ -1,16 +1,5 @@
 name: Release
 
-# =============================================================================
-# REQUIRED REPOSITORY SETTINGS (see .github/WORKFLOWS.md for details):
-#
-# 1. Settings → Actions → General → Workflow permissions:
-#    - Select "Read and write permissions"
-#    - ✅ Check "Allow GitHub Actions to create and approve pull requests"
-#
-# 2. Settings → General → Pull Requests:
-#    - ✅ Check "Allow auto-merge"
-# =============================================================================
-
 on:
   workflow_dispatch:
     inputs:
@@ -55,16 +44,6 @@ jobs:
 
       - name: Verify Go version
         run: go version
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Install Mage
         run: go install github.com/magefile/mage@latest
@@ -217,27 +196,13 @@ jobs:
       - name: Verify Go version
         run: go version
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Build website assets
-        run: |
-          cd ../web
-          pnpm install
-          pnpm run build
-          cd ../cli
-
       - name: Build for multiple platforms
         run: |
-          chmod +x build.sh
-          BUILD_ALL=true ./build.sh
+          mkdir -p bin/windows-amd64 bin/linux-amd64 bin/darwin-amd64 bin/darwin-arm64
+          GOOS=windows GOARCH=amd64 go build -o bin/windows-amd64/exec.exe ./src/cmd/script
+          GOOS=linux GOARCH=amd64 go build -o bin/linux-amd64/exec ./src/cmd/script
+          GOOS=darwin GOARCH=amd64 go build -o bin/darwin-amd64/exec ./src/cmd/script
+          GOOS=darwin GOARCH=arm64 go build -o bin/darwin-arm64/exec ./src/cmd/script
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -274,16 +239,6 @@ jobs:
 
       - name: Verify Go version
         run: go version
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - name: Calculate next version
         id: version
@@ -486,14 +441,6 @@ jobs:
           # Add the official azd extensions registry source
           azd extension source add azd --location https://aka.ms/azd/extensions/registry --type url 2>/dev/null || true
           azd extension install microsoft.azd.extensions --source azd
-
-      - name: Build website assets (for embedding in binary)
-        working-directory: cli
-        run: |
-          cd ../web
-          pnpm install
-          pnpm run build
-          cd ../cli
 
       - name: Build binaries
         working-directory: cli

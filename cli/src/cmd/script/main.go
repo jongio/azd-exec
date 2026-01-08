@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -24,7 +25,24 @@ var (
 	interactive bool
 )
 
+type scriptExecutor interface {
+	Execute(ctx context.Context, scriptPath string) error
+	ExecuteInline(ctx context.Context, scriptContent string) error
+}
+
+var newScriptExecutor = func(config executor.Config) scriptExecutor {
+	return executor.New(config)
+}
+
 func main() {
+	rootCmd := newRootCmd()
+	if err := rootCmd.Execute(); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func newRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
 		Use:   "exec [script-file-or-command] [-- script-args...]",
 		Short: "Exec - Execute commands/scripts with Azure Developer CLI context",
@@ -50,7 +68,7 @@ Examples:
 			}
 
 			// Create executor
-			exec := executor.New(executor.Config{
+			exec := newScriptExecutor(executor.Config{
 				Shell:       shell,
 				WorkingDir:  workingDir,
 				Interactive: interactive,
@@ -133,15 +151,5 @@ Examples:
 		commands.NewListenCommand(),
 	)
 
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-}
-
-// init remaps legacy invocation `azd script` to `azd exec` for compatibility.
-func init() {
-	if len(os.Args) > 1 && os.Args[1] == "script" {
-		os.Args[1] = "exec"
-	}
+	return rootCmd
 }

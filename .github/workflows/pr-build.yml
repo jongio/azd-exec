@@ -35,6 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     # Only run if:
     # 1. CI workflow succeeded, OR
+    # Only run if:
+    # 1. CI workflow succeeded, OR
     # 2. Manual trigger via workflow_dispatch, OR
     # 3. PR labeled with 'safe-to-build', OR
     # 4. Push to prbuild branch (for testing)
@@ -86,6 +88,7 @@ jobs:
                 state: 'open',
                 head: `${context.repo.owner}:${context.ref.replace('refs/heads/', '')}`
               });
+              
               if (prs.length > 0) {
                 prNumber = prs[0].number;
                 prSha = prs[0].head.sha;
@@ -196,16 +199,6 @@ jobs:
       - name: Verify Go version
         run: go version
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Calculate PR version
         id: version
         working-directory: cli
@@ -228,20 +221,6 @@ jobs:
           # Add the official azd extensions registry source
           azd extension source add azd --location https://aka.ms/azd/extensions/registry --type url 2>/dev/null || true
           azd extension install microsoft.azd.extensions --source azd
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v4
-        with:
-          path: ~/.pnpm-store
-          key: ${{ runner.os }}-pnpm-${{ hashFiles('web/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-
-
-      - name: Build website assets
-        working-directory: web
-        run: |
-          pnpm install
-          pnpm run build
 
       - name: Update extension.yaml with PR version
         working-directory: cli
@@ -310,11 +289,16 @@ jobs:
           SHORT_COMMIT=$(echo $COMMIT | cut -c1-7)
           # Use the branch where the scripts actually exist
           BRANCH="${{ github.ref_name }}"
+          WEBSITE_URL="https://jongio.github.io/azd-exec/pr/$PR_NUM/"
           
           cat > ../instructions.md <<EOF
           ## 🚀 Test This PR
           
           A preview build (\`$VERSION\`) is ready for testing!
+          
+          ### 🌐 Website Preview
+          
+          **Live Preview:** [$WEBSITE_URL]($WEBSITE_URL)
           
           ### One-Line Install (Recommended)
           
@@ -372,7 +356,6 @@ jobs:
               comment.user.type === 'Bot' && 
               comment.body.includes('🚀 Test This PR')
             );
-            
             if (botComment) {
               // Update existing comment
               await github.rest.issues.updateComment({

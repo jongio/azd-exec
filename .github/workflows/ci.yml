@@ -42,16 +42,6 @@ jobs:
           ln -sf $(which go${{ env.GO_VERSION }}) $(go env GOPATH)/bin/go
           go version
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
       - name: Install Mage
         run: go install github.com/magefile/mage@latest
 
@@ -110,23 +100,6 @@ jobs:
 
       - name: Verify Go version
         run: go version
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Build website assets
-        run: |
-          cd ../web
-          pnpm install
-          pnpm run build
-          cd ../cli
 
       - name: Download dependencies
         run: go mod download
@@ -192,23 +165,6 @@ jobs:
       - name: Verify Go version
         run: go version
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Build website assets
-        run: |
-          cd ../web
-          pnpm install
-          pnpm run build
-          cd ../cli
-
       - name: Install golangci-lint
         run: go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
@@ -244,30 +200,87 @@ jobs:
       - name: Verify Go version
         run: go version
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
-
-      - name: Build website assets
-        run: |
-          cd ../web
-          pnpm install
-          pnpm run build
-          cd ../cli
-
       - name: Build for multiple platforms
         run: |
-          chmod +x build.sh
-          BUILD_ALL=true ./build.sh
+          mkdir -p bin/windows-amd64 bin/linux-amd64 bin/darwin-amd64 bin/darwin-arm64
+          GOOS=windows GOARCH=amd64 go build -o bin/windows-amd64/exec.exe ./src/cmd/script
+          GOOS=linux GOARCH=amd64 go build -o bin/linux-amd64/exec ./src/cmd/script
+          GOOS=darwin GOARCH=amd64 go build -o bin/darwin-amd64/exec ./src/cmd/script
+          GOOS=darwin GOARCH=arm64 go build -o bin/darwin-arm64/exec ./src/cmd/script
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: binaries
           path: cli/bin/
+
+  integration:
+    name: Integration Tests
+    runs-on: ${{ matrix.os }}
+    needs: [preflight, test]
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go (bootstrap)
+        uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+          cache: false
+
+      - name: Install Go ${{ env.GO_VERSION }} (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          go install golang.org/dl/go${{ env.GO_VERSION }}@latest
+          go${{ env.GO_VERSION }} download
+          echo "$(go env GOPATH)/bin" >> $GITHUB_PATH
+          ln -sf $(which go${{ env.GO_VERSION }}) $(go env GOPATH)/bin/go
+
+      - name: Install Go ${{ env.GO_VERSION }} (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          go install golang.org/dl/go${{ env.GO_VERSION }}@latest
+          & go${{ env.GO_VERSION }} download
+          $gopath = go env GOPATH
+          "$gopath\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          Copy-Item "$gopath\bin\go${{ env.GO_VERSION }}.exe" "$gopath\bin\go.exe" -Force
+
+      - name: Verify Go version
+        run: go version
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run port manager integration tests
+        shell: bash
+        timeout-minutes: 8
+        run: |
+          go test -v -tags=integration -timeout=6m ./src/internal/executor/...
+        env:
+          CI: true
+
+      - name: Run E2E integration tests
+        shell: bash
+        timeout-minutes: 15
+        run: |
+          go test -v -tags=integration -timeout=10m ./src/cmd/script/commands/...
+        env:
+          CI: true
+
+      - name: Upload test logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-test-logs-${{ matrix.os }}
+          path: |
+            cli/tests/projects/**/*.log
+            cli/.azure/**/*.log
+          if-no-files-found: ignore
