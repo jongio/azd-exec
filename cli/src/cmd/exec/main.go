@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jongio/azd-exec/cli/src/cmd/script/commands"
+	"github.com/jongio/azd-exec/cli/src/cmd/exec/commands"
 	"github.com/jongio/azd-exec/cli/src/internal/executor"
 	"github.com/spf13/cobra"
 )

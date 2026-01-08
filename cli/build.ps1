@@ -228,7 +228,7 @@ foreach ($PLATFORM in $PLATFORMS) {
     go build `
         "-ldflags=$ldflags" `
         -o $OUTPUT_NAME `
-        ./src/cmd/script
+        ./src/cmd/exec
 
     if ($LASTEXITCODE -ne 0) {
         Write-Host "ERROR: Build failed for $OS/$ARCH" -ForegroundColor Red

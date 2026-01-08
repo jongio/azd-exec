@@ -14,7 +14,7 @@ import (
 
 const (
 	binaryName    = "exec"
-	srcDir        = "src/cmd/script"
+	srcDir        = "src/cmd/exec"
 	binDir        = "bin"
 	coverageDir   = "coverage"
 	extensionFile = "extension.yaml"
@@ -286,7 +286,7 @@ func TestIntegration() error {
 		case "executor":
 			testPath = "./src/internal/executor"
 		case "commands":
-			testPath = "./src/cmd/script/commands"
+			testPath = "./src/cmd/exec/commands"
 		default:
 			return fmt.Errorf("unknown package: %s (valid: executor, commands)", pkg)
 		}

@@ -203,10 +203,10 @@ jobs:
       - name: Build for multiple platforms
         run: |
           mkdir -p bin/windows-amd64 bin/linux-amd64 bin/darwin-amd64 bin/darwin-arm64
-          GOOS=windows GOARCH=amd64 go build -o bin/windows-amd64/exec.exe ./src/cmd/script
-          GOOS=linux GOARCH=amd64 go build -o bin/linux-amd64/exec ./src/cmd/script
-          GOOS=darwin GOARCH=amd64 go build -o bin/darwin-amd64/exec ./src/cmd/script
-          GOOS=darwin GOARCH=arm64 go build -o bin/darwin-arm64/exec ./src/cmd/script
+          GOOS=windows GOARCH=amd64 go build -o bin/windows-amd64/exec.exe ./src/cmd/exec
+          GOOS=linux GOARCH=amd64 go build -o bin/linux-amd64/exec ./src/cmd/exec
+          GOOS=darwin GOARCH=amd64 go build -o bin/darwin-amd64/exec ./src/cmd/exec
+          GOOS=darwin GOARCH=arm64 go build -o bin/darwin-arm64/exec ./src/cmd/exec
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
@@ -271,7 +271,7 @@ jobs:
         shell: bash
         timeout-minutes: 15
         run: |
-          go test -v -tags=integration -timeout=10m ./src/cmd/script/commands/...
+          go test -v -tags=integration -timeout=10m ./src/cmd/exec/commands/...
         env:
           CI: true
 

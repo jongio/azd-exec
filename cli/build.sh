@@ -192,7 +192,7 @@ for PLATFORM in "${PLATFORMS[@]}"; do
     GOOS=$OS GOARCH=$ARCH go build \
         -ldflags="$LDFLAGS" \
         -o "$OUTPUT_NAME" \
-        ./src/cmd/script
+        ./src/cmd/exec
 
     if [ $? -ne 0 ]; then
         echo "ERROR: Build failed for $OS/$ARCH"
