@@ -65,7 +65,7 @@
                 "value": "4849ee5f16e53789fb3f489cc2ae938f9b250333d7d5fa678f6f54c11f91c18e"
               },
               "entryPoint": "jongio-azd-exec-darwin-amd64",
-              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.1.18/jongio-azd-exec-darwin-amd64.zip"
+              "url": "https://github.com/jongio/azd-exec/releases/download/v0.1.18/jongio-azd-exec-darwin-amd64.zip"
             },
             "darwin/arm64": {
               "checksum": {
@@ -73,7 +73,7 @@
                 "value": "f68c1a0f53c2e2b13f83996822878acea2c0411da04510bbf046e5411072a616"
               },
               "entryPoint": "jongio-azd-exec-darwin-arm64",
-              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.1.18/jongio-azd-exec-darwin-arm64.zip"
+              "url": "https://github.com/jongio/azd-exec/releases/download/v0.1.18/jongio-azd-exec-darwin-arm64.zip"
             },
             "linux/amd64": {
               "checksum": {
@@ -81,7 +81,7 @@
                 "value": "965e60feaa1903d564b0646761ddeaa5a42491b436be916006cd060e962b13ee"
               },
               "entryPoint": "jongio-azd-exec-linux-amd64",
-              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.1.18/jongio-azd-exec-linux-amd64.tar.gz"
+              "url": "https://github.com/jongio/azd-exec/releases/download/v0.1.18/jongio-azd-exec-linux-amd64.tar.gz"
             },
             "linux/arm64": {
               "checksum": {
@@ -89,7 +89,7 @@
                 "value": "501b11d8569cfb59071415bf96331755c547760cf9dc5552a2f8a2e0ac7f9f8a"
               },
               "entryPoint": "jongio-azd-exec-linux-arm64",
-              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.1.18/jongio-azd-exec-linux-arm64.tar.gz"
+              "url": "https://github.com/jongio/azd-exec/releases/download/v0.1.18/jongio-azd-exec-linux-arm64.tar.gz"
             },
             "windows/amd64": {
               "checksum": {
@@ -97,7 +97,7 @@
                 "value": "018d84c574e9c09b5bc97bbdf600c2f4ed65d21b0228558003586da73c28505c"
               },
               "entryPoint": "jongio-azd-exec-windows-amd64.exe",
-              "url": "/home/runner/.azd/registry/jongio.azd.exec/0.1.18/jongio-azd-exec-windows-amd64.zip"
+              "url": "https://github.com/jongio/azd-exec/releases/download/v0.1.18/jongio-azd-exec-windows-amd64.zip"
             }
           }
         },

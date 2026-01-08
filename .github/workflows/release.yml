@@ -375,7 +375,8 @@ jobs:
           
           azd x publish \
             --registry ../registry.json \
-            --version "${{ steps.version.outputs.next }}"
+            --version "${{ steps.version.outputs.next }}" \
+            --repo "${{ github.repository }}"
           
           cd ..
           
