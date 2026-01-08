@@ -29,48 +29,239 @@ const base = import.meta.env.BASE_URL;
         <div class="command-grid">
           <div class="command-card">
             <h3><code>exec &lt;script&gt;</code></h3>
-            <p>Execute a script with Azure environment variables</p>
+            <p>Execute a script file or inline command with Azure context</p>
             <span class="command-example">azd exec ./script.sh</span>
           </div>
 
-          <a href={`${base}reference/cli/version`} class="command-card">
+          <div class="command-card">
             <h3><code>version</code></h3>
             <p>Show azd exec version information</p>
             <span class="command-example">azd exec version</span>
-          </a>
+          </div>
         </div>
       </section>
 
       <section class="section">
-        <h2>Global Flags</h2>
-        <p>These flags are available for all commands:</p>
+        <h2>Command Usage</h2>
+        <CodeBlock code="azd exec [script-file-or-command] [flags] [-- script-args...]" language="bash" />
+        
+        <h3>Basic Examples</h3>
+        <CodeBlock code={`# Execute a script file
+azd exec ./deploy.sh
+
+# Execute an inline command
+azd exec 'echo "Environment: $AZURE_ENV_NAME"'
+
+# Pass arguments to the script
+azd exec ./build.sh -- --verbose --config release
+
+# Specify shell explicitly
+azd exec ./setup.ps1 --shell pwsh`} language="bash" />
+      </section>
+
+      <section class="section">
+        <h2>Execution Flags</h2>
+        <p>Control how scripts are executed:</p>
         
         <div class="flags-table">
           <table>
             <thead>
               <tr>
                 <th>Flag</th>
+                <th>Short</th>
                 <th>Description</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td><code>--help</code>, <code>-h</code></td>
-                <td>Show help for any command</td>
+                <td><code>--shell</code></td>
+                <td><code>-s</code></td>
+                <td>Shell to use for execution: <code>bash</code>, <code>sh</code>, <code>zsh</code>, <code>pwsh</code>, <code>powershell</code>, <code>cmd</code>. Auto-detected from file extension or shebang if not specified.</td>
               </tr>
               <tr>
-                <td><code>--cwd</code></td>
-                <td>Set working directory for command execution</td>
+                <td><code>--working-dir</code></td>
+                <td><code>-w</code></td>
+                <td>Working directory for script execution. Defaults to the directory containing the script.</td>
               </tr>
               <tr>
-                <td><code>--debug</code></td>
-                <td>Enable debug logging</td>
+                <td><code>--interactive</code></td>
+                <td><code>-i</code></td>
+                <td>Run script in interactive mode, enabling user input and prompts.</td>
+              </tr>
+              <tr>
+                <td><code>--stop-on-keyvault-error</code></td>
+                <td></td>
+                <td>Fail-fast: stop execution when any Key Vault reference fails to resolve.</td>
               </tr>
             </tbody>
           </table>
         </div>
+      </section>
+
+      <section class="section">
+        <h2>Global Flags</h2>
+        <p>These flags are inherited from azd and available for all commands:</p>
         
-        <p class="note">Additional advanced flags like <code>--trace-log-file</code> and <code>--trace-log-url</code> are available for diagnostic tracing. See the <a href="https://github.com/jongio/azd-exec/blob/main/cli/docs/cli-reference.md">complete CLI reference</a> for full documentation.</p>
+        <div class="flags-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Flag</th>
+                <th>Short</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>--output</code></td>
+                <td><code>-o</code></td>
+                <td>Output format: <code>default</code> or <code>json</code></td>
+              </tr>
+              <tr>
+                <td><code>--debug</code></td>
+                <td></td>
+                <td>Enable debug mode with verbose logging</td>
+              </tr>
+              <tr>
+                <td><code>--no-prompt</code></td>
+                <td></td>
+                <td>Disable prompts and use default values</td>
+              </tr>
+              <tr>
+                <td><code>--cwd</code></td>
+                <td><code>-C</code></td>
+                <td>Sets the current working directory before execution</td>
+              </tr>
+              <tr>
+                <td><code>--environment</code></td>
+                <td><code>-e</code></td>
+                <td>The name of the azd environment to use</td>
+              </tr>
+              <tr>
+                <td><code>--help</code></td>
+                <td><code>-h</code></td>
+                <td>Show help for any command</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Azure Key Vault Integration</h2>
+        <p>
+          azd exec automatically resolves Azure Key Vault references in environment variables before running your script.
+        </p>
+
+        <h3>Supported Reference Formats</h3>
+        <CodeBlock code={`# Format 1: SecretUri
+@Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/my-secret)
+@Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/my-secret/abc123)
+
+# Format 2: VaultName and SecretName
+@Microsoft.KeyVault(VaultName=myvault;SecretName=my-secret)
+@Microsoft.KeyVault(VaultName=myvault;SecretName=my-secret;SecretVersion=abc123)
+
+# Format 3: azd akvs URI (used internally by azd)
+akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/myvault/my-secret`} language="bash" />
+
+        <h3>Authentication</h3>
+        <p>Key Vault resolution uses the same Azure credentials as azd:</p>
+        <ul>
+          <li>Azure CLI (<code>az login</code>)</li>
+          <li>Managed Identity (when running on Azure)</li>
+          <li>Service Principal (environment variables)</li>
+          <li>Visual Studio / VS Code authentication</li>
+        </ul>
+
+        <h3>Error Handling</h3>
+        <p>If Key Vault resolution fails (secret not found, no access, etc.):</p>
+        <ul>
+          <li>Warning displayed to stderr (secret values are never printed)</li>
+          <li>azd exec continues resolving other Key Vault references</li>
+          <li>Successfully resolved secrets are substituted with their values</li>
+          <li>Failed references remain unchanged</li>
+        </ul>
+        <p>To fail-fast (abort on the first Key Vault resolution error), use <code>--stop-on-keyvault-error</code>.</p>
+
+        <h3>Example Workflow</h3>
+        <CodeBlock code={`# 1. Store secret in Key Vault
+az keyvault secret set --vault-name myvault --name db-password --value "Secret123!"
+
+# 2. Set environment variable with Key Vault reference
+azd env set DB_PASSWORD "@Microsoft.KeyVault(VaultName=myvault;SecretName=db-password)"
+
+# 3. Use in script (automatically resolved)
+azd exec 'echo "Password length: \${#DB_PASSWORD}"'`} language="bash" />
+      </section>
+
+      <section class="section">
+        <h2>Examples</h2>
+        
+        <h3>Basic Execution</h3>
+        <CodeBlock code={`# Execute a script file
+azd exec ./deploy.sh
+
+# Execute an inline command
+azd exec 'echo "Environment: $AZURE_ENV_NAME"'
+
+# Show version
+azd exec version`} language="bash" />
+
+        <h3>Shell Specification</h3>
+        <CodeBlock code={`# Specify PowerShell
+azd exec ./deploy.ps1 --shell pwsh
+
+# Inline PowerShell command
+azd exec 'Write-Host "Hello from $env:AZURE_ENV_NAME"' --shell pwsh
+
+# Force bash for a .sh file
+azd exec ./script.sh --shell bash`} language="bash" />
+
+        <h3>Working Directory</h3>
+        <CodeBlock code={`# Execute with specific working directory
+azd exec ./scripts/setup.sh --cwd /path/to/project
+
+# Inline with working directory
+azd exec 'echo $(pwd)' --cwd /tmp`} language="bash" />
+
+        <h3>Script Arguments</h3>
+        <CodeBlock code={`# Pass arguments to the script
+azd exec ./build.sh -- --verbose --config release
+
+# Multiple arguments
+azd exec ./deploy.sh -- production --force --no-cache`} language="bash" />
+
+        <h3>Interactive Mode</h3>
+        <CodeBlock code={`# Run script in interactive mode
+azd exec ./interactive-setup.sh --interactive
+
+# Interactive PowerShell script
+azd exec ./wizard.ps1 --shell pwsh --interactive`} language="bash" />
+
+        <h3>Multi-Environment Deployment</h3>
+        <CodeBlock code={`# Deploy to development environment
+azd exec ./deploy.sh --environment dev
+
+# Deploy to production
+azd exec ./deploy.sh --environment prod`} language="bash" />
+
+        <h3>Debugging</h3>
+        <CodeBlock code={`# Enable debug logging
+azd exec ./deploy.sh --debug
+
+# Check available environment variables
+azd exec 'env | grep AZURE_' --debug`} language="bash" />
+
+        <h3>Working with Key Vault</h3>
+        <CodeBlock code={`# Set Key Vault reference
+azd env set API_KEY "@Microsoft.KeyVault(VaultName=myvault;SecretName=api-key)"
+
+# Script automatically gets the resolved secret value
+azd exec ./deploy.sh
+
+# Fail-fast on Key Vault errors
+azd exec ./deploy.sh --stop-on-keyvault-error`} language="bash" />
       </section>
 
       <section class="section">
@@ -138,51 +329,19 @@ const base = import.meta.env.BASE_URL;
               </tr>
               <tr>
                 <td><code>1</code></td>
-                <td>Script execution failed</td>
+                <td>Script execution failed or script not found</td>
               </tr>
               <tr>
                 <td><code>2</code></td>
-                <td>Invalid arguments or command syntax</td>
+                <td>Invalid arguments or configuration</td>
               </tr>
               <tr>
-                <td><code>126</code></td>
-                <td>Script not executable</td>
-              </tr>
-              <tr>
-                <td><code>127</code></td>
-                <td>Script not found</td>
-              </tr>
-              <tr>
-                <td><code>130</code></td>
-                <td>Script terminated by Ctrl+C</td>
+                <td>Non-zero</td>
+                <td>Exit code from the executed script</td>
               </tr>
             </tbody>
           </table>
         </div>
-      </section>
-
-      <section class="section">
-        <h2>Examples</h2>
-        
-        <h3>Basic Usage</h3>
-        <CodeBlock code={`# Run a script
-azd exec ./run-migration.sh
-
-# Show help
-azd exec --help
-
-# Check version
-azd exec version`} language="bash" />
-
-        <h3>Advanced Usage</h3>
-        <CodeBlock code={`# Run with custom working directory
-azd exec ./build.sh --cwd /path/to/project
-
-# Pass arguments to script
-azd exec ./script.sh -- arg1 arg2 --flag
-
-# Run with debug output
-azd exec ./run-migration.sh --debug`} language="bash" />
       </section>
 
       <section class="section">
