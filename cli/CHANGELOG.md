@@ -1,3 +1,8 @@
+## [0.2.22] - 2026-01-08
+
+- feat: add release-test workflow and use azd-app build scripts (5782bb6)
+- fix: rewrite build.sh to handle azd x build environment variables like build.ps1 (182178c)
+
 ## [0.2.21] - 2026-01-08
 
 - debug: add comprehensive artifact logging to release workflow (27e9913)
