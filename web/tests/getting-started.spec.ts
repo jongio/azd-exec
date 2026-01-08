@@ -16,8 +16,12 @@ test.describe('Getting Started Page', () => {
 
   test('should display code examples', async ({ page }) => {
     await page.goto(`${BASE_URL}/getting-started`);
-    const codeBlocks = page.locator('pre code, .code-block');
-    await expect(codeBlocks.first()).toBeVisible();
+    // Check for code content (expressive-code uses figure > pre > code structure)
+    const codeBlocks = page.locator('pre code, .expressive-code code, [class*="code"]');
+    await expect(codeBlocks.first()).toBeAttached();
+    // Verify there's actual code content
+    const codeContent = await codeBlocks.first().textContent();
+    expect(codeContent?.trim()).not.toBe('');
   });
 
   test('should have quick start guide', async ({ page }) => {

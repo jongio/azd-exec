@@ -59,6 +59,7 @@ const ogImage = `${siteUrl}${base}og-image.png`;
     <link rel="icon" type="image/svg+xml" href={`${base}favicon.svg`} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="generator" content={Astro.generator} />
+    <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#ffffff" />
 
@@ -84,14 +85,18 @@ const ogImage = `${siteUrl}${base}og-image.png`;
     <script is:inline>
       (function() {
         const stored = localStorage.getItem('azd-exec:theme');
-        const theme = stored === 'dark' || 
-          (stored !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-          ? 'dark' 
-          : 'light';
-        document.documentElement.setAttribute('data-theme', stored || 'system');
+        // Default to dark theme unless explicitly set to light
+        const prefersDark = stored !== 'light' && 
+          (stored === 'dark' || !stored || window.matchMedia('(prefers-color-scheme: dark)').matches);
+        const theme = prefersDark ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', theme);
         document.documentElement.style.colorScheme = theme;
         const meta = document.querySelector('meta[name="theme-color"]');
         if (meta) meta.setAttribute('content', theme === 'dark' ? '#1e293b' : '#ffffff');
+        // Store initial preference if not set
+        if (!stored) {
+          localStorage.setItem('azd-exec:theme', theme);
+        }
       })();
     </script>
   </head>
