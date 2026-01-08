@@ -112,27 +112,31 @@ elseif (Test-Path $dashboardSrcPath) {
 }
 
 if ($shouldBuildDashboard) {
-    Write-Host "Building dashboard..." -ForegroundColor Yellow
-    Push-Location "dashboard"
-    try {
-        if (-not (Test-Path "node_modules")) {
-            Write-Host "  Installing dashboard dependencies..." -ForegroundColor Gray
-            npm install --silent
+    if (-not (Test-Path "dashboard")) {
+        Write-Host "  ✓ Dashboard directory not found, skipping dashboard build" -ForegroundColor Green
+    } else {
+        Write-Host "Building dashboard..." -ForegroundColor Yellow
+        Push-Location "dashboard"
+        try {
+            if (-not (Test-Path "node_modules")) {
+                Write-Host "  Installing dashboard dependencies..." -ForegroundColor Gray
+                npm install --silent
+                if ($LASTEXITCODE -ne 0) {
+                    Write-Host "ERROR: npm install failed" -ForegroundColor Red
+                    exit 1
+                }
+            }
+
+            Write-Host "  Building dashboard bundle..." -ForegroundColor Gray
+            npm run build --silent
             if ($LASTEXITCODE -ne 0) {
-                Write-Host "ERROR: npm install failed" -ForegroundColor Red
+                Write-Host "ERROR: Dashboard build failed" -ForegroundColor Red
                 exit 1
             }
+            Write-Host "  ✓ Dashboard built successfully" -ForegroundColor Green
+        } finally {
+            Pop-Location
         }
-
-        Write-Host "  Building dashboard bundle..." -ForegroundColor Gray
-        npm run build --silent
-        if ($LASTEXITCODE -ne 0) {
-            Write-Host "ERROR: Dashboard build failed" -ForegroundColor Red
-            exit 1
-        }
-        Write-Host "  ✓ Dashboard built successfully" -ForegroundColor Green
-    } finally {
-        Pop-Location
     }
 } else {
     Write-Host "  ✓ Dashboard up to date" -ForegroundColor Green

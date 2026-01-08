@@ -102,27 +102,31 @@ elif [ -d "$DASHBOARD_SRC_PATH" ]; then
 fi
 
 if [ "$SHOULD_BUILD_DASHBOARD" = true ]; then
-    echo "Building dashboard..."
-    pushd dashboard > /dev/null
-    
-    if [ ! -d "node_modules" ]; then
-        echo "  Installing dashboard dependencies..."
-        npm install --silent
+    if [ ! -d "dashboard" ]; then
+        echo "  ✓ Dashboard directory not found, skipping dashboard build"
+    else
+        echo "Building dashboard..."
+        pushd dashboard > /dev/null
+        
+        if [ ! -d "node_modules" ]; then
+            echo "  Installing dashboard dependencies..."
+            npm install --silent
+            if [ $? -ne 0 ]; then
+                echo "ERROR: npm install failed"
+                exit 1
+            fi
+        fi
+
+        echo "  Building dashboard bundle..."
+        npm run build --silent
         if [ $? -ne 0 ]; then
-            echo "ERROR: npm install failed"
+            echo "ERROR: Dashboard build failed"
             exit 1
         fi
+        echo "  ✓ Dashboard built successfully"
+        
+        popd > /dev/null
     fi
-
-    echo "  Building dashboard bundle..."
-    npm run build --silent
-    if [ $? -ne 0 ]; then
-        echo "ERROR: Dashboard build failed"
-        exit 1
-    fi
-    echo "  ✓ Dashboard built successfully"
-    
-    popd > /dev/null
 else
     echo "  ✓ Dashboard up to date"
 fi
