@@ -1,6 +1,5 @@
 #!/bin/bash
 # Build script called by azd x build
-# This handles pre-build steps like dashboard compilation
 
 set -e
 
@@ -32,7 +31,6 @@ stop_extension_processes() {
 }
 
 # Check if we need to rebuild the Go binary
-# This happens when: Go files changed OR embedded dashboard dist changed
 NEEDS_GO_BUILD=false
 
 if [ -d "bin" ]; then
@@ -53,17 +51,6 @@ if [ -d "bin" ]; then
                 echo "Go source files changed, will rebuild"
             fi
         fi
-        
-        # Check embedded dashboard dist (it's compiled into the binary)
-        DASHBOARD_DIST_PATH="src/internal/dashboard/dist"
-        if [ -d "$DASHBOARD_DIST_PATH" ]; then
-            NEWEST_DIST_TIME=$(find "$DASHBOARD_DIST_PATH" -type f -exec stat -c %Y {} \; 2>/dev/null | sort -n | tail -1 || \
-                               find "$DASHBOARD_DIST_PATH" -type f -exec stat -f %m {} \; 2>/dev/null | sort -n | tail -1)
-            if [ -n "$NEWEST_DIST_TIME" ] && [ "$NEWEST_DIST_TIME" -gt "$NEWEST_BINARY_TIME" ]; then
-                NEEDS_GO_BUILD=true
-                echo "Embedded dashboard dist changed, will rebuild"
-            fi
-        fi
     fi
 else
     NEEDS_GO_BUILD=true
@@ -81,55 +68,6 @@ else
 fi
 
 echo "Building App Extension..."
-
-# Build dashboard first (if needed)
-DASHBOARD_DIST_PATH="src/internal/dashboard/dist"
-DASHBOARD_SRC_PATH="dashboard/src"
-
-SHOULD_BUILD_DASHBOARD=false
-
-if [ ! -d "$DASHBOARD_DIST_PATH" ]; then
-    SHOULD_BUILD_DASHBOARD=true
-    echo "Dashboard not built yet"
-elif [ -d "$DASHBOARD_SRC_PATH" ]; then
-    DIST_TIME=$(stat -c %Y "$DASHBOARD_DIST_PATH" 2>/dev/null || stat -f %m "$DASHBOARD_DIST_PATH" 2>/dev/null)
-    NEWEST_SRC=$(find "$DASHBOARD_SRC_PATH" -type f -printf '%T@\n' 2>/dev/null | sort -n | tail -1 || find "$DASHBOARD_SRC_PATH" -type f -exec stat -f %m {} \; 2>/dev/null | sort -n | tail -1)
-    
-    if [ -n "$NEWEST_SRC" ] && [ "${NEWEST_SRC%.*}" -gt "$DIST_TIME" ]; then
-        SHOULD_BUILD_DASHBOARD=true
-        echo "Dashboard source changed, rebuild needed"
-    fi
-fi
-
-if [ "$SHOULD_BUILD_DASHBOARD" = true ]; then
-    if [ ! -d "dashboard" ]; then
-        echo "  ✓ Dashboard directory not found, skipping dashboard build"
-    else
-        echo "Building dashboard..."
-        pushd dashboard > /dev/null
-        
-        if [ ! -d "node_modules" ]; then
-            echo "  Installing dashboard dependencies..."
-            npm install --silent
-            if [ $? -ne 0 ]; then
-                echo "ERROR: npm install failed"
-                exit 1
-            fi
-        fi
-
-        echo "  Building dashboard bundle..."
-        npm run build --silent
-        if [ $? -ne 0 ]; then
-            echo "ERROR: Dashboard build failed"
-            exit 1
-        fi
-        echo "  ✓ Dashboard built successfully"
-        
-        popd > /dev/null
-    fi
-else
-    echo "  ✓ Dashboard up to date"
-fi
 
 # Create a safe version of EXTENSION_ID replacing dots with dashes
 EXTENSION_ID_SAFE="${EXTENSION_ID//./-}"

@@ -1,6 +1,5 @@
 #!/usr/bin/env pwsh
 # Build script called by azd x build
-# This handles pre-build steps like dashboard compilation
 
 $ErrorActionPreference = 'Stop'
 
@@ -41,7 +40,6 @@ function Stop-ExtensionProcesses {
 }
 
 # Check if we need to rebuild the Go binary
-# This happens when: Go files changed OR embedded dashboard dist changed
 $needsGoBuild = $false
 $existingBinaries = Get-ChildItem -Path "bin" -Filter "*.exe" -ErrorAction SilentlyContinue | Where-Object { $_.Name -notlike "*.old" }
 
@@ -62,23 +60,9 @@ if (-not $existingBinaries) {
             Write-Host "Go source files changed, will rebuild" -ForegroundColor Yellow
         }
     }
-    
-    # Check embedded dashboard dist (it's compiled into the binary)
-    $dashboardDistPath = "src\internal\dashboard\dist"
-    if (Test-Path $dashboardDistPath) {
-        $distFiles = Get-ChildItem -Path $dashboardDistPath -Recurse -File -ErrorAction SilentlyContinue
-        if ($distFiles) {
-            $newestDistFile = $distFiles | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-            if ($newestDistFile.LastWriteTime -gt $binaryTime) {
-                $needsGoBuild = $true
-                Write-Host "Embedded dashboard dist changed, will rebuild" -ForegroundColor Yellow
-            }
-        }
-    }
 }
 
 # Only kill extension processes if we're actually going to rebuild the binary
-# This prevents unnecessary restarts when dashboard source changes (vite watcher handles that separately)
 if ($needsGoBuild) {
     Write-Host "Stopping extension processes before rebuild..." -ForegroundColor Yellow
     Stop-ExtensionProcesses
@@ -89,58 +73,6 @@ if ($needsGoBuild) {
 }
 
 Write-Host "Building App Extension..." -ForegroundColor Cyan
-
-# Build dashboard first (if needed)
-$dashboardDistPath = "src\internal\dashboard\dist"
-$dashboardSrcPath = "dashboard\src"
-
-$shouldBuildDashboard = $false
-
-if (-not (Test-Path $dashboardDistPath)) {
-    $shouldBuildDashboard = $true
-    Write-Host "Dashboard not built yet" -ForegroundColor Yellow
-}
-elseif (Test-Path $dashboardSrcPath) {
-    $distTime = (Get-Item $dashboardDistPath).LastWriteTime
-    $srcFiles = Get-ChildItem $dashboardSrcPath -Recurse -File
-    $newestSrc = ($srcFiles | Sort-Object LastWriteTime -Descending | Select-Object -First 1).LastWriteTime
-    
-    if ($newestSrc -gt $distTime) {
-        $shouldBuildDashboard = $true
-        Write-Host "Dashboard source changed, rebuild needed" -ForegroundColor Yellow
-    }
-}
-
-if ($shouldBuildDashboard) {
-    if (-not (Test-Path "dashboard")) {
-        Write-Host "  ✓ Dashboard directory not found, skipping dashboard build" -ForegroundColor Green
-    } else {
-        Write-Host "Building dashboard..." -ForegroundColor Yellow
-        Push-Location "dashboard"
-        try {
-            if (-not (Test-Path "node_modules")) {
-                Write-Host "  Installing dashboard dependencies..." -ForegroundColor Gray
-                npm install --silent
-                if ($LASTEXITCODE -ne 0) {
-                    Write-Host "ERROR: npm install failed" -ForegroundColor Red
-                    exit 1
-                }
-            }
-
-            Write-Host "  Building dashboard bundle..." -ForegroundColor Gray
-            npm run build --silent
-            if ($LASTEXITCODE -ne 0) {
-                Write-Host "ERROR: Dashboard build failed" -ForegroundColor Red
-                exit 1
-            }
-            Write-Host "  ✓ Dashboard built successfully" -ForegroundColor Green
-        } finally {
-            Pop-Location
-        }
-    }
-} else {
-    Write-Host "  ✓ Dashboard up to date" -ForegroundColor Green
-}
 
 # Create a safe version of EXTENSION_ID replacing dots with dashes
 $EXTENSION_ID_SAFE = $env:EXTENSION_ID -replace '\.', '-'
