@@ -28,27 +28,47 @@ go build -ldflags "${LDFLAGS}" -o bin/exec ./src/cmd/script
 if [ "${BUILD_ALL:-false}" = "true" ]; then
         echo "Building for multiple platforms..."
         
-        # Create platform-specific directories
-        mkdir -p bin/linux-amd64 bin/linux-arm64 bin/darwin-amd64 bin/darwin-arm64 bin/windows-amd64
+        # Create a safe version of extension ID (replace dots with dashes)
+        EXTENSION_ID_SAFE="${EXTENSION_ID:-jongio.azd.exec}"
+        EXTENSION_ID_SAFE="${EXTENSION_ID_SAFE//./-}"
         
-        # Linux AMD64
-        GOOS=linux GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/linux-amd64/exec ./src/cmd/script
-
-        # Linux ARM64
-        GOOS=linux GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/linux-arm64/exec ./src/cmd/script
-
-        # macOS AMD64
-        GOOS=darwin GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/darwin-amd64/exec ./src/cmd/script
-
-        # macOS ARM64 (Apple Silicon)
-        GOOS=darwin GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o bin/darwin-arm64/exec ./src/cmd/script
-
-        # Windows AMD64
-        GOOS=windows GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o bin/windows-amd64/exec.exe ./src/cmd/script
+        # List of OS and architecture combinations
+        PLATFORMS=(
+            "linux/amd64"
+            "linux/arm64"
+            "darwin/amd64"
+            "darwin/arm64"
+            "windows/amd64"
+        )
+        
+        # Loop through platforms and build
+        for PLATFORM in "${PLATFORMS[@]}"; do
+            OS=$(echo "$PLATFORM" | cut -d'/' -f1)
+            ARCH=$(echo "$PLATFORM" | cut -d'/' -f2)
+            
+            OUTPUT_NAME="bin/${EXTENSION_ID_SAFE}-${OS}-${ARCH}"
+            
+            if [ "$OS" = "windows" ]; then
+                OUTPUT_NAME+='.exe'
+            fi
+            
+            echo "  Building for $OS/$ARCH..."
+            
+            # Delete the output file if it already exists
+            [ -f "$OUTPUT_NAME" ] && rm -f "$OUTPUT_NAME"
+            
+            # Build for this platform
+            GOOS=$OS GOARCH=$ARCH go build -ldflags "${LDFLAGS}" -o "$OUTPUT_NAME" ./src/cmd/script
+            
+            if [ $? -ne 0 ]; then
+                echo "ERROR: Build failed for $OS/$ARCH"
+                exit 1
+            fi
+        done
 
         echo "All builds complete!"
         echo "Verifying binaries:"
-        find bin -type f -name "exec*" | while read -r file; do
+        find bin -type f -name "${EXTENSION_ID_SAFE}-*" | while read -r file; do
             echo "  - ${file} ($(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "?") bytes)"
         done
 fi
