@@ -451,7 +451,25 @@ jobs:
 
       - name: Package
         working-directory: cli
-        run: azd x pack
+        run: |
+          echo "=== Running azd x pack ==="
+          azd x pack
+          echo ""
+          echo "=== Pack command completed ===" 
+
+      - name: Debug - List build artifacts
+        run: |
+          echo "=== Checking bin/ directory ==="
+          ls -lah cli/bin/ || echo "bin/ directory not found"
+          echo ""
+          echo "=== Checking registry directory ==="
+          ls -lah ~/.azd/registry/jongio.azd.exec/ || echo "Registry directory not found"
+          echo ""
+          echo "=== Checking version directory ==="
+          ls -lah ~/.azd/registry/jongio.azd.exec/${{ steps.version.outputs.next }}/ || echo "Version directory not found"
+          echo ""
+          echo "=== Full tree of registry ==="
+          find ~/.azd/registry/jongio.azd.exec/ -type f 2>/dev/null || echo "No files found in registry"
 
       - name: Extract release notes
         id: release_notes
