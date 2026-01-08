@@ -96,11 +96,11 @@ func Pack() error {
 	extensionIdSafe := strings.ReplaceAll(extensionID, ".", "-")
 	platformName := fmt.Sprintf("%s-windows-amd64.exe", extensionIdSafe)
 	binPath := filepath.Join(binDir, platformName)
-	
+
 	if _, err := os.Stat(binPath); err != nil {
 		return fmt.Errorf("binary not found at %s: %w", binPath, err)
 	}
-	
+
 	fmt.Printf("  ✅ Found %s\n", platformName)
 
 	// Now pack
