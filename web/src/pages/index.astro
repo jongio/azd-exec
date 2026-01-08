@@ -4,9 +4,10 @@ import CodeBlock from '../components/CodeBlock.astro';
 import InstallTabs from '../components/InstallTabs.astro';
 
 const base = import.meta.env.BASE_URL;
+const description = "Execute any script with full access to your Azure Developer CLI environment variables and Azure credentials. Seamlessly integrate Azure identity and Key Vault secrets into your automation workflows.";
 ---
 
-<Layout title="Home">
+<Layout title="Home" description={description}>
   <!-- Hero Section -->
   <section class="hero">
     <div class="hero-container">
