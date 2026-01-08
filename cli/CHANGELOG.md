@@ -1,3 +1,13 @@
+## [0.2.26] - 2026-01-08
+
+- Merge branch 'main' of https://github.com/jongio/azd-exec (0f7db99)
+- chore: remove unnecessary blank lines in Pack function for cleaner code (eb287e5)
+- feat: implement continue-on-error behavior for Key Vault resolution; add --stop-on-keyvault-error flag for fail-fast option; update documentation and tests (cee354f)
+- chore: update description in OG image generation for clarity (acddf2c)
+- chore: enhance page metadata and update layout description for better SEO (ddd476d)
+- chore: set default bump type to 'patch' in release workflow (a508b09)
+- chore: update registry for v0.2.25 (ba390dc)
+
 ## [0.2.25] - 2026-01-08
 
 - Merge branch 'main' of https://github.com/jongio/azd-exec (540fd09)
