@@ -20,12 +20,6 @@ func TestNewExecutor(t *testing.T) {
 			},
 		},
 		{
-			name: "With working directory",
-			config: Config{
-				WorkingDir: "/tmp",
-			},
-		},
-		{
 			name: "With interactive mode",
 			config: Config{
 				Interactive: true,
@@ -42,9 +36,6 @@ func TestNewExecutor(t *testing.T) {
 			}
 			if exec.config.Shell != tt.config.Shell {
 				t.Errorf("Shell = %v, want %v", exec.config.Shell, tt.config.Shell)
-			}
-			if exec.config.WorkingDir != tt.config.WorkingDir {
-				t.Errorf("WorkingDir = %v, want %v", exec.config.WorkingDir, tt.config.WorkingDir)
 			}
 			if exec.config.Interactive != tt.config.Interactive {
 				t.Errorf("Interactive = %v, want %v", exec.config.Interactive, tt.config.Interactive)

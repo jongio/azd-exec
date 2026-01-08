@@ -63,9 +63,6 @@ azd exec 'echo "Environment: $AZURE_ENV_NAME"'
 # Specify shell explicitly
 azd exec ./setup.ps1 --shell pwsh
 
-# Execute with specific working directory
-azd exec ./scripts/build.sh --cwd /path/to/project
-
 # Run in interactive mode (for scripts with prompts)
 azd exec ./interactive-setup.sh --interactive
 
@@ -89,7 +86,6 @@ azd exec ./deploy.sh --environment production
 | Flag | Short | Type | Default | Description |
 |------|-------|------|---------|-------------|
 | `--shell` | `-s` | string | (auto-detect) | Shell to use for execution. Options: `bash`, `sh`, `zsh`, `pwsh`, `powershell`, `cmd`. Auto-detected from file extension or shebang if not specified. |
-| `--working-dir` | `-w` | string | (script directory) | Working directory for script execution. Defaults to the directory containing the script. |
 | `--interactive` | `-i` | bool | false | Run script in interactive mode, enabling user input and prompts. |
 | `--stop-on-keyvault-error` |  | bool | false | Fail-fast: stop execution when any Key Vault reference fails to resolve. |
 

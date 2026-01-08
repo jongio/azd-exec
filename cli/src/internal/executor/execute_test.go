@@ -2,32 +2,9 @@ package executor
 
 import (
 	"context"
-	"os"
-	"path/filepath"
 	"strings"
 	"testing"
 )
-
-func TestExecuteWithWorkingDirectory(t *testing.T) {
-	tmpDir := t.TempDir()
-	scriptPath := filepath.Join(tmpDir, "test.bat")
-
-	// Create a simple batch script
-	content := "@echo off\necho test\nexit 0"
-	if err := os.WriteFile(scriptPath, []byte(content), 0600); err != nil {
-		t.Fatal(err)
-	}
-
-	// Create executor with working directory
-	exec := New(Config{
-		WorkingDir: tmpDir,
-	})
-
-	// Verify config
-	if exec.config.WorkingDir != tmpDir {
-		t.Errorf("WorkingDir = %v, want %v", exec.config.WorkingDir, tmpDir)
-	}
-}
 
 func TestExecuteWithInteractiveMode(t *testing.T) {
 	exec := New(Config{

@@ -125,7 +125,6 @@ func TestRunE_DispatchesFileOrInline(t *testing.T) {
 	environment = ""
 	traceLogFile = ""
 	traceLogURL = ""
-	workingDir = ""
 	shell = ""
 	interactive = false
 

@@ -13,7 +13,6 @@ import (
 // Config holds the configuration for script execution.
 type Config struct {
 	Shell       string // Shell to use for execution
-	WorkingDir  string // Working directory
 	Interactive bool   // Interactive mode
 	// StopOnKeyVaultError causes azd exec to fail-fast when any Key Vault reference fails to resolve.
 	// Default is false (continue resolving other references and run with unresolved values left as-is).
@@ -59,11 +58,8 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 		shell = e.detectShell(scriptPath)
 	}
 
-	// Determine working directory
-	workingDir := e.config.WorkingDir
-	if workingDir == "" {
-		workingDir = filepath.Dir(scriptPath)
-	}
+	// Use script's directory as working directory
+	workingDir := filepath.Dir(scriptPath)
 
 	return e.executeCommand(ctx, shell, workingDir, scriptPath, false)
 }
@@ -85,14 +81,10 @@ func (e *Executor) ExecuteInline(ctx context.Context, scriptContent string) erro
 		}
 	}
 
-	// Determine working directory
-	workingDir := e.config.WorkingDir
-	if workingDir == "" {
-		var err error
-		workingDir, err = os.Getwd()
-		if err != nil {
-			return fmt.Errorf("failed to get working directory: %w", err)
-		}
+	// Use current directory as working directory
+	workingDir, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to get working directory: %w", err)
 	}
 
 	return e.executeCommand(ctx, shell, workingDir, scriptContent, true)

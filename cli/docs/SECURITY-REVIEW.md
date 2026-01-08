@@ -85,7 +85,7 @@ absPath, err := filepath.Abs(scriptPath)  // Resolve to absolute path
 
 **Debug Output** (Optional, user-controlled):
 ```go
-// executor.go:72-75
+// executor.go
 if os.Getenv("AZD_SCRIPT_DEBUG") == "true" {
     fmt.Fprintf(os.Stderr, "Executing: %s %s\n", shell, strings.Join(cmd.Args[1:], " "))
     fmt.Fprintf(os.Stderr, "Working directory: %s\n", workingDir)

@@ -235,17 +235,6 @@ func TestExecutorWithDebugMode(t *testing.T) {
 	}
 }
 
-func TestExecutorWithWorkingDir(t *testing.T) {
-	tmpDir := t.TempDir()
-	exec := New(Config{
-		WorkingDir: tmpDir,
-	})
-
-	err := exec.ExecuteInline(context.Background(), "pwd")
-	if err != nil {
-		t.Errorf("Unexpected error: %v", err)
-	}
-}
 
 func TestExecutorWithArgs(t *testing.T) {
 	projectsDir := testhelpers.GetTestProjectsDir(t)

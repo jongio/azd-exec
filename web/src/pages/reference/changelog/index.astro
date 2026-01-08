@@ -20,168 +20,30 @@ import Layout from '../../../components/Layout.astro';
     <div class="content">
       <section class="release">
         <div class="release-header">
-          <h2 class="version">0.2.16</h2>
-          <span class="date">2025-12-24</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.15</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.14</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.13</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.12</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.11</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.10</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.9</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.8</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.7</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.6</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.5</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.4</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.3</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.2</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.2.1</h2>
-          <span class="date">2025-12-23</span>
-        </div>
-        <div class="changes">
-
-        </div>
-      </section>
-      <section class="release">
-        <div class="release-header">
-          <h2 class="version">0.1.0</h2>
-          <span class="date">2025-12-19</span>
+          <h2 class="version">0.2.28</h2>
+          <span class="date">2026-01-08</span>
         </div>
         <div class="changes">
         <h3><span class="badge badge-added">Added</span> New Features</h3>
         <ul>
-          <li>Initial release of azd exec extension</li>
-          <li>Execute scripts with full access to azd environment variables and context</li>
+          <li>Initial public release of azd exec</li>
+          <li>Execute scripts and commands with full access to azd environment variables</li>
+          <li>Azure Key Vault reference resolution (`@keyvault(vaultName, secretName)` and `@akvs(secretId)` formats)</li>
           <li>Automatic shell detection (bash, sh, zsh, pwsh, powershell, cmd)</li>
-          <li>Script arguments support with `--` separator</li>
+          <li>Script argument support with `--` separator</li>
           <li>Working directory control with `--cwd` flag</li>
           <li>Interactive mode for scripts requiring user input</li>
-          <li>Comprehensive unit tests and integration tests</li>
+          <li>Multi-platform support (Windows, macOS, Linux, ARM64)</li>
+          <li>Comprehensive test coverage with unit and integration tests</li>
           <li>Security scanning with CodeQL and gosec</li>
-          <li>Multi-platform support (Windows, macOS, Linux)</li>
-          <li>Backward compatibility alias (`azd script` to `azd exec`)</li>
-          <li>`azd exec` - Execute script files with azd context</li>
+          <li>Automated release workflow and package distribution</li>
+          <li>Complete documentation website with examples</li>
+          <li>Backward compatibility alias (`azd script` continues to work)</li>
+          <li>`azd exec &lt;script&gt;` - Execute script files with azd context</li>
           <li>`azd exec version` - Display extension version</li>
+          <li>`--cwd &lt;path&gt;` - Set working directory for script execution</li>
+          <li>`--stop-on-keyvault-error` - Fail fast on Key Vault resolution errors (default: continue)</li>
+          <li>`-- &lt;args&gt;` - Pass arguments to your scripts</li>
         </ul>
         </div>
       </section>

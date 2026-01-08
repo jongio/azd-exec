@@ -79,11 +79,6 @@ azd exec ./setup.ps1 --shell pwsh`} language="bash" />
                 <td>Shell to use for execution: <code>bash</code>, <code>sh</code>, <code>zsh</code>, <code>pwsh</code>, <code>powershell</code>, <code>cmd</code>. Auto-detected from file extension or shebang if not specified.</td>
               </tr>
               <tr>
-                <td><code>--working-dir</code></td>
-                <td><code>-w</code></td>
-                <td>Working directory for script execution. Defaults to the directory containing the script.</td>
-              </tr>
-              <tr>
                 <td><code>--interactive</code></td>
                 <td><code>-i</code></td>
                 <td>Run script in interactive mode, enabling user input and prompts.</td>
@@ -217,13 +212,6 @@ azd exec 'Write-Host "Hello from $env:AZURE_ENV_NAME"' --shell pwsh
 
 # Force bash for a .sh file
 azd exec ./script.sh --shell bash`} language="bash" />
-
-        <h3>Working Directory</h3>
-        <CodeBlock code={`# Execute with specific working directory
-azd exec ./scripts/setup.sh --cwd /path/to/project
-
-# Inline with working directory
-azd exec 'echo $(pwd)' --cwd /tmp`} language="bash" />
 
         <h3>Script Arguments</h3>
         <CodeBlock code={`# Pass arguments to the script
