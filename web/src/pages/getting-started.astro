@@ -142,7 +142,7 @@ akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/myvault/my-secret/abc123`} language=
         <CodeBlock code={`az keyvault secret set --vault-name myvault --name database-password --value "SuperSecret123!"`} language="bash" />
 
         <p><strong>2. Set environment variable with Key Vault reference:</strong></p>
-        <CodeBlock code={`azd env set DATABASE_PASSWORD "@Microsoft.KeyVault(VaultName=myvault;SecretName=database-password)"`} language="bash" />
+        <CodeBlock code={`azd env set-secret DATABASE_PASSWORD`} language="bash" />
 
         <p><strong>3. Use in your script:</strong></p>
         <CodeBlock code={`#!/bin/bash

@@ -235,7 +235,7 @@ akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/myvault/my-secret/abc123
 az keyvault secret set --vault-name myvault --name db-password --value "Secret123!"
 
 # 2. Set environment variable with Key Vault reference
-azd env set DB_PASSWORD "@Microsoft.KeyVault(VaultName=myvault;SecretName=db-password)"
+azd env set-secret DB_PASSWORD
 
 # 3. Use in script (automatically resolved)
 azd exec 'echo "Password: $DB_PASSWORD"'
@@ -401,7 +401,7 @@ azd exec 'Get-ChildItem Env: | Where-Object Name -like "AZURE_*"' --shell pwsh -
 
 ```bash
 # Set Key Vault reference
-azd env set API_KEY "@Microsoft.KeyVault(VaultName=myvault;SecretName=api-key)"
+azd env set-secret API_KEY
 
 # Script automatically gets the resolved secret value
 azd exec ./deploy.sh

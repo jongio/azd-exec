@@ -10,7 +10,7 @@ Write-Host "Location: $env:AZURE_LOCATION"
 Write-Host ""
 
 # If you set an environment variable with a Key Vault reference like:
-# azd env set API_KEY "@Microsoft.KeyVault(VaultName=myvault;SecretName=api-key)"
+# azd env set-secret API_KEY
 #
 # Then azd exec will automatically fetch the secret value before running this script
 # and API_KEY will contain the actual secret value, not the reference string
@@ -26,7 +26,7 @@ if ($env:API_KEY) {
     Write-Host "     az keyvault secret set --vault-name myvault --name api-key --value 'sk-abc123xyz'"
     Write-Host ""
     Write-Host "  2. Set the environment variable with a Key Vault reference:"
-    Write-Host "     azd env set API_KEY '@Microsoft.KeyVault(VaultName=myvault;SecretName=api-key)'"
+    Write-Host "     azd env set-secret API_KEY"
     Write-Host ""
     Write-Host "  3. Run this script:"
     Write-Host "     azd exec examples/keyvault-demo.ps1"

@@ -11,7 +11,7 @@ echo "Location: $AZURE_LOCATION"
 echo ""
 
 # If you set an environment variable with a Key Vault reference like:
-# azd env set DATABASE_PASSWORD "@Microsoft.KeyVault(VaultName=myvault;SecretName=db-password)"
+# azd env set-secret DATABASE_PASSWORD
 #
 # Then azd exec will automatically fetch the secret value before running this script
 # and DATABASE_PASSWORD will contain the actual secret value, not the reference string
@@ -26,7 +26,7 @@ else
     echo "     az keyvault secret set --vault-name myvault --name db-password --value 'SuperSecret123!'"
     echo ""
     echo "  2. Set the environment variable with a Key Vault reference:"
-    echo "     azd env set DATABASE_PASSWORD '@Microsoft.KeyVault(VaultName=myvault;SecretName=db-password)'"
+    echo "     azd env set-secret DATABASE_PASSWORD"
     echo ""
     echo "  3. Run this script:"
     echo "     azd exec examples/keyvault-demo.sh"

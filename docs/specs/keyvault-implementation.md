@@ -232,7 +232,7 @@ CSpell: Files checked: 28, Issues found: 0
 az keyvault secret set --vault-name myvault --name db-password --value "secret123"
 
 # 2. Set environment variable with reference
-azd env set DATABASE_PASSWORD "@Microsoft.KeyVault(VaultName=myvault;SecretName=db-password)"
+azd env set-secret DATABASE_PASSWORD
 
 # 3. Run script - password automatically resolved
 azd exec ./deploy.sh

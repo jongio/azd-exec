@@ -214,8 +214,8 @@ az keyvault secret set \\
 
 # Step 2: Set environment variables with Key Vault references
 echo "Configuring environment variables..."
-azd env set DATABASE_PASSWORD "@Microsoft.KeyVault(VaultName=kv-$AZURE_ENV_NAME;SecretName=database-password)"
-azd env set API_KEY "@Microsoft.KeyVault(VaultName=kv-$AZURE_ENV_NAME;SecretName=api-key)"
+azd env set-secret DATABASE_PASSWORD
+azd env set-secret API_KEY
 
 echo "Setup complete! Secrets are now securely referenced."`} language="bash" />
 
@@ -239,17 +239,16 @@ Invoke-RestMethod -Uri "https://api.example.com/deploy" \\
 
 Write-Host "Deployment completed successfully!"`} language="powershell" />
 
-        <h3>Using Different Reference Formats</h3>
-        <CodeBlock code={`# Format 1: SecretUri (with full URL)
-azd env set DB_PASSWORD "@Microsoft.KeyVault(SecretUri=https://kv-myapp.vault.azure.net/secrets/db-password)"
+        <h3>Setting Secrets with azd env set-secret</h3>
+        <CodeBlock code={`# Interactive prompt to select/create Key Vault secret
+azd env set-secret DB_PASSWORD
 
-# Format 2: VaultName and SecretName (recommended)
-azd env set DB_PASSWORD "@Microsoft.KeyVault(VaultName=kv-myapp;SecretName=db-password)"
+# The command will:
+# 1. Prompt you to select an existing Key Vault or create a new one
+# 2. Prompt you to select an existing secret or create a new one
+# 3. Automatically set the environment variable with the Key Vault reference
 
-# Format 3: With specific version
-azd env set DB_PASSWORD "@Microsoft.KeyVault(VaultName=kv-myapp;SecretName=db-password;SecretVersion=abc123)"
-
-# Verify the references are set
+# Verify the secret reference is set
 azd env get-values | grep DB_PASSWORD`} language="bash" />
 
         <h3>Error Handling with --stop-on-keyvault-error</h3>

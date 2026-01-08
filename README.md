@@ -310,7 +310,7 @@ az keyvault secret set --vault-name myvault --name database-password --value "Su
 
 **2. Set environment variable with Key Vault reference:**
 ```bash
-azd env set DATABASE_PASSWORD "@Microsoft.KeyVault(VaultName=myvault;SecretName=database-password)"
+azd env set-secret DATABASE_PASSWORD
 ```
 
 **3. Use in your script:**
