@@ -1,3 +1,7 @@
+## [0.2.19] - 2026-01-08
+
+- refactor: enhance multi-platform build process by consolidating platform-specific logic and improving output naming (3764603)
+
 ## [0.2.18] - 2026-01-08
 
 - fix: normalize paths in test for macOS symlink compatibility (1049f48)
