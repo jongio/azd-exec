@@ -1,3 +1,10 @@
+---
+title: Integration Tests
+description: Integration test suite for azd-exec CLI
+lastUpdated: 2026-01-09
+tags: [testing, integration-tests, development]
+---
+
 # Integration Tests
 
 This document describes the integration test suite for azd-exec.

@@ -1,3 +1,6 @@
+// Package main provides the azd exec extension command-line interface.
+// It enables execution of scripts with full Azure Developer CLI context,
+// including environment variables and Azure credentials.
 package main
 
 import (
@@ -12,16 +15,23 @@ import (
 )
 
 var (
+	// Output and logging flags.
 	outputFormat string
 	debugMode    bool
 	noPrompt     bool
-	cwd          string
-	environment  string
+
+	// Execution context flags.
+	cwd         string
+	environment string
+
+	// Tracing flags (advanced debugging).
 	traceLogFile string
 	traceLogURL  string
+
 	// Root command flags for direct script execution.
 	shell       string
 	interactive bool
+
 	// Key Vault resolution behavior flags.
 	stopOnKeyVaultError bool
 )

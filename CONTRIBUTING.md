@@ -1,3 +1,10 @@
+---
+title: Contributing to azd-exec
+description: Guidelines for contributing to the azd-exec project
+lastUpdated: 2026-01-09
+tags: [contributing, development, guidelines]
+---
+
 # Contributing to azd-exec
 
 We love your input! We want to make contributing to azd-exec as easy and transparent as possible, whether it's:

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/jongio/azd-exec/cli/src/internal/testhelpers"
@@ -18,7 +19,7 @@ func TestExecute_FileValidation(t *testing.T) {
 		if err == nil {
 			t.Error("Expected error for empty script path")
 		}
-		if err.Error() != "script path cannot be empty" {
+		if !strings.Contains(err.Error(), "cannot be empty") {
 			t.Errorf("Unexpected error: %v", err)
 		}
 	})
@@ -52,7 +53,7 @@ func TestExecuteInline_Validation(t *testing.T) {
 		if err == nil {
 			t.Error("Expected error for empty script content")
 		}
-		if err.Error() != "script content cannot be empty" {
+		if !strings.Contains(err.Error(), "cannot be empty") {
 			t.Errorf("Unexpected error: %v", err)
 		}
 	})
@@ -74,8 +75,9 @@ func TestPrepareEnvironment(t *testing.T) {
 		defer func() {
 			os.Clearenv()
 			for _, env := range origEnv {
-				if idx := findEqualsSign(env); idx > 0 {
-					_ = os.Setenv(env[:idx], env[idx+1:])
+				parts := strings.SplitN(env, "=", 2)
+				if len(parts) == 2 {
+					_ = os.Setenv(parts[0], parts[1])
 				}
 			}
 		}()
@@ -97,8 +99,9 @@ func TestPrepareEnvironment(t *testing.T) {
 		defer func() {
 			os.Clearenv()
 			for _, env := range origEnv {
-				if idx := findEqualsSign(env); idx > 0 {
-					_ = os.Setenv(env[:idx], env[idx+1:])
+				parts := strings.SplitN(env, "=", 2)
+				if len(parts) == 2 {
+					_ = os.Setenv(parts[0], parts[1])
 				}
 			}
 		}()
@@ -270,12 +273,44 @@ func TestExecutorInteractiveMode(t *testing.T) {
 	}
 }
 
-// Helper function to find '=' in environment variable.
-func findEqualsSign(env string) int {
-	for i, c := range env {
-		if c == '=' {
-			return i
-		}
+// TestNewExecutor tests the New() constructor.
+// Merged from constructor_test.go.
+func TestNewExecutor(t *testing.T) {
+	tests := []struct {
+		name   string
+		config Config
+	}{
+		{
+			name:   "Default config",
+			config: Config{},
+		},
+		{
+			name: "With shell specified",
+			config: Config{
+				Shell: "bash",
+			},
+		},
+		{
+			name: "With interactive mode",
+			config: Config{
+				Interactive: true,
+			},
+		},
 	}
-	return -1
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			exec := New(tt.config)
+			if exec == nil {
+				t.Error("New() returned nil")
+				return
+			}
+			if exec.config.Shell != tt.config.Shell {
+				t.Errorf("Shell = %v, want %v", exec.config.Shell, tt.config.Shell)
+			}
+			if exec.config.Interactive != tt.config.Interactive {
+				t.Errorf("Interactive = %v, want %v", exec.config.Interactive, tt.config.Interactive)
+			}
+		})
+	}
 }

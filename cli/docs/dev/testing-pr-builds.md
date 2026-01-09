@@ -1,3 +1,10 @@
+---
+title: Testing PR Builds
+description: Guide for testing pull request builds before merge
+lastUpdated: 2026-01-09
+tags: [testing, pr-builds, development, ci-cd]
+---
+
 # Testing PR Builds
 
 Want to test changes from a pull request before they're merged? Follow this guide!

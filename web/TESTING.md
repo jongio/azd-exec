@@ -1,3 +1,10 @@
+---
+title: Website Testing Setup
+description: Playwright test setup for azd-exec documentation website
+lastUpdated: 2026-01-09
+tags: [testing, playwright, e2e, website]
+---
+
 # Website Testing Setup
 
 ## Quick Start

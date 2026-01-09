@@ -1,3 +1,10 @@
+---
+title: Testing Guide
+description: Comprehensive testing guide covering unit, integration, and e2e tests
+lastUpdated: 2026-01-09
+tags: [testing, quality, automation]
+---
+
 # Testing Guide
 
 This project includes comprehensive testing across multiple layers: unit tests, integration tests, and end-to-end (e2e) tests.

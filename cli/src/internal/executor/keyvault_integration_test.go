@@ -8,6 +8,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/jongio/azd-core/keyvault"
 )
 
 // TestKeyVaultIntegration tests Key Vault resolution with real Azure credentials.
@@ -28,7 +30,7 @@ func TestKeyVaultIntegration(t *testing.T) {
 	}
 
 	t.Run("Resolve VaultName format", func(t *testing.T) {
-		resolver, err := NewKeyVaultResolver()
+		resolver, err := keyvault.NewKeyVaultResolver()
 		if err != nil {
 			t.Fatalf("Failed to create resolver: %v", err)
 		}
@@ -47,7 +49,7 @@ func TestKeyVaultIntegration(t *testing.T) {
 	})
 
 	t.Run("Resolve SecretUri format", func(t *testing.T) {
-		resolver, err := NewKeyVaultResolver()
+		resolver, err := keyvault.NewKeyVaultResolver()
 		if err != nil {
 			t.Fatalf("Failed to create resolver: %v", err)
 		}
@@ -67,7 +69,7 @@ func TestKeyVaultIntegration(t *testing.T) {
 	})
 
 	t.Run("Resolve environment variables", func(t *testing.T) {
-		resolver, err := NewKeyVaultResolver()
+		resolver, err := keyvault.NewKeyVaultResolver()
 		if err != nil {
 			t.Fatalf("Failed to create resolver: %v", err)
 		}
@@ -78,7 +80,7 @@ func TestKeyVaultIntegration(t *testing.T) {
 			"ANOTHER_VAR=another_value",
 		}
 
-		resolved, _, err := resolver.ResolveEnvironmentVariables(context.Background(), envVars, ResolveEnvironmentOptions{})
+		resolved, _, err := resolver.ResolveEnvironmentVariables(context.Background(), envVars, keyvault.ResolveEnvironmentOptions{})
 		if err != nil {
 			t.Fatalf("Failed to resolve environment variables: %v", err)
 		}
@@ -92,7 +94,7 @@ func TestKeyVaultIntegration(t *testing.T) {
 		for _, envVar := range resolved {
 			if strings.HasPrefix(envVar, "KV_SECRET=") {
 				value := strings.TrimPrefix(envVar, "KV_SECRET=")
-				if IsKeyVaultReference(value) {
+				if keyvault.IsKeyVaultReference(value) {
 					t.Error("KV_SECRET was not resolved")
 				} else if value != "" {
 					kvSecretResolved = true
@@ -107,7 +109,7 @@ func TestKeyVaultIntegration(t *testing.T) {
 	})
 
 	t.Run("Handle invalid vault name", func(t *testing.T) {
-		resolver, err := NewKeyVaultResolver()
+		resolver, err := keyvault.NewKeyVaultResolver()
 		if err != nil {
 			t.Fatalf("Failed to create resolver: %v", err)
 		}
@@ -121,7 +123,7 @@ func TestKeyVaultIntegration(t *testing.T) {
 	})
 
 	t.Run("Handle invalid secret name", func(t *testing.T) {
-		resolver, err := NewKeyVaultResolver()
+		resolver, err := keyvault.NewKeyVaultResolver()
 		if err != nil {
 			t.Fatalf("Failed to create resolver: %v", err)
 		}
@@ -179,7 +181,7 @@ func TestKeyVaultErrorHandling(t *testing.T) {
 	}
 
 	t.Run("Invalid reference format", func(t *testing.T) {
-		resolver, err := NewKeyVaultResolver()
+		resolver, err := keyvault.NewKeyVaultResolver()
 		if err != nil {
 			t.Skip("Skipping test: Azure credentials not available")
 		}
@@ -195,7 +197,7 @@ func TestKeyVaultErrorHandling(t *testing.T) {
 	})
 
 	t.Run("Invalid SecretUri", func(t *testing.T) {
-		resolver, err := NewKeyVaultResolver()
+		resolver, err := keyvault.NewKeyVaultResolver()
 		if err != nil {
 			t.Skip("Skipping test: Azure credentials not available")
 		}

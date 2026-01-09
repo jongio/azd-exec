@@ -1,3 +1,10 @@
+---
+title: GitHub Actions Workflows Setup
+description: Required permissions and settings for GitHub Actions workflows
+lastUpdated: 2026-01-09
+tags: [github-actions, ci-cd, automation]
+---
+
 # GitHub Actions Workflows - Setup Guide
 
 This document describes the required permissions and settings for the GitHub Actions workflows in this repository.

@@ -1,3 +1,11 @@
+---
+title: azd-exec Documentation Website
+description: Specification for documentation website using Astro and GitHub Pages
+lastUpdated: 2026-01-09
+tags: [spec, website, documentation, astro]
+status: implemented
+---
+
 # azd-exec Documentation Website
 
 ## Overview

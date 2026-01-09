@@ -1,13 +1,12 @@
 package executor
 
 import (
-	"fmt"
-	"os"
 	"os/exec"
 	"strings"
 )
 
 // validShells maps known shell names to whether they're valid.
+// This is used for validation and shell-specific argument construction.
 var validShells = map[string]bool{
 	shellBash:       true,
 	shellSh:         true,
@@ -18,15 +17,20 @@ var validShells = map[string]bool{
 }
 
 // buildCommand builds the exec.Cmd for the given shell and script.
+// It constructs shell-specific argument lists:
+//   - Unix shells (bash, sh, zsh): Use -c for inline, direct path for files
+//   - PowerShell (pwsh, powershell): Use -Command for inline, -File for files
+//   - Windows cmd: Use /c for both inline and files
+//   - Unknown shells: Fall back to -c flag (Unix-like behavior)
+//
+// Script arguments (e.config.Args) are appended after the script specification.
 func (e *Executor) buildCommand(shell, scriptOrPath string, isInline bool) *exec.Cmd {
-	// Validate shell parameter
-	if !validShells[strings.ToLower(shell)] {
-		fmt.Fprintf(os.Stderr, "Warning: unknown shell '%s', execution may fail\n", shell)
-	}
-
 	var cmdArgs []string
 
-	switch strings.ToLower(shell) {
+	// Normalize shell name to lowercase for comparison
+	shellLower := strings.ToLower(shell)
+
+	switch shellLower {
 	case shellBash, shellSh, shellZsh:
 		if isInline {
 			cmdArgs = []string{shell, "-c", scriptOrPath}
@@ -42,6 +46,7 @@ func (e *Executor) buildCommand(shell, scriptOrPath string, isInline bool) *exec
 	case shellCmd:
 		cmdArgs = []string{shell, "/c", scriptOrPath}
 	default:
+		// Unknown shell: use Unix-like -c pattern as fallback
 		if isInline {
 			cmdArgs = []string{shell, "-c", scriptOrPath}
 		} else {

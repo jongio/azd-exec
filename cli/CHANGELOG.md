@@ -1,3 +1,10 @@
+---
+title: Changelog
+description: Release history and changes for azd-exec CLI
+lastUpdated: 2026-01-09
+tags: [changelog, releases, version-history]
+---
+
 ## [0.2.29] - 2026-01-08
 
 - refactor: update Key Vault reference commands to use 'set-secret' for environment variables (8dd9d28)

@@ -1,3 +1,11 @@
+---
+title: azd exec - Key Vault Resolution Error Handling
+description: Spec for continue-on-error Key Vault reference resolution
+lastUpdated: 2026-01-09
+tags: [spec, keyvault, error-handling]
+status: implemented
+---
+
 # azd exec — Key Vault resolution error handling
 
 ## Problem

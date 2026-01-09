@@ -1,3 +1,10 @@
+---
+title: CLI Reference
+description: Complete command reference for azd exec extension
+lastUpdated: 2026-01-09
+tags: [cli, reference, documentation, commands]
+---
+
 # CLI Reference
 
 Complete reference for the `azd exec` extension commands and flags.
@@ -211,6 +218,8 @@ All azd environment variables are available to your scripts:
 ### Azure Key Vault Integration
 
 `azd exec` automatically resolves Azure Key Vault references in environment variables before running your script.
+
+> **Implementation**: Key Vault resolution is powered by the [azd-core](https://github.com/jongio/azd-core) library, ensuring consistent behavior across Azure Developer CLI tools.
 
 **Supported Formats:**
 

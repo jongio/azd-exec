@@ -1,3 +1,10 @@
+---
+title: azd-exec Website Tasks
+description: Task tracking for documentation website development
+lastUpdated: 2026-01-09
+tags: [tasks, website, tracking]
+---
+
 # azd-exec Website Tasks
 
 ## TODO: Setup Project Foundation
