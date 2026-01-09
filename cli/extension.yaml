@@ -3,7 +3,7 @@ namespace: exec
 displayName: Exec Extension
 description: azd exec - Run any script with azd environment and Azure credentials. Database migrations, setup automation, CI/CD workflows - with seamless Key Vault integration.
 usage: azd exec <command> [options]
-version: 0.2.29
+version: 0.2.30
 language: go
 capabilities:
   - custom-commands

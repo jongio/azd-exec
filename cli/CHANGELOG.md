@@ -1,3 +1,7 @@
+## [0.2.30] - 2026-01-09
+
+- Integrate azd-core library for Key Vault reference resolution (#25) (a9deb44)
+
 ---
 title: Changelog
 description: Release history and changes for azd-exec CLI
