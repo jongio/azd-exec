@@ -10,7 +10,13 @@ import (
 	"strings"
 )
 
-// detectShell auto-detects the appropriate shell based on the script extension.
+// detectShell auto-detects the appropriate shell based on the script extension and shebang.
+// Detection priority:
+//  1. File extension (.ps1, .cmd, .bat, .sh, .zsh)
+//  2. Shebang line (#!/bin/bash, #!/usr/bin/env python3, etc.)
+//  3. OS-specific default (Windows: cmd, Unix: bash)
+//
+// Returns the shell command name (e.g., "bash", "pwsh", "cmd").
 func (e *Executor) detectShell(scriptPath string) string {
 	ext := strings.ToLower(filepath.Ext(scriptPath))
 
@@ -27,12 +33,12 @@ func (e *Executor) detectShell(scriptPath string) string {
 	case ".zsh":
 		return shellZsh
 	default:
-		// Check shebang line
+		// Check shebang line for scripts without recognized extensions
 		if shebang := e.readShebang(scriptPath); shebang != "" {
 			return shebang
 		}
 
-		// Default based on OS
+		// Default based on OS (cmd for Windows, bash for Unix)
 		if runtime.GOOS == osWindows {
 			return shellCmd
 		}
@@ -40,16 +46,27 @@ func (e *Executor) detectShell(scriptPath string) string {
 	}
 }
 
-// readShebang reads the shebang line from a script file.
+// readShebang reads the shebang line from a script file and extracts the shell name.
+// It handles common shebang formats:
+//   - #!/bin/bash
+//   - #!/usr/bin/env python3
+//   - #! /bin/sh
+//
+// Returns:
+//   - Empty string if no shebang is found or file cannot be read
+//   - The base name of the shell/interpreter (e.g., "bash", "python3")
 func (e *Executor) readShebang(scriptPath string) string {
 	file, err := os.Open(scriptPath) // #nosec G304 - scriptPath is validated by caller
 	if err != nil {
 		return ""
 	}
 	defer func() {
-		if err := file.Close(); err != nil {
+		if closeErr := file.Close(); closeErr != nil {
 			// Log error but don't fail - we may have already read what we needed
-			fmt.Fprintf(os.Stderr, "warning: failed to close file %s: %v\n", scriptPath, err)
+			// Only log to stderr if we're in debug mode to avoid noise
+			if os.Getenv(envVarScriptDebug) == "true" {
+				fmt.Fprintf(os.Stderr, "warning: failed to close file %s: %v\n", filepath.Base(scriptPath), closeErr)
+			}
 		}
 	}()
 
@@ -57,7 +74,7 @@ func (e *Executor) readShebang(scriptPath string) string {
 
 	// Read first bytes to check for shebang
 	buf := make([]byte, shebangReadSize)
-	if _, err := io.ReadFull(reader, buf); err != nil {
+	if _, readErr := io.ReadFull(reader, buf); readErr != nil {
 		return ""
 	}
 
@@ -66,21 +83,21 @@ func (e *Executor) readShebang(scriptPath string) string {
 	}
 
 	// Read the rest of the line
-	line, err := reader.ReadString('\n')
-	if err != nil && err != io.EOF {
+	line, lineErr := reader.ReadString('\n')
+	if lineErr != nil && lineErr != io.EOF {
 		return ""
 	}
 
 	line = strings.TrimSpace(line)
 	parts := strings.Fields(line)
-	if len(parts) > 0 {
-		// Handle "#!/usr/bin/env python3" style shebangs
-		if filepath.Base(parts[0]) == envCommand && len(parts) > 1 {
-			return filepath.Base(parts[1])
-		}
-		shellPath := parts[0]
-		return filepath.Base(shellPath)
+	if len(parts) == 0 {
+		return ""
 	}
 
-	return ""
+	// Handle "#!/usr/bin/env python3" style shebangs
+	if filepath.Base(parts[0]) == envCommand && len(parts) > 1 {
+		return filepath.Base(parts[1])
+	}
+
+	return filepath.Base(parts[0])
 }

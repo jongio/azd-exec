@@ -1,3 +1,11 @@
+---
+title: Key Vault Reference Resolution - Implementation
+description: Implementation summary of Azure Key Vault reference resolution for azd exec
+lastUpdated: 2026-01-09
+tags: [spec, keyvault, implementation, azure]
+status: implemented
+---
+
 # Key Vault Reference Resolution - Implementation Summary
 
 ## Overview

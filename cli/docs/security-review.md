@@ -1,3 +1,11 @@
+---
+title: Security Review
+description: Comprehensive security analysis of azd-exec CLI
+lastUpdated: 2026-01-09
+tags: [security, review, vulnerability-analysis]
+status: secure
+---
+
 # Security Review - azd-exec
 
 **Date**: December 19, 2025  

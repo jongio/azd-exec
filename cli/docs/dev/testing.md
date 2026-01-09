@@ -1,3 +1,10 @@
+---
+title: Testing Guide
+description: Testing strategies and practices for azd-exec extension
+lastUpdated: 2026-01-09
+tags: [testing, development, quality]
+---
+
 # Testing Guide
 
 This guide covers testing strategies and practices for the azd-exec extension.

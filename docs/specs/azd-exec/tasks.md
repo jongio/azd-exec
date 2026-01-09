@@ -1,3 +1,10 @@
+---
+title: azd-exec Tasks
+description: Task tracking for azd-exec project
+lastUpdated: 2026-01-09
+tags: [tasks, tracking, project-management]
+---
+
 <!-- NEXT:  -->
 # azd-exec Tasks
 

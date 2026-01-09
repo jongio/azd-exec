@@ -14,6 +14,7 @@
 coverage.txt
 coverage.html
 coverage/
+*coverage*
 cov
 cov-*
 test-cov*

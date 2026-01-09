@@ -3,260 +3,45 @@ package executor
 import (
 	"strings"
 	"testing"
+
+	"github.com/jongio/azd-core/keyvault"
 )
 
-func TestParseSecretURI(t *testing.T) {
-	tests := []struct {
-		name        string
-		secretURI   string
-		wantVault   string
-		wantSecret  string
-		wantVersion string
-		wantErr     bool
-	}{
-		{
-			name:        "Valid URI without version",
-			secretURI:   "https://myvault.vault.azure.net/secrets/mysecret",
-			wantVault:   "https://myvault.vault.azure.net",
-			wantSecret:  "mysecret",
-			wantVersion: "",
-			wantErr:     false,
-		},
-		{
-			name:        "Valid URI with version",
-			secretURI:   "https://myvault.vault.azure.net/secrets/mysecret/abc123",
-			wantVault:   "https://myvault.vault.azure.net",
-			wantSecret:  "mysecret",
-			wantVersion: "abc123",
-			wantErr:     false,
-		},
-		{
-			name:        "Invalid path - missing secrets",
-			secretURI:   "https://myvault.vault.azure.net/mysecret",
-			wantVault:   "",
-			wantSecret:  "",
-			wantVersion: "",
-			wantErr:     true,
-		},
+func TestIsKeyVaultReference_DetectsValidFormats(t *testing.T) {
+	valid := []string{
+		"@Microsoft.KeyVault(SecretUri=https://myvault.vault.azure.net/secrets/mysecret)",
+		"@Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret)",
+		"@Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret;SecretVersion=abc123)",
+		"akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD",
+		"\"akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD\"",
+		"  'akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD/abc123'  ",
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			// We don't have a public parseSecretURI method, so we test through pattern matching
-			// This validates our URI parsing logic is correct
-			reference := "@Microsoft.KeyVault(SecretUri=" + tt.secretURI + ")"
-			matches := kvRefSecretURIPattern.FindStringSubmatch(reference)
-			if matches == nil {
-				t.Error("Reference did not match pattern")
-				return
-			}
-
-			if matches[1] != tt.secretURI {
-				t.Errorf("Extracted URI = %q, want %q", matches[1], tt.secretURI)
-			}
-		})
-	}
-}
-
-func TestResolveEnvironmentVariables_NoReferences(t *testing.T) {
-	// Test without actually connecting to Azure
-	envVars := []string{
-		"NORMAL_VAR=value1",
-		"ANOTHER_VAR=value2",
-		"PATH=/usr/bin:/bin",
-	}
-
-	// We can test the IsKeyVaultReference check without creating a resolver
-	for _, envVar := range envVars {
-		parts := splitEnvVar(envVar)
-		if len(parts) == 2 && IsKeyVaultReference(parts[1]) {
-			t.Errorf("Non-reference value detected as Key Vault reference: %s", envVar)
+	for _, v := range valid {
+		if !keyvault.IsKeyVaultReference(v) {
+			t.Errorf("expected value to be detected as reference: %s", v)
 		}
 	}
 }
 
-func TestResolveEnvironmentVariables_WithReferences(t *testing.T) {
-	// Test detection of Key Vault references in environment variables
-	envVars := []string{
-		"NORMAL_VAR=value1",
-		"KV_SECRET=@Microsoft.KeyVault(VaultName=myvault;SecretName=mysecret)",
-		"ANOTHER_NORMAL=value2",
-		"KV_SECRET2=@Microsoft.KeyVault(SecretUri=https://vault.vault.azure.net/secrets/secret2)",
-	}
-
-	kvRefCount := 0
-	for _, envVar := range envVars {
-		parts := splitEnvVar(envVar)
-		if len(parts) == 2 && IsKeyVaultReference(parts[1]) {
-			kvRefCount++
-		}
-	}
-
-	if kvRefCount != 2 {
-		t.Errorf("Expected to find 2 Key Vault references, found %d", kvRefCount)
-	}
-}
-
-// splitEnvVar splits an environment variable into key and value.
-func splitEnvVar(envVar string) []string {
-	parts := make([]string, 0, 2)
-	idx := 0
-	for i, c := range envVar {
-		if c == '=' {
-			idx = i
-			break
-		}
-	}
-	if idx > 0 {
-		parts = append(parts, envVar[:idx], envVar[idx+1:])
-	}
-	return parts
-}
-
-// TestNewKeyVaultResolver tests resolver creation.
-// Note: This will fail if Azure credentials are not available,
-// which is expected in CI/CD without Azure auth setup.
-func TestNewKeyVaultResolver(t *testing.T) {
-	t.Run("Creation without Azure auth", func(t *testing.T) {
-		// This test documents that resolver creation requires Azure credentials
-		resolver, err := NewKeyVaultResolver()
-
-		// In environments without Azure credentials, this should fail
-		// In environments with credentials, it should succeed
-		switch {
-		case err != nil:
-			// Expected in CI/CD without Azure auth
-			t.Logf("NewKeyVaultResolver failed as expected without Azure credentials: %v", err)
-		case resolver == nil:
-			t.Error("NewKeyVaultResolver returned nil resolver without error")
-		default:
-			t.Log("NewKeyVaultResolver succeeded with available Azure credentials")
-		}
-	})
-}
-
-func TestResolveReference_InvalidFormats(t *testing.T) {
-	// Test error handling for invalid formats without actual Azure calls
-	invalidRefs := []string{
-		"not-a-reference",
-		"@Microsoft.KeyVault(Invalid=format)",
-		"@Microsoft.KeyVault(SecretUri=invalid-uri)",
+func TestIsKeyVaultReference_RejectsInvalidFormats(t *testing.T) {
+	invalid := []string{
 		"",
+		"just-a-regular-value",
+		"@Microsoft.KeyVault(",
+		"@Microsoft.KeyVault(SecretUri)",
+		"@Microsoft.KeyVault(VaultName)",
+		"@microsoft.keyvault(SecretUri=https://vault.vault.azure.net/secrets/test)",
 	}
 
-	for _, ref := range invalidRefs {
-		if IsKeyVaultReference(ref) && !kvRefSecretURIPattern.MatchString(ref) && !kvRefVaultNamePattern.MatchString(ref) && !kvRefAzdAkvsPattern.MatchString(normalizeKeyVaultReferenceValue(ref)) {
-			t.Logf("Reference %q would fail validation", ref)
+	for _, v := range invalid {
+		if keyvault.IsKeyVaultReference(v) {
+			t.Errorf("expected value NOT to be detected as reference: %s", v)
 		}
 	}
 }
 
-func TestNormalizeKeyVaultReferenceValue(t *testing.T) {
-	tests := []struct {
-		name string
-		in   string
-		want string
-	}{
-		{
-			name: "Trim whitespace",
-			in:   "  akvs://guid/vault/secret  ",
-			want: "akvs://guid/vault/secret",
-		},
-		{
-			name: "Strip double quotes",
-			in:   "\"akvs://guid/vault/secret\"",
-			want: "akvs://guid/vault/secret",
-		},
-		{
-			name: "Strip single quotes",
-			in:   "'@Microsoft.KeyVault(VaultName=v;SecretName=s)'",
-			want: "@Microsoft.KeyVault(VaultName=v;SecretName=s)",
-		},
-		{
-			name: "Do not strip mismatched quotes",
-			in:   "\"not-a-ref'",
-			want: "\"not-a-ref'",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := normalizeKeyVaultReferenceValue(tt.in); got != tt.want {
-				t.Errorf("normalizeKeyVaultReferenceValue() = %q, want %q", got, tt.want)
-			}
-		})
-	}
-}
-
-func TestParseAzdAkvsURI(t *testing.T) {
-	tests := []struct {
-		name        string
-		in          string
-		wantGuid    string
-		wantVault   string
-		wantSecret  string
-		wantVersion string
-		wantErr     bool
-	}{
-		{
-			name:        "Without version",
-			in:          "akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD",
-			wantGuid:    "c3b3091e-400e-43a7-8ee5-e6e8cefdbebf",
-			wantVault:   "fookv",
-			wantSecret:  "REDIS-CACHE-PASSWORD",
-			wantVersion: "",
-			wantErr:     false,
-		},
-		{
-			name:        "With version",
-			in:          "akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD/abc123",
-			wantGuid:    "c3b3091e-400e-43a7-8ee5-e6e8cefdbebf",
-			wantVault:   "fookv",
-			wantSecret:  "REDIS-CACHE-PASSWORD",
-			wantVersion: "abc123",
-			wantErr:     false,
-		},
-		{
-			name:    "Missing segments",
-			in:      "akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/onlyvault",
-			wantErr: true,
-		},
-		{
-			name:    "Too many segments",
-			in:      "akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/vault/secret/ver/extra",
-			wantErr: true,
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			guid, vault, secret, version, err := parseAzdAkvsURI(tt.in)
-			if tt.wantErr {
-				if err == nil {
-					t.Fatal("expected error, got nil")
-				}
-				return
-			}
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			if guid != tt.wantGuid {
-				t.Errorf("guid = %q, want %q", guid, tt.wantGuid)
-			}
-			if vault != tt.wantVault {
-				t.Errorf("vault = %q, want %q", vault, tt.wantVault)
-			}
-			if secret != tt.wantSecret {
-				t.Errorf("secret = %q, want %q", secret, tt.wantSecret)
-			}
-			if version != tt.wantVersion {
-				t.Errorf("version = %q, want %q", version, tt.wantVersion)
-			}
-		})
-	}
-}
-
-func TestResolveEnvironmentVariables_WithAkvsReferences_DetectionOnly(t *testing.T) {
+func TestResolveEnvironmentVariables_DetectionWithQuotes(t *testing.T) {
 	envVars := []string{
 		"NORMAL_VAR=value1",
 		"AKVS_UNQUOTED=akvs://c3b3091e-400e-43a7-8ee5-e6e8cefdbebf/fookv/REDIS-CACHE-PASSWORD",
@@ -266,59 +51,13 @@ func TestResolveEnvironmentVariables_WithAkvsReferences_DetectionOnly(t *testing
 
 	count := 0
 	for _, envVar := range envVars {
-		parts := splitEnvVar(envVar)
-		if len(parts) == 2 && IsKeyVaultReference(parts[1]) {
+		parts := strings.SplitN(envVar, "=", 2)
+		if len(parts) == 2 && keyvault.IsKeyVaultReference(parts[1]) {
 			count++
 		}
 	}
 
 	if count != 3 {
-		t.Errorf("Expected to find 3 Key Vault references, found %d", count)
+		t.Fatalf("expected 3 references detected, got %d", count)
 	}
-}
-
-func TestKeyVaultErrorHandling_InvalidFormats(t *testing.T) {
-	t.Run("Empty reference", func(t *testing.T) {
-		if IsKeyVaultReference("") {
-			t.Error("Empty string should not be detected as Key Vault reference")
-		}
-	})
-
-	t.Run("Malformed references", func(t *testing.T) {
-		malformed := []string{
-			"@Microsoft.KeyVault(",
-			"@Microsoft.KeyVault)",
-			"@Microsoft.KeyVault(SecretUri)",
-			"@Microsoft.KeyVault(VaultName)",
-		}
-
-		for _, ref := range malformed {
-			// These should not match the validation patterns
-			if kvRefSecretURIPattern.MatchString(ref) {
-				t.Errorf("Malformed reference should not match SecretUri pattern: %s", ref)
-			}
-			if kvRefVaultNamePattern.MatchString(ref) {
-				t.Errorf("Malformed reference should not match VaultName pattern: %s", ref)
-			}
-		}
-	})
-
-	t.Run("Case sensitivity", func(t *testing.T) {
-		// Test that detection is case-sensitive for the prefix
-		cases := []struct {
-			ref   string
-			valid bool
-		}{
-			{"@Microsoft.KeyVault(SecretUri=https://vault.vault.azure.net/secrets/test)", true},
-			{"@microsoft.keyvault(SecretUri=https://vault.vault.azure.net/secrets/test)", false},
-			{"@MICROSOFT.KEYVAULT(SecretUri=https://vault.vault.azure.net/secrets/test)", false},
-		}
-
-		for _, tc := range cases {
-			got := strings.HasPrefix(tc.ref, "@Microsoft.KeyVault(")
-			if got != tc.valid {
-				t.Errorf("Reference %q: expected HasPrefix=%v, got %v", tc.ref, tc.valid, got)
-			}
-		}
-	})
 }

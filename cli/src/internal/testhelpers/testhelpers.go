@@ -1,3 +1,5 @@
+// Package testhelpers provides common testing utilities for the azd exec extension.
+// It includes helpers for capturing output, locating test resources, and common assertions.
 package testhelpers
 
 import (
@@ -8,6 +10,16 @@ import (
 )
 
 // CaptureOutput captures stdout during function execution.
+// It redirects os.Stdout to a pipe, executes the function, and returns the captured output.
+// The original stdout is always restored, even if the function returns an error.
+// This is useful for testing commands that write to stdout.
+//
+// Example:
+//
+//	output := CaptureOutput(t, func() error {
+//	    fmt.Println("test output")
+//	    return nil
+//	})
 func CaptureOutput(t *testing.T, fn func() error) string {
 	t.Helper()
 
@@ -23,7 +35,7 @@ func CaptureOutput(t *testing.T, fn func() error) string {
 	// Replace stdout
 	os.Stdout = w
 
-	// Channel for output
+	// Channel for output (buffered to avoid goroutine leak)
 	outCh := make(chan string, 1)
 	go func() {
 		var output strings.Builder
@@ -59,7 +71,10 @@ func CaptureOutput(t *testing.T, fn func() error) string {
 	return output
 }
 
-// GetTestProjectsDir finds the test projects directory.
+// GetTestProjectsDir finds the test projects directory relative to the current working directory.
+// It searches common locations and returns the first valid path found.
+// This helper is useful for integration tests that need to locate test fixtures.
+// It fails the test if the directory cannot be found.
 func GetTestProjectsDir(t *testing.T) string {
 	t.Helper()
 
@@ -69,7 +84,7 @@ func GetTestProjectsDir(t *testing.T) string {
 		t.Fatalf("Failed to get working directory: %v", err)
 	}
 
-	// Try multiple possible paths
+	// Try multiple possible paths relative to common test locations
 	possiblePaths := []string{
 		filepath.Join(cwd, "..", "..", "..", "tests", "projects"),       // From commands dir
 		filepath.Join(cwd, "..", "tests", "projects"),                   // From src dir
@@ -84,7 +99,7 @@ func GetTestProjectsDir(t *testing.T) string {
 		}
 	}
 
-	// If not found, try to find the cli directory
+	// If not found, try to walk up the directory tree
 	testDir := filepath.Join(cwd, "tests", "projects")
 	for i := 0; i < 5; i++ {
 		testDir = filepath.Join("..", testDir)
@@ -99,6 +114,7 @@ func GetTestProjectsDir(t *testing.T) string {
 }
 
 // Contains checks if a string contains a substring.
+// This is a convenience helper for common test assertions.
 func Contains(s, substr string) bool {
 	return strings.Contains(s, substr)
 }

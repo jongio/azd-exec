@@ -1,3 +1,11 @@
+---
+title: Threat Model & Attack Vector Analysis
+description: Security threat analysis from adversarial perspective
+lastUpdated: 2026-01-09
+tags: [security, threat-model, red-team]
+classification: confidential
+---
+
 # Threat Model & Attack Vector Analysis - azd-exec
 
 **Date**: December 19, 2025  

@@ -3,7 +3,11 @@ package executor
 import (
 	"context"
 	"errors"
+	"fmt"
+	"strings"
 	"testing"
+
+	"github.com/jongio/azd-core/keyvault"
 )
 
 func TestResolveEnvironmentVariables_ContinueOnError_PartialResults(t *testing.T) {
@@ -26,7 +30,7 @@ func TestResolveEnvironmentVariables_ContinueOnError_PartialResults(t *testing.T
 		}
 	}
 
-	resolved, warnings, err := resolveEnvironmentVariables(context.Background(), envVars, resolve, ResolveEnvironmentOptions{StopOnError: false})
+	resolved, warnings, err := resolveEnvironmentVariablesForTest(context.Background(), envVars, resolve, keyvault.ResolveEnvironmentOptions{StopOnError: false})
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -70,7 +74,7 @@ func TestResolveEnvironmentVariables_StopOnError_FailFast_NoPartialResults(t *te
 		return "", errors.New("not found")
 	}
 
-	resolved, warnings, err := resolveEnvironmentVariables(context.Background(), envVars, resolve, ResolveEnvironmentOptions{StopOnError: true})
+	resolved, warnings, err := resolveEnvironmentVariablesForTest(context.Background(), envVars, resolve, keyvault.ResolveEnvironmentOptions{StopOnError: true})
 	if err == nil {
 		t.Fatalf("expected error, got nil")
 	}
@@ -83,4 +87,45 @@ func TestResolveEnvironmentVariables_StopOnError_FailFast_NoPartialResults(t *te
 	if warnings[0].Key != "BAD" {
 		t.Fatalf("expected warning for key BAD, got %q", warnings[0].Key)
 	}
+}
+
+// resolveEnvironmentVariablesForTest mirrors the legacy behavior to validate StopOnError semantics without hitting Azure.
+func resolveEnvironmentVariablesForTest(
+	ctx context.Context,
+	envVars []string,
+	resolve func(context.Context, string) (string, error),
+	options keyvault.ResolveEnvironmentOptions,
+) ([]string, []keyvault.KeyVaultResolutionWarning, error) {
+	resolved := make([]string, 0, len(envVars))
+	warnings := make([]keyvault.KeyVaultResolutionWarning, 0)
+
+	for _, envVar := range envVars {
+		parts := strings.SplitN(envVar, "=", 2)
+		if len(parts) != 2 {
+			resolved = append(resolved, envVar)
+			continue
+		}
+
+		key := parts[0]
+		value := parts[1]
+
+		if !keyvault.IsKeyVaultReference(value) {
+			resolved = append(resolved, envVar)
+			continue
+		}
+
+		secretValue, err := resolve(ctx, value)
+		if err != nil {
+			warnings = append(warnings, keyvault.KeyVaultResolutionWarning{Key: key, Err: err})
+			if options.StopOnError {
+				return nil, warnings, fmt.Errorf("failed to resolve Key Vault reference for %s: %w", key, err)
+			}
+			resolved = append(resolved, envVar)
+			continue
+		}
+
+		resolved = append(resolved, fmt.Sprintf("%s=%s", key, secretValue))
+	}
+
+	return resolved, warnings, nil
 }

@@ -40,30 +40,30 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 	oldTraceURL := os.Getenv("AZD_TRACE_LOG_URL")
 
 	cmd := newRootCmd()
-	if err := cmd.PersistentFlags().Set("debug", "true"); err != nil {
-		t.Fatalf("setting debug flag failed: %v", err)
+	if setErr := cmd.PersistentFlags().Set("debug", "true"); setErr != nil {
+		t.Fatalf("setting debug flag failed: %v", setErr)
 	}
-	if err := cmd.PersistentFlags().Set("no-prompt", "true"); err != nil {
-		t.Fatalf("setting no-prompt flag failed: %v", err)
+	if setErr := cmd.PersistentFlags().Set("no-prompt", "true"); setErr != nil {
+		t.Fatalf("setting no-prompt flag failed: %v", setErr)
 	}
-	if err := cmd.PersistentFlags().Set("cwd", newWd); err != nil {
-		t.Fatalf("setting cwd flag failed: %v", err)
+	if setErr := cmd.PersistentFlags().Set("cwd", newWd); setErr != nil {
+		t.Fatalf("setting cwd flag failed: %v", setErr)
 	}
-	if err := cmd.PersistentFlags().Set("environment", "test-env"); err != nil {
-		t.Fatalf("setting environment flag failed: %v", err)
+	if setErr := cmd.PersistentFlags().Set("environment", "test-env"); setErr != nil {
+		t.Fatalf("setting environment flag failed: %v", setErr)
 	}
-	if err := cmd.PersistentFlags().Set("trace-log-file", "trace.log"); err != nil {
-		t.Fatalf("setting trace-log-file flag failed: %v", err)
+	if setErr := cmd.PersistentFlags().Set("trace-log-file", "trace.log"); setErr != nil {
+		t.Fatalf("setting trace-log-file flag failed: %v", setErr)
 	}
-	if err := cmd.PersistentFlags().Set("trace-log-url", "http://example.invalid"); err != nil {
-		t.Fatalf("setting trace-log-url flag failed: %v", err)
+	if setErr := cmd.PersistentFlags().Set("trace-log-url", "http://example.invalid"); setErr != nil {
+		t.Fatalf("setting trace-log-url flag failed: %v", setErr)
 	}
 	if cmd.PersistentPreRunE == nil {
 		t.Fatalf("expected PersistentPreRunE to be set")
 	}
 
-	if err := cmd.PersistentPreRunE(cmd, []string{"echo"}); err != nil {
-		t.Fatalf("PersistentPreRunE failed: %v", err)
+	if runErr := cmd.PersistentPreRunE(cmd, []string{"echo"}); runErr != nil {
+		t.Fatalf("PersistentPreRunE failed: %v", runErr)
 	}
 
 	gotWd, err := os.Getwd()

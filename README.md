@@ -1,3 +1,10 @@
+---
+title: azd exec
+description: Execute any script with full access to your Azure Developer CLI environment variables and Azure credentials
+lastUpdated: 2026-01-09
+tags: [azure, cli, devops, scripts, keyvault]
+---
+
 <div align="center">
 
 # azd exec
@@ -278,6 +285,8 @@ Scripts executed by `azd exec` have access to all azd environment variables:
 ## 🔐 Azure Key Vault Integration
 
 `azd exec` automatically resolves Azure Key Vault references in environment variables, allowing you to securely store and access secrets without hardcoding them.
+
+> **Note**: Key Vault resolution is provided by the [azd-core](https://github.com/jongio/azd-core) library, a shared utility for Azure Developer CLI tools.
 
 ### Supported Reference Formats
 

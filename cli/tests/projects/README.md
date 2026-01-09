@@ -1,3 +1,10 @@
+---
+title: Test Projects
+description: Integration test scripts for azd exec command
+lastUpdated: 2026-01-09
+tags: [testing, integration-tests, scripts]
+---
+
 # Test Projects
 
 This directory contains test scripts for integration testing of the `azd exec` command.

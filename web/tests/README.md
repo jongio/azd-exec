@@ -1,3 +1,10 @@
+---
+title: Website E2E Tests
+description: End-to-end tests for azd-exec documentation website
+lastUpdated: 2026-01-09
+tags: [testing, e2e, playwright, website]
+---
+
 # azd-exec Website Tests
 
 Playwright end-to-end tests for the azd-exec documentation website.

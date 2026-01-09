@@ -1,3 +1,10 @@
+---
+title: azd-exec Documentation Website
+description: Astro-based documentation website for azd-exec extension
+lastUpdated: 2026-01-09
+tags: [website, documentation, astro]
+---
+
 # azd-exec Documentation Website
 
 Documentation website for the azd-exec extension, built with Astro and Tailwind CSS.

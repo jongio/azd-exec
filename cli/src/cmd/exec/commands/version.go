@@ -1,3 +1,4 @@
+// Package commands provides subcommands for the azd exec extension.
 package commands
 
 import (
@@ -9,7 +10,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NewVersionCommand creates a new version command.
+// NewVersionCommand creates a new version command that displays extension version information.
+// The command supports both human-readable and JSON output formats.
+// The outputFormat parameter controls the output style via the --output/-o flag.
 func NewVersionCommand(outputFormat *string) *cobra.Command {
 	var quiet bool
 
