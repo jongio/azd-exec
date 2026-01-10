@@ -33,7 +33,7 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 
 	newWd := t.TempDir()
 
-	oldDebug := os.Getenv("AZD_SCRIPT_DEBUG")
+	oldDebug := os.Getenv("AZD_DEBUG")
 	oldNoPrompt := os.Getenv("AZD_NO_PROMPT")
 	oldEnvName := os.Getenv("AZURE_ENV_NAME")
 	oldTraceFile := os.Getenv("AZD_TRACE_LOG_FILE")
@@ -83,8 +83,8 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 		t.Fatalf("expected cwd %q, got %q", newWdNorm, gotWdNorm)
 	}
 
-	if os.Getenv("AZD_SCRIPT_DEBUG") != "true" {
-		t.Fatalf("expected AZD_SCRIPT_DEBUG=true")
+	if os.Getenv("AZD_DEBUG") != "true" {
+		t.Fatalf("expected AZD_DEBUG=true")
 	}
 	if os.Getenv("AZD_NO_PROMPT") != "true" {
 		t.Fatalf("expected AZD_NO_PROMPT=true")
@@ -101,7 +101,7 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 
 	// Restore process state.
 	_ = os.Chdir(oldWd)
-	_ = os.Setenv("AZD_SCRIPT_DEBUG", oldDebug)
+	_ = os.Setenv("AZD_DEBUG", oldDebug)
 	_ = os.Setenv("AZD_NO_PROMPT", oldNoPrompt)
 	_ = os.Setenv("AZURE_ENV_NAME", oldEnvName)
 	_ = os.Setenv("AZD_TRACE_LOG_FILE", oldTraceFile)

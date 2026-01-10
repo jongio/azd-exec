@@ -109,7 +109,7 @@ Examples:
 
 			// Handle debug mode
 			if debugMode {
-				_ = os.Setenv("AZD_SCRIPT_DEBUG", "true")
+				_ = os.Setenv("AZD_DEBUG", "true")
 			}
 
 			// Handle no-prompt mode

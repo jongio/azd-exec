@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/jongio/azd-core/keyvault"
+	"github.com/jongio/azd-core/shellutil"
 )
 
 // Config holds the configuration for script execution.
@@ -106,7 +107,7 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 	// Auto-detect shell if not specified
 	shell := e.config.Shell
 	if shell == "" {
-		shell = e.detectShell(absPath)
+		shell = shellutil.DetectShell(absPath)
 	}
 
 	// Use script's directory as working directory
@@ -170,7 +171,7 @@ func (e *Executor) executeCommand(ctx context.Context, shell, workingDir, script
 	cmd.Stderr = os.Stderr
 
 	// Add debug output
-	if os.Getenv(envVarScriptDebug) == "true" {
+	if os.Getenv(shellutil.EnvVarDebug) == "true" {
 		e.logDebugInfo(shell, workingDir, scriptOrPath, isInline, cmd.Args)
 	}
 

@@ -212,7 +212,7 @@ All azd environment variables are available to your scripts:
 - Variables from `.azure/<env>/.env` file
 
 **azd-exec Specific:**
-- `AZD_SCRIPT_DEBUG` - Set to "true" when `--debug` flag is used
+- `AZD_DEBUG` - Set to "true" when `--debug` flag is used
 - `AZD_NO_PROMPT` - Set to "true" when `--no-prompt` flag is used
 
 ### Azure Key Vault Integration

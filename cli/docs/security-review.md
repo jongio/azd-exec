@@ -89,12 +89,12 @@ absPath, err := filepath.Abs(scriptPath)  // Resolve to absolute path
 - ✅ Environment variables inherited from parent process (`os.Environ()`)
 - ✅ Azd context variables passed through safely
 - ✅ No sensitive data logged by default
-- ✅ Debug mode explicitly requires `AZD_SCRIPT_DEBUG=true`
+- ✅ Debug mode explicitly requires `AZD_DEBUG=true`
 
 **Debug Output** (Optional, user-controlled):
 ```go
 // executor.go
-if os.Getenv("AZD_SCRIPT_DEBUG") == "true" {
+if os.Getenv("AZD_DEBUG") == "true" {
     fmt.Fprintf(os.Stderr, "Executing: %s %s\n", shell, strings.Join(cmd.Args[1:], " "))
     fmt.Fprintf(os.Stderr, "Working directory: %s\n", workingDir)
 }

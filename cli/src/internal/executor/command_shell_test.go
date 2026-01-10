@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"runtime"
 	"testing"
+
+	"github.com/jongio/azd-core/shellutil"
 )
 
 func TestBuildCommand_Bash(t *testing.T) {
@@ -201,7 +203,6 @@ func TestBuildCommand_CaseInsensitiveShellNames(t *testing.T) {
 }
 
 func TestReadShebang_ValidShebang(t *testing.T) {
-	exec := New(Config{})
 	tmpDir := t.TempDir()
 
 	tests := []struct {
@@ -243,7 +244,7 @@ func TestReadShebang_ValidShebang(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			result := exec.readShebang(scriptPath)
+			result := shellutil.ReadShebang(scriptPath)
 			if result != tt.expected {
 				t.Errorf("Expected %q, got %q", tt.expected, result)
 			}
@@ -252,7 +253,6 @@ func TestReadShebang_ValidShebang(t *testing.T) {
 }
 
 func TestReadShebang_NoShebang(t *testing.T) {
-	exec := New(Config{})
 	tmpDir := t.TempDir()
 
 	tests := []struct {
@@ -280,7 +280,7 @@ func TestReadShebang_NoShebang(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			result := exec.readShebang(scriptPath)
+			result := shellutil.ReadShebang(scriptPath)
 			if result != "" {
 				t.Errorf("Expected empty string, got %q", result)
 			}
@@ -289,10 +289,8 @@ func TestReadShebang_NoShebang(t *testing.T) {
 }
 
 func TestReadShebang_FileErrors(t *testing.T) {
-	exec := New(Config{})
-
 	t.Run("Nonexistent file", func(t *testing.T) {
-		result := exec.readShebang("/nonexistent/file.sh")
+		result := shellutil.ReadShebang("/nonexistent/file.sh")
 		if result != "" {
 			t.Errorf("Expected empty string for nonexistent file, got %q", result)
 		}
