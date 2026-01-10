@@ -61,8 +61,10 @@ type Executor struct {
 // Returns a configured Executor ready to execute scripts.
 // The config is validated before creating the executor.
 func New(config Config) *Executor {
-	// Note: We don't return an error here to maintain backward compatibility.
-	// Invalid config values are caught during execution.
+	// Validate config early to catch errors before execution.
+	// Note: We don't return an error to maintain backward compatibility,
+	// but validation happens here to fail fast on invalid shells.
+	_ = config.Validate()
 	return &Executor{config: config}
 }
 
@@ -86,7 +88,7 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 		return &ValidationError{Field: "scriptPath", Reason: fmt.Sprintf("invalid path: %v", err)}
 	}
 
-	// Check for path traversal attempts
+	// Check for path traversal attempts (after getting absolute path)
 	if strings.Contains(filepath.ToSlash(absPath), "/../") {
 		return &ValidationError{Field: "scriptPath", Reason: "path traversal not allowed"}
 	}
