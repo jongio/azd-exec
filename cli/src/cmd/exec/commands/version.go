@@ -23,9 +23,15 @@ func NewVersionCommand(outputFormat *string) *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			// Set output format from flag
 			if *outputFormat == "json" {
-				cliout.SetFormat("json")
+				if err := cliout.SetFormat("json"); err != nil {
+					cliout.Error("Failed to set output format: %v", err)
+					return
+				}
 			} else {
-				cliout.SetFormat("default")
+				if err := cliout.SetFormat("default"); err != nil {
+					cliout.Error("Failed to set output format: %v", err)
+					return
+				}
 			}
 
 			if cliout.IsJSON() {

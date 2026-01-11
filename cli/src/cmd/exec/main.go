@@ -103,7 +103,9 @@ Examples:
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// Set output format from flag
 			if outputFormat == "json" {
-				cliout.SetFormat("json")
+				if err := cliout.SetFormat("json"); err != nil {
+					return fmt.Errorf("failed to set output format: %w", err)
+				}
 			}
 
 			// Handle working directory change
