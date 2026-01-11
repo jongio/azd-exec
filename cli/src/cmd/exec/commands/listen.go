@@ -2,6 +2,7 @@
 package commands
 
 import (
+	"github.com/jongio/azd-core/cliout"
 	"github.com/spf13/cobra"
 )
 
@@ -21,6 +22,7 @@ func NewListenCommand() *cobra.Command {
 			// In a full implementation, this would start a gRPC server for azd communication.
 			// For now, this extension operates in "exec mode" without persistent listener,
 			// so returning nil is appropriate.
+			cliout.Info("Listen command is not implemented - azd-exec operates in exec mode")
 			return nil
 		},
 	}

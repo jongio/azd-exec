@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jongio/azd-exec/cli/src/internal/testhelpers"
+	"github.com/jongio/azd-core/testutil"
 	"github.com/jongio/azd-exec/cli/src/internal/version"
 )
 
@@ -25,7 +25,7 @@ func TestVersionCommandIntegration(t *testing.T) {
 		{
 			name:       "Default output",
 			outputFlag: "default",
-			wantText:   "azd exec version",
+			wantText:   "azd exec",
 		},
 		{
 			name:       "JSON output",
@@ -50,7 +50,7 @@ func TestVersionCommandIntegration(t *testing.T) {
 			}
 
 			// Capture output
-			output := testhelpers.CaptureOutput(t, func() error {
+			output := testutil.CaptureOutput(t, func() error {
 				return cmd.Execute()
 			})
 
@@ -82,7 +82,7 @@ func TestVersionCommandIntegration_QuietFlag(t *testing.T) {
 	cmd := NewVersionCommand(&outputFormat)
 	cmd.Flags().Set("quiet", "true")
 
-	output := testhelpers.CaptureOutput(t, func() error {
+	output := testutil.CaptureOutput(t, func() error {
 		return cmd.Execute()
 	})
 
@@ -106,7 +106,7 @@ func TestVersionCommandIntegration_JSONFormat(t *testing.T) {
 	outputFormat := "json"
 	cmd := NewVersionCommand(&outputFormat)
 
-	output := testhelpers.CaptureOutput(t, func() error {
+	output := testutil.CaptureOutput(t, func() error {
 		return cmd.Execute()
 	})
 

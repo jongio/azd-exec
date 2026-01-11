@@ -13,6 +13,7 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/jongio/azd-core/cliout"
 	"github.com/jongio/azd-core/keyvault"
 	"github.com/jongio/azd-core/shellutil"
 )
@@ -158,9 +159,9 @@ func (e *Executor) executeCommand(ctx context.Context, shell, workingDir, script
 	}
 	for _, w := range warnings {
 		if w.Key != "" {
-			fmt.Fprintf(os.Stderr, "Warning: failed to resolve Key Vault reference for %s: %v\n", w.Key, w.Err)
+			cliout.Warning("Failed to resolve Key Vault reference for %s: %v", w.Key, w.Err)
 		} else {
-			fmt.Fprintf(os.Stderr, "Warning: %v\n", w.Err)
+			cliout.Warning("%v", w.Err)
 		}
 	}
 	cmd.Env = envVars

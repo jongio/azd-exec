@@ -4,8 +4,8 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
+	"github.com/jongio/azd-core/cliout"
 	"github.com/jongio/azd-exec/cli/src/internal/version"
 	"github.com/spf13/cobra"
 )
@@ -21,22 +21,37 @@ func NewVersionCommand(outputFormat *string) *cobra.Command {
 		Short: "Display the extension version",
 		Long:  `Display the version information for the azd exec extension.`,
 		Run: func(cmd *cobra.Command, args []string) {
-			switch *outputFormat {
-			case "json":
+			// Set output format from flag
+			if *outputFormat == "json" {
+				cliout.SetFormat("json")
+			} else {
+				cliout.SetFormat("default")
+			}
+
+			if cliout.IsJSON() {
+				// JSON output mode
 				output := map[string]string{
 					"version": version.Version,
 				}
 				data, err := json.MarshalIndent(output, "", "  ")
 				if err != nil {
-					fmt.Fprintf(os.Stderr, "Error formatting JSON: %v\n", err)
+					cliout.Error("Error formatting JSON: %v", err)
 					return
 				}
 				fmt.Println(string(data))
-			default:
+			} else {
+				// Human-readable output with colors
 				if quiet {
 					fmt.Println(version.Version)
 				} else {
-					fmt.Printf("azd exec version %s\n", version.Version)
+					cliout.Header("azd exec")
+					cliout.Label("Version", version.Version)
+					if version.BuildDate != "unknown" {
+						cliout.Label("Build Date", version.BuildDate)
+					}
+					if version.GitCommit != "unknown" {
+						cliout.Label("Git Commit", version.GitCommit)
+					}
 				}
 			}
 		},
