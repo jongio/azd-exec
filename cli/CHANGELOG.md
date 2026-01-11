@@ -1,3 +1,7 @@
+## [0.2.31] - 2026-01-11
+
+- Integrate azd-core v0.2.0 and Extract Testing Utilities (#26) (2f465d6)
+
 ## [0.2.30] - 2026-01-09
 
 - Integrate azd-core library for Key Vault reference resolution (#25) (a9deb44)
