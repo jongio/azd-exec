@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jongio/azd-core/cliout"
 	"github.com/jongio/azd-exec/cli/src/cmd/exec/commands"
 	"github.com/jongio/azd-exec/cli/src/internal/executor"
 	"github.com/spf13/cobra"
@@ -48,7 +49,7 @@ var newScriptExecutor = func(config executor.Config) scriptExecutor {
 func main() {
 	rootCmd := newRootCmd()
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		cliout.Error("%v", err)
 		os.Exit(1)
 	}
 }
@@ -100,6 +101,13 @@ Examples:
 			return exec.ExecuteInline(cmd.Context(), scriptInput)
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// Set output format from flag
+			if outputFormat == "json" {
+				if err := cliout.SetFormat("json"); err != nil {
+					return fmt.Errorf("failed to set output format: %w", err)
+				}
+			}
+
 			// Handle working directory change
 			if cwd != "" {
 				if err := os.Chdir(cwd); err != nil {
@@ -109,7 +117,7 @@ Examples:
 
 			// Handle debug mode
 			if debugMode {
-				_ = os.Setenv("AZD_SCRIPT_DEBUG", "true")
+				_ = os.Setenv("AZD_DEBUG", "true")
 			}
 
 			// Handle no-prompt mode

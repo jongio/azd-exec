@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jongio/azd-exec/cli/src/internal/testhelpers"
+	"github.com/jongio/azd-core/testutil"
 )
 
 func TestExecute_FileValidation(t *testing.T) {
@@ -25,7 +25,7 @@ func TestExecute_FileValidation(t *testing.T) {
 	})
 
 	t.Run("Valid script file", func(t *testing.T) {
-		projectsDir := testhelpers.GetTestProjectsDir(t)
+		projectsDir := testutil.FindTestData(t, "tests", "projects")
 
 		// Use OS-appropriate scripts to avoid Windows path translation issues.
 		scriptPath := filepath.Join(projectsDir, "bash", "simple.sh")
@@ -239,7 +239,7 @@ func TestExecutorWithDebugMode(t *testing.T) {
 }
 
 func TestExecutorWithArgs(t *testing.T) {
-	projectsDir := testhelpers.GetTestProjectsDir(t)
+	projectsDir := testutil.FindTestData(t, "tests", "projects")
 
 	scriptPath := filepath.Join(projectsDir, "bash", "with-args.sh")
 	args := []string{"arg1", "arg2"}

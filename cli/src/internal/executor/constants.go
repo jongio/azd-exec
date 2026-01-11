@@ -1,50 +1,32 @@
 package executor
 
+import "github.com/jongio/azd-core/shellutil"
+
 // Shell identifiers used for script execution.
 // These constants define the supported shell types and are used
 // for shell detection and command building.
 const (
 	// shellBash is the Bourne Again Shell (default on most Unix systems).
-	shellBash = "bash"
+	shellBash = shellutil.ShellBash
 
 	// shellCmd is the Windows Command Prompt.
-	shellCmd = "cmd"
+	shellCmd = shellutil.ShellCmd
 
 	// shellPowerShell is Windows PowerShell (5.1 and earlier).
-	shellPowerShell = "powershell"
+	shellPowerShell = shellutil.ShellPowerShell
 
 	// shellPwsh is PowerShell Core (6.0+, cross-platform).
-	shellPwsh = "pwsh"
+	shellPwsh = shellutil.ShellPwsh
 
 	// shellSh is the POSIX shell.
-	shellSh = "sh"
+	shellSh = shellutil.ShellSh
 
 	// shellZsh is the Z Shell.
-	shellZsh = "zsh"
+	shellZsh = shellutil.ShellZsh
 )
 
 // Operating system identifiers.
 const (
 	// osWindows identifies the Windows operating system.
 	osWindows = "windows"
-)
-
-// Environment variable names.
-const (
-	// envVarScriptDebug enables debug output for script execution.
-	// When set to "true", execution details are logged to stderr.
-	envVarScriptDebug = "AZD_SCRIPT_DEBUG"
-)
-
-// File reading constants for shebang detection.
-const (
-	// shebangPrefix is the expected start of a shebang line ("#!").
-	shebangPrefix = "#!"
-
-	// shebangReadSize is the number of bytes to read for shebang detection.
-	// This must be at least len(shebangPrefix) bytes.
-	shebangReadSize = len(shebangPrefix)
-
-	// envCommand is the common env wrapper in shebangs (e.g., #!/usr/bin/env bash).
-	envCommand = "env"
 )

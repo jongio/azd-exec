@@ -13,7 +13,9 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/jongio/azd-core/cliout"
 	"github.com/jongio/azd-core/keyvault"
+	"github.com/jongio/azd-core/shellutil"
 )
 
 // Config holds the configuration for script execution.
@@ -60,8 +62,10 @@ type Executor struct {
 // Returns a configured Executor ready to execute scripts.
 // The config is validated before creating the executor.
 func New(config Config) *Executor {
-	// Note: We don't return an error here to maintain backward compatibility.
-	// Invalid config values are caught during execution.
+	// Validate config early to catch errors before execution.
+	// Note: We don't return an error to maintain backward compatibility,
+	// but validation happens here to fail fast on invalid shells.
+	_ = config.Validate()
 	return &Executor{config: config}
 }
 
@@ -85,7 +89,7 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 		return &ValidationError{Field: "scriptPath", Reason: fmt.Sprintf("invalid path: %v", err)}
 	}
 
-	// Check for path traversal attempts
+	// Check for path traversal attempts (after getting absolute path)
 	if strings.Contains(filepath.ToSlash(absPath), "/../") {
 		return &ValidationError{Field: "scriptPath", Reason: "path traversal not allowed"}
 	}
@@ -106,7 +110,7 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 	// Auto-detect shell if not specified
 	shell := e.config.Shell
 	if shell == "" {
-		shell = e.detectShell(absPath)
+		shell = shellutil.DetectShell(absPath)
 	}
 
 	// Use script's directory as working directory
@@ -155,9 +159,9 @@ func (e *Executor) executeCommand(ctx context.Context, shell, workingDir, script
 	}
 	for _, w := range warnings {
 		if w.Key != "" {
-			fmt.Fprintf(os.Stderr, "Warning: failed to resolve Key Vault reference for %s: %v\n", w.Key, w.Err)
+			cliout.Warning("Failed to resolve Key Vault reference for %s: %v", w.Key, w.Err)
 		} else {
-			fmt.Fprintf(os.Stderr, "Warning: %v\n", w.Err)
+			cliout.Warning("%v", w.Err)
 		}
 	}
 	cmd.Env = envVars
@@ -170,7 +174,7 @@ func (e *Executor) executeCommand(ctx context.Context, shell, workingDir, script
 	cmd.Stderr = os.Stderr
 
 	// Add debug output
-	if os.Getenv(envVarScriptDebug) == "true" {
+	if os.Getenv(shellutil.EnvVarDebug) == "true" {
 		e.logDebugInfo(shell, workingDir, scriptOrPath, isInline, cmd.Args)
 	}
 
