@@ -3,7 +3,7 @@ module github.com/jongio/azd-exec/cli
 go 1.25.5
 
 require (
-	github.com/jongio/azd-core v0.2.0
+	github.com/jongio/azd-core v0.2.1
 	github.com/magefile/mage v1.15.0
 	github.com/spf13/cobra v1.10.2
 )
@@ -26,5 +26,3 @@ require (
 	golang.org/x/sys v0.40.0 // indirect
 	golang.org/x/text v0.33.0 // indirect
 )
-
-replace github.com/jongio/azd-core => ../../azd-core
