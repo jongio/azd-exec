@@ -170,18 +170,18 @@ Create extension patterns guide documenting version management, logging, and str
 - ✅ Logging recommendations provided
 - ✅ Extension structure guidance clear
 
-### 8. Update azd-core v0.3.0 release notes
+### 8. Update azd-core v0.2.0 release notes
 
-Create release notes for azd-core v0.3.0 with testutil and cliout packages.
+Create release notes for azd-core v0.2.0 with testutil and cliout packages.
 
 **Scope**:
-- Create `azd-core/release-notes-v0.3.0.md`
+- Create `azd-core/release-notes-v0.2.0.md`
 - Document new packages (testutil, cliout)
 - Document integration impact (code reduction)
 - Update CHANGELOG.md
 
 **Files to Create**:
-- `azd-core/release-notes-v0.3.0.md`
+- `azd-core/release-notes-v0.2.0.md`
 
 **Files to Update**:
 - `azd-core/CHANGELOG.md`
@@ -341,21 +341,21 @@ Create extension patterns guide documenting version management, logging, and str
 
 **Sections**: Version management, logging, extension structure, testing, CLI output, error handling
 
-### 8. Update azd-core v0.3.0 release notes ✓
+### 8. Update azd-core v0.2.0 release notes ✓
 
-Create release notes for azd-core v0.3.0 with testutil and cliout packages.
+Create release notes for azd-core v0.2.0 with testutil and cliout packages.
 
 **Completed**:
-- ✅ Created comprehensive v0.3.0 release notes (789 lines)
+- ✅ Created comprehensive v0.2.0 release notes (789 lines)
 - ✅ Documented 2 new packages (testutil, cliout)
 - ✅ Documented integration impact (~650 lines saved)
-- ✅ Updated CHANGELOG.md with v0.3.0 entry
+- ✅ Updated CHANGELOG.md with v0.2.0 entry
 - ✅ Migration guide and examples included
 
 **Files Created**:
-- `azd-core/release-notes-v0.3.0.md` (789 lines, 23 KB)
+- `azd-core/release-notes-v0.2.0.md` (789 lines, 23 KB)
 
 **Files Updated**:
-- `azd-core/CHANGELOG.md` (added v0.3.0 section)
+- `azd-core/CHANGELOG.md` (added v0.2.0 section)
 
 **Highlights**: 2 packages, 81 tests, 83-95% coverage, ~650 lines eliminated, Extension Patterns Guide

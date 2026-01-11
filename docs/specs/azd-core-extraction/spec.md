@@ -195,8 +195,8 @@ type ExecutionError struct {
 
 ## Extraction Priority & Roadmap
 
-### Phase 1: High-Value Extraction (v0.3.0)
-**Target**: azd-core v0.3.0
+### Phase 1: High-Value Extraction (v0.2.0)
+**Target**: azd-core v0.2.0
 
 1. **testutil package** (P1)
    - Extract `CaptureOutput`, `FindTestData`, add `TempDir`
@@ -209,8 +209,8 @@ type ExecutionError struct {
 - Enables better testing in azd-app CLI commands
 - Standardizes test infrastructure for future extensions
 
-### Phase 2: Error Standardization (v0.3.0 or v0.4.0)
-**Target**: azd-core v0.3.0 or v0.4.0 (depending on demand)
+### Phase 2: Error Standardization (v0.2.0 or v0.3.0)
+**Target**: azd-core v0.2.0 or v0.3.0 (depending on demand)
 
 2. **errors package** (P3)
    - Extract `ValidationError`
@@ -301,7 +301,7 @@ type ExecutionError struct {
 ## Recommendations
 
 ### Immediate Action (Now)
-1. **Approve testutil extraction** for azd-core v0.3.0
+1. **Approve testutil extraction** for azd-core v0.2.0
 2. Create task: "Extract testhelpers to azd-core/testutil"
 3. Create task: "Migrate azd-exec to use azd-core/testutil"
 4. Create task: "Document extension patterns in azd-core"
@@ -590,8 +590,8 @@ const MaxErrorMessageLength = 500   // Max error message before truncation
 
 ## Combined Extraction Roadmap (azd-exec + azd-app)
 
-### Phase 1: Essential Utilities (v0.3.0)
-**Target**: azd-core v0.3.0
+### Phase 1: Essential Utilities (v0.2.0)
+**Target**: azd-core v0.2.0
 
 1. **testutil package** (from azd-exec) - **P1**
    - Extract `CaptureOutput`, `FindTestData`, add `TempDir`
