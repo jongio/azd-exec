@@ -1,3 +1,7 @@
+## [0.2.32] - 2026-01-13
+
+- chore: upgrade azd-core to v0.3.0 and update related documentation (#28) (7a6ba00)
+
 ## [0.2.31] - 2026-01-11
 
 - Integrate azd-core v0.2.0 and Extract Testing Utilities (#26) (2f465d6)
