@@ -43,7 +43,8 @@ const base = import.meta.env.BASE_URL;
 
       <section class="section">
         <h2>Command Usage</h2>
-        <CodeBlock code="azd exec [script-file-or-command] [flags] [-- script-args...]" language="bash" />
+        <CodeBlock code="azd exec [flags-before-script] <script-file-or-command> [script-args...]" language="bash" />
+        <p class="note">Place azd exec flags (e.g., <code>--cwd</code>, <code>--debug</code>, <code>--environment</code>) before the script. Everything after the script is passed through to the script; the <code>--</code> separator is optional.</p>
         
         <h3>Basic Examples</h3>
         <CodeBlock code={`# Execute a script file
@@ -53,10 +54,10 @@ azd exec ./deploy.sh
 azd exec 'echo "Environment: $AZURE_ENV_NAME"'
 
 # Pass arguments to the script
-azd exec ./build.sh -- --verbose --config release
+azd exec ./build.sh --verbose --config release
 
 # Specify shell explicitly
-azd exec ./setup.ps1 --shell pwsh`} language="bash" />
+azd exec --shell pwsh ./setup.ps1`} language="bash" />
       </section>
 
       <section class="section">
@@ -205,41 +206,41 @@ azd exec version`} language="bash" />
 
         <h3>Shell Specification</h3>
         <CodeBlock code={`# Specify PowerShell
-azd exec ./deploy.ps1 --shell pwsh
+      azd exec --shell pwsh ./deploy.ps1
 
 # Inline PowerShell command
-azd exec 'Write-Host "Hello from $env:AZURE_ENV_NAME"' --shell pwsh
+      azd exec --shell pwsh 'Write-Host "Hello from $env:AZURE_ENV_NAME"'
 
 # Force bash for a .sh file
-azd exec ./script.sh --shell bash`} language="bash" />
+      azd exec --shell bash ./script.sh`} language="bash" />
 
         <h3>Script Arguments</h3>
         <CodeBlock code={`# Pass arguments to the script
-azd exec ./build.sh -- --verbose --config release
+      azd exec ./build.sh --verbose --config release
 
 # Multiple arguments
-azd exec ./deploy.sh -- production --force --no-cache`} language="bash" />
+      azd exec ./deploy.sh production --force --no-cache`} language="bash" />
 
         <h3>Interactive Mode</h3>
         <CodeBlock code={`# Run script in interactive mode
-azd exec ./interactive-setup.sh --interactive
+      azd exec --interactive ./interactive-setup.sh
 
 # Interactive PowerShell script
-azd exec ./wizard.ps1 --shell pwsh --interactive`} language="bash" />
+      azd exec --shell pwsh --interactive ./wizard.ps1`} language="bash" />
 
         <h3>Multi-Environment Deployment</h3>
         <CodeBlock code={`# Deploy to development environment
-azd exec ./deploy.sh --environment dev
+      azd exec --environment dev ./deploy.sh
 
 # Deploy to production
-azd exec ./deploy.sh --environment prod`} language="bash" />
+      azd exec --environment prod ./deploy.sh`} language="bash" />
 
         <h3>Debugging</h3>
         <CodeBlock code={`# Enable debug logging
-azd exec ./deploy.sh --debug
+      azd exec --debug ./deploy.sh
 
 # Check available environment variables
-azd exec 'env | grep AZURE_' --debug`} language="bash" />
+      azd exec --debug 'env | grep AZURE_'`} language="bash" />
 
         <h3>Working with Key Vault</h3>
         <CodeBlock code={`# Set Key Vault reference
@@ -249,7 +250,7 @@ azd env set-secret API_KEY
 azd exec ./deploy.sh
 
 # Fail-fast on Key Vault errors
-azd exec ./deploy.sh --stop-on-keyvault-error`} language="bash" />
+azd exec --stop-on-keyvault-error ./deploy.sh`} language="bash" />
       </section>
 
       <section class="section">

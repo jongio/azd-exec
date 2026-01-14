@@ -45,8 +45,10 @@ Execute a script file or inline command with full access to azd environment vari
 ### Usage
 
 ```bash
-azd exec [script-file-or-command] [flags] [-- script-args...]
+azd exec [flags-before-script] <script-file-or-command> [script-args...]
 ```
+
+Place azd exec flags (like `--cwd`, `--debug`, `--environment`) before the script. Everything after the script is passed through to the script; `--` remains optional if you prefer an explicit separator.
 
 ### Description
 
@@ -68,22 +70,22 @@ azd exec ./deploy.sh
 azd exec 'echo "Environment: $AZURE_ENV_NAME"'
 
 # Specify shell explicitly
-azd exec ./setup.ps1 --shell pwsh
+azd exec --shell pwsh ./setup.ps1
 
 # Run in interactive mode (for scripts with prompts)
-azd exec ./interactive-setup.sh --interactive
+azd exec --interactive ./interactive-setup.sh
 
 # Pass arguments to the script
-azd exec ./build.sh -- --verbose --config release
+azd exec ./build.sh --verbose --config release
 
 # Inline PowerShell command
-azd exec 'Write-Host "Hello from $env:AZURE_ENV_NAME"' --shell pwsh
+azd exec --shell pwsh 'Write-Host "Hello from $env:AZURE_ENV_NAME"'
 
-# Execute with debug logging
-azd exec ./deploy.sh --debug
+# Execute with debug logging (flags before the script)
+azd exec --debug ./deploy.sh
 
-# Use specific environment
-azd exec ./deploy.sh --environment production
+# Use specific environment (flags before the script)
+azd exec --environment production ./deploy.sh
 ```
 
 ### Flags
@@ -108,14 +110,14 @@ azd exec ./deploy.sh --environment production
 
 ### Script Arguments
 
-Arguments after `--` are passed directly to your script:
+Arguments after the script are passed directly to it—no `--` separator required. You can still use `--` if you prefer to explicitly stop flag parsing.
 
 ```bash
 # The script receives: --verbose --config release
-azd exec ./build.sh -- --verbose --config release
+azd exec ./build.sh --verbose --config release
 
 # Inline script with arguments
-azd exec './process.sh "$@"' -- file1.txt file2.txt
+azd exec './process.sh "$@"' file1.txt file2.txt
 ```
 
 ### File vs Inline Execution
@@ -141,10 +143,10 @@ azd exec 'echo $AZURE_ENV_NAME'
 azd exec 'echo "Starting"; echo $AZURE_ENV_NAME; echo "Done"'
 
 # PowerShell inline
-azd exec 'Write-Host "Hello"; Get-Date' --shell pwsh
+azd exec --shell pwsh 'Write-Host "Hello"; Get-Date'
 
 # Complex inline with arguments
-azd exec 'echo "Args: $@"' -- arg1 arg2
+azd exec 'echo "Args: $@"' arg1 arg2
 ```
 
 ### Shell Detection
@@ -380,30 +382,30 @@ azd exec ./deploy.sh
 azd exec 'echo "Deploying to $AZURE_ENV_NAME in $AZURE_LOCATION"'
 
 # Run tests with arguments
-azd exec ./test.sh -- --verbose --coverage
+azd exec ./test.sh --verbose --coverage
 ```
 
 ### Multi-Environment Deployment
 
 ```bash
 # Deploy to development
-azd exec ./deploy.sh --environment dev
+azd exec --environment dev ./deploy.sh
 
 # Deploy to production (with confirmation)
-azd exec ./deploy.sh --environment prod --interactive
+azd exec --environment prod --interactive ./deploy.sh
 ```
 
 ### Debugging Scripts
 
 ```bash
 # Enable debug logging
-azd exec ./deploy.sh --debug
+azd exec --debug ./deploy.sh
 
 # Check what environment variables are available
 azd exec 'env | grep AZURE_' --debug
 
 # PowerShell debugging
-azd exec 'Get-ChildItem Env: | Where-Object Name -like "AZURE_*"' --shell pwsh --debug
+azd exec --shell pwsh --debug 'Get-ChildItem Env: | Where-Object Name -like "AZURE_*"'
 ```
 
 ### Working with Key Vault Secrets
@@ -449,7 +451,7 @@ azd exec ./deploy.sh
 
 ```bash
 # Solution: Specify shell explicitly
-azd exec ./script --shell bash
+azd exec --shell bash ./script
 
 # Or add shebang to script
 echo '#!/bin/bash' | cat - script.sh > temp && mv temp script.sh

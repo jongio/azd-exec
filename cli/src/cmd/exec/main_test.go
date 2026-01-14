@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/jongio/azd-exec/cli/src/internal/executor"
@@ -172,4 +173,41 @@ func TestRunE_DispatchesFileOrInline(t *testing.T) {
 			t.Fatalf("expected Execute not to be called")
 		}
 	})
+}
+
+func TestRunE_AllowsPassthroughArgsWithoutDoubleDash(t *testing.T) {
+	oldNew := newScriptExecutor
+	defer func() { newScriptExecutor = oldNew }()
+
+	fake := &fakeExecutor{}
+	newScriptExecutor = func(cfg executor.Config) scriptExecutor {
+		fake.args = append([]string{}, cfg.Args...)
+		return fake
+	}
+
+	// Avoid changing env/cwd during Execute.
+	debugMode = false
+	noPrompt = false
+	cwd = ""
+	environment = ""
+	traceLogFile = ""
+	traceLogURL = ""
+	shell = ""
+	interactive = false
+
+	cmd := newRootCmd()
+	cmd.SetArgs([]string{"pnpm", "sync", "--skip-sync"})
+
+	if err := cmd.Execute(); err != nil {
+		t.Fatalf("Execute failed: %v", err)
+	}
+
+	expectedArgs := []string{"sync", "--skip-sync"}
+	if !reflect.DeepEqual(fake.args, expectedArgs) {
+		t.Fatalf("expected passthrough args %v, got %v", expectedArgs, fake.args)
+	}
+
+	if fake.inlineContent != "pnpm" {
+		t.Fatalf("expected inline execution of 'pnpm', got %q", fake.inlineContent)
+	}
 }

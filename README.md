@@ -176,31 +176,33 @@ For complete command reference, see [CLI Reference](cli/docs/cli-reference.md).
 ### Specify Shell
 
 ```bash
-azd exec ./deploy.ps1 --shell pwsh
+azd exec --shell pwsh ./deploy.ps1
 
 # Inline with specific shell
-azd exec 'Write-Host $env:AZURE_ENV_NAME' --shell pwsh
+azd exec --shell pwsh 'Write-Host $env:AZURE_ENV_NAME'
 ```
 
 ### Pass Arguments
 
 ```bash
-azd exec ./build.sh -- --verbose --config release
+azd exec ./build.sh --verbose --config release
+# azd exec flags go before the script; script args go after it
+# example with cwd flag: azd exec --cwd /path/to/project ./build.sh --verbose
 ```
 
 ### Set Working Directory
 
 ```bash
-azd exec ./scripts/setup.sh --cwd /path/to/project
+azd exec --cwd /path/to/project ./scripts/setup.sh
 
 # Inline with working directory
-azd exec 'echo $(pwd)' --cwd /tmp
+azd exec --cwd /tmp 'echo $(pwd)'
 ```
 
 ### Interactive Mode
 
 ```bash
-azd exec ./interactive-setup.sh --interactive
+azd exec --interactive ./interactive-setup.sh
 ```
 
 ---
@@ -248,8 +250,8 @@ Write-Host "Resource Group: $env:AZURE_RESOURCE_GROUP"
 **PowerShell Inline**
 
 ```bash
-azd exec 'Write-Host "Hello from $env:AZURE_ENV_NAME"' --shell pwsh
-azd exec 'Get-ChildItem Env: | Where-Object Name -like "AZURE_*"' --shell pwsh
+azd exec --shell pwsh 'Write-Host "Hello from $env:AZURE_ENV_NAME"'
+azd exec --shell pwsh 'Get-ChildItem Env: | Where-Object Name -like "AZURE_*"'
 ```
 
 </td>
@@ -364,7 +366,7 @@ If Key Vault resolution fails (e.g., secret not found, no access, vault doesn't 
 To fail-fast (abort on the first Key Vault resolution error), use:
 
 ```bash
-azd exec ./script.sh --stop-on-keyvault-error
+azd exec --stop-on-keyvault-error ./script.sh
 ```
 
 ### Security Benefits

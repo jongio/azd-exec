@@ -142,6 +142,12 @@ Examples:
 		},
 	}
 
+	// Allow passthrough flags meant for the invoked command without requiring "--".
+	rootCmd.FParseErrWhitelist.UnknownFlags = true
+	// Stop flag parsing after the first script argument so downstream flags are preserved as args.
+	rootCmd.Flags().SetInterspersed(false)
+	rootCmd.PersistentFlags().SetInterspersed(false)
+
 	// Add extension-specific flags
 	rootCmd.PersistentFlags().StringVarP(&outputFormat, "output", "o", "default", "Output format: default or json")
 
