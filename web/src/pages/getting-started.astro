@@ -104,16 +104,16 @@ azd exec ./test-script.ps1`} language="powershell" />
         <CodeBlock code={`azd exec ./my-script.sh`} language="bash" />
 
         <h3>Pass Arguments</h3>
-        <CodeBlock code={`azd exec ./build.sh -- --verbose --config release`} language="bash" />
+        <CodeBlock code={`azd exec ./build.sh --verbose --config release`} language="bash" />
 
         <h3>Specify Shell</h3>
-        <CodeBlock code={`azd exec ./deploy.ps1 --shell pwsh`} language="bash" />
+        <CodeBlock code={`azd exec --shell pwsh ./deploy.ps1`} language="bash" />
 
         <h3>Set Working Directory</h3>
-        <CodeBlock code={`azd exec ./setup.sh --cwd /path/to/project`} language="bash" />
+        <CodeBlock code={`azd exec --cwd /path/to/project ./setup.sh`} language="bash" />
 
         <h3>Interactive Mode</h3>
-        <CodeBlock code={`azd exec ./interactive-setup.sh --interactive`} language="bash" />
+        <CodeBlock code={`azd exec --interactive ./interactive-setup.sh`} language="bash" />
       </section>
 
       <section class="section">
@@ -169,7 +169,7 @@ mysql -u admin -p"$DATABASE_PASSWORD" -h myserver.mysql.database.azure.com`} lan
           By default, if Key Vault resolution fails (e.g., secret not found, no access), azd exec displays a warning but continues. 
           To fail-fast on Key Vault errors, use the <code>--stop-on-keyvault-error</code> flag:
         </p>
-        <CodeBlock code={`azd exec ./script.sh --stop-on-keyvault-error`} language="bash" />
+        <CodeBlock code={`azd exec --stop-on-keyvault-error ./script.sh`} language="bash" />
 
         <p>For more examples, see the <a href={`${base}examples#keyvault`}>Key Vault examples section</a>.</p>
       </section>

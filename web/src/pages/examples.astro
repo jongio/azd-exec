@@ -263,7 +263,7 @@ echo "Environment: $AZURE_ENV_NAME"
 # Use --stop-on-keyvault-error to fail fast
 
 # Run the deployment
-azd exec ./deploy-critical.sh --stop-on-keyvault-error
+azd exec --stop-on-keyvault-error ./deploy-critical.sh
 
 # If we get here, all Key Vault secrets were successfully resolved
 echo "Deployment completed with all secrets verified!"`} language="bash" />
@@ -336,7 +336,7 @@ echo ""
 echo "Resource created successfully!"`} language="bash" />
 
         <h3>Usage</h3>
-        <CodeBlock code={`azd exec ./setup-wizard.sh --interactive`} language="bash" />
+        <CodeBlock code={`azd exec --interactive ./setup-wizard.sh`} language="bash" />
       </section>
 
       <section class="example">

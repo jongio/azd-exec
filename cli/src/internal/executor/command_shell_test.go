@@ -75,6 +75,27 @@ func TestBuildCommand_PowerShell(t *testing.T) {
 	})
 }
 
+func TestBuildCommand_PowerShellInlineArgsAreEmbedded(t *testing.T) {
+	exec := New(Config{
+		Args: []string{"sync", "--", "--skip-sync"},
+	})
+
+	cmd := exec.buildCommand("pwsh", "pnpm", true)
+
+	expected := "pnpm 'sync' '--' '--skip-sync'"
+	if cmd == nil {
+		t.Fatal("buildCommand returned nil")
+	}
+
+	if len(cmd.Args) != 3 {
+		t.Fatalf("expected 3 args for inline PowerShell command, got %d: %v", len(cmd.Args), cmd.Args)
+	}
+
+	if cmd.Args[2] != expected {
+		t.Fatalf("unexpected inline PowerShell command: got %q, want %q", cmd.Args[2], expected)
+	}
+}
+
 func TestBuildCommand_Cmd(t *testing.T) {
 	exec := New(Config{})
 
