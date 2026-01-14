@@ -1,3 +1,7 @@
+## [0.2.33] - 2026-01-14
+
+
+
 ## [0.2.32] - 2026-01-13
 
 - chore: upgrade azd-core to v0.3.0 and update related documentation (#28) (7a6ba00)
