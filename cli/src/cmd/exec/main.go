@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/jongio/azd-core/cliout"
+	"github.com/jongio/azd-core/env"
 	"github.com/jongio/azd-exec/cli/src/cmd/exec/commands"
 	"github.com/jongio/azd-exec/cli/src/internal/executor"
 	"github.com/spf13/cobra"
@@ -127,7 +128,10 @@ Examples:
 
 			// Handle environment selection
 			if environment != "" {
-				_ = os.Setenv("AZURE_ENV_NAME", environment)
+				// Load environment variables from the specified environment
+				if err := env.LoadAzdEnvironment(cmd.Context(), environment); err != nil {
+					return fmt.Errorf("failed to load environment '%s': %w", environment, err)
+				}
 			}
 
 			// Handle trace logging

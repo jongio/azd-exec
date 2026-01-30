@@ -5,8 +5,10 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/jongio/azd-core/env"
 	"github.com/jongio/azd-exec/cli/src/internal/executor"
 )
 
@@ -36,11 +38,11 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 
 	oldDebug := os.Getenv("AZD_DEBUG")
 	oldNoPrompt := os.Getenv("AZD_NO_PROMPT")
-	oldEnvName := os.Getenv("AZURE_ENV_NAME")
 	oldTraceFile := os.Getenv("AZD_TRACE_LOG_FILE")
 	oldTraceURL := os.Getenv("AZD_TRACE_LOG_URL")
 
 	cmd := newRootCmd()
+	cmd.SetContext(context.Background())
 	if setErr := cmd.PersistentFlags().Set("debug", "true"); setErr != nil {
 		t.Fatalf("setting debug flag failed: %v", setErr)
 	}
@@ -50,9 +52,8 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 	if setErr := cmd.PersistentFlags().Set("cwd", newWd); setErr != nil {
 		t.Fatalf("setting cwd flag failed: %v", setErr)
 	}
-	if setErr := cmd.PersistentFlags().Set("environment", "test-env"); setErr != nil {
-		t.Fatalf("setting environment flag failed: %v", setErr)
-	}
+	// Note: -e/--environment flag is not tested here because it now calls 'azd env get-values'
+	// which requires an actual azd environment to exist. See TestLoadAzdEnvironment for unit tests.
 	if setErr := cmd.PersistentFlags().Set("trace-log-file", "trace.log"); setErr != nil {
 		t.Fatalf("setting trace-log-file flag failed: %v", setErr)
 	}
@@ -90,9 +91,6 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 	if os.Getenv("AZD_NO_PROMPT") != "true" {
 		t.Fatalf("expected AZD_NO_PROMPT=true")
 	}
-	if os.Getenv("AZURE_ENV_NAME") != "test-env" {
-		t.Fatalf("expected AZURE_ENV_NAME=test-env")
-	}
 	if os.Getenv("AZD_TRACE_LOG_FILE") != "trace.log" {
 		t.Fatalf("expected AZD_TRACE_LOG_FILE=trace.log")
 	}
@@ -104,9 +102,23 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 	_ = os.Chdir(oldWd)
 	_ = os.Setenv("AZD_DEBUG", oldDebug)
 	_ = os.Setenv("AZD_NO_PROMPT", oldNoPrompt)
-	_ = os.Setenv("AZURE_ENV_NAME", oldEnvName)
 	_ = os.Setenv("AZD_TRACE_LOG_FILE", oldTraceFile)
 	_ = os.Setenv("AZD_TRACE_LOG_URL", oldTraceURL)
+}
+
+// TestLoadAzdEnvironment_Validation verifies that the azd-core env package
+// is correctly integrated. The actual implementation is tested in azd-core/env.
+func TestLoadAzdEnvironment_Validation(t *testing.T) {
+	ctx := context.Background()
+
+	// Just verify the function is accessible and basic validation works
+	err := env.LoadAzdEnvironment(ctx, "")
+	if err == nil {
+		t.Fatal("expected error for empty environment name")
+	}
+	if !strings.Contains(err.Error(), "cannot be empty") {
+		t.Fatalf("unexpected error message: %v", err)
+	}
 }
 
 func TestRunE_DispatchesFileOrInline(t *testing.T) {
