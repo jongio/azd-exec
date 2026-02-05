@@ -1,3 +1,7 @@
+## [0.3.1] - 2026-02-05
+
+- chore: update dependencies and add new changelog entries for upcoming releases (#31) (2acc836)
+
 ## [0.3.0] - 2026-01-30
 
 
