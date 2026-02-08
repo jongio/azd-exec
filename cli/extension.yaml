@@ -13,7 +13,7 @@ examples:
     usage: azd exec ./my-script.sh
   - name: with shell
     description: Execute with specific shell
-    usage: azd exec ./deploy.ps1 --shell pwsh
+    usage: azd exec --shell pwsh ./deploy.ps1
   - name: version
     description: Display extension version
     usage: azd exec version

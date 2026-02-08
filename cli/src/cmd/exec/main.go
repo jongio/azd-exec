@@ -64,8 +64,8 @@ func newRootCmd() *cobra.Command {
 Examples:
 \tazd exec ./setup.sh                           # Execute script file
 \tazd exec 'echo $AZURE_ENV_NAME'               # Inline bash (Linux/macOS)
-\tazd exec "Write-Host 'Hello'" --shell pwsh   # Inline PowerShell
-\tazd exec ./deploy.ps1 --shell pwsh            # Script with shell
+\tazd exec --shell pwsh "Write-Host 'Hello'"   # Inline PowerShell
+\tazd exec --shell pwsh ./deploy.ps1            # Script with shell
 \tazd exec ./build.sh -- --verbose              # Script with args
 \tazd exec ./init.sh -i                         # Interactive mode`,
 		Args: cobra.MinimumNArgs(1),
