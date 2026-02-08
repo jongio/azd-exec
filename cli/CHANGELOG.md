@@ -1,3 +1,8 @@
+## [0.3.2] - 2026-02-08
+
+- chore: update usage examples for shell execution in extension.yaml and registry.json (e0d6970)
+- chore: update registry for v0.3.1 (982a0ee)
+
 ## [0.3.1] - 2026-02-05
 
 - chore: update dependencies and add new changelog entries for upcoming releases (#31) (2acc836)
