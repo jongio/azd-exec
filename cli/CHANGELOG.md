@@ -1,3 +1,7 @@
+## [0.3.3] - 2026-02-10
+
+- Enhance Build and Setup functions for improved local installation process (#32) (667d771)
+
 ## [0.3.2] - 2026-02-08
 
 - chore: update usage examples for shell execution in extension.yaml and registry.json (e0d6970)
