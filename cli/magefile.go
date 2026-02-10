@@ -5,8 +5,11 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"time"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -31,14 +34,51 @@ func All() error {
 	return nil
 }
 
-// Build compiles the CLI binary using azd x build.
+// killExtensionProcesses terminates any running azd exec extension processes.
+func killExtensionProcesses() error {
+	extensionBinaryPrefix := strings.ReplaceAll(extensionID, ".", "-")
+
+	if runtime.GOOS == "windows" {
+		fmt.Println("Stopping any running extension processes...")
+		for _, arch := range []string{"windows-amd64", "windows-arm64"} {
+			procName := extensionBinaryPrefix + "-" + arch
+			_ = exec.Command("powershell", "-NoProfile", "-Command",
+				"Stop-Process -Name '"+procName+"' -Force -ErrorAction SilentlyContinue").Run()
+		}
+	} else {
+		_ = exec.Command("pkill", "-f", extensionBinaryPrefix).Run()
+	}
+	return nil
+}
+
+// runWithEnvRetry runs a command with environment variables, retrying up to 3 times on failure.
+func runWithEnvRetry(env map[string]string, cmd string, args ...string) error {
+	const maxRetries = 3
+	var err error
+	for i := 0; i < maxRetries; i++ {
+		if i > 0 {
+			delay := time.Duration(i*5) * time.Second
+			fmt.Printf("  ⚠️  Attempt %d/%d failed, retrying in %s...\n", i, maxRetries, delay)
+			time.Sleep(delay)
+		}
+		if err = sh.RunWithV(env, cmd, args...); err == nil {
+			return nil
+		}
+	}
+	return err
+}
+
+// Build compiles the CLI binary and installs it locally using azd x build.
 func Build() error {
+	_ = killExtensionProcesses()
+	time.Sleep(500 * time.Millisecond)
+
 	// Ensure azd extensions are set up (enables extensions + installs azd x if needed)
 	if err := ensureAzdExtensions(); err != nil {
 		return err
 	}
 
-	fmt.Println("Building azd exec extension...")
+	fmt.Println("Building and installing azd exec extension...")
 
 	// Get version from extension.yaml
 	version, err := getVersion()
@@ -52,17 +92,13 @@ func Build() error {
 		"EXTENSION_VERSION": version,
 	}
 
-	// Build using azd x build (always skip install - we'll do proper publish workflow)
-	if err := sh.RunWithV(env, "azd", "x", "build", "--skip-install"); err != nil {
+	// Build and install directly using azd x build
+	if err := runWithEnvRetry(env, "azd", "x", "build"); err != nil {
 		return fmt.Errorf("azd x build failed: %w", err)
 	}
 
 	fmt.Printf("✅ Build complete! Version: %s\n", version)
-	fmt.Println("\n📝 Next steps for local testing:")
-	fmt.Println("   1. Run 'mage pack' to package the extension")
-	fmt.Println("   2. Run 'mage publish' to update local registry")
-	fmt.Println("   3. Run 'azd extension install jongio.azd.exec --source local' to install")
-	fmt.Println("\n   Or run 'mage setup' to do all three steps at once")
+	fmt.Println("   Run 'azd exec version' to verify")
 	return nil
 }
 
@@ -115,41 +151,15 @@ func Publish() error {
 	return sh.RunV("azd", "x", "publish")
 }
 
-// Setup runs the complete local development setup: build -> pack -> publish -> install.
-// This is the recommended way to set up the extension for local testing.
+// Setup runs the complete local development setup: build -> install.
+// For most development, 'mage build' is sufficient since azd x build handles installation.
+// Use 'mage pack' and 'mage publish' separately when testing the release workflow.
 func Setup() error {
-	fmt.Println("🚀 Setting up extension for local development...\n")
+	fmt.Println("🚀 Setting up extension for local development...")
+	fmt.Println()
 
-	// Step 1: Ensure local registry exists
-	if err := ensureLocalRegistry(); err != nil {
-		return err
-	}
-
-	// Step 2: Build
-	fmt.Println("\n[1/4] Building...")
 	if err := Build(); err != nil {
 		return err
-	}
-
-	// Step 3: Pack
-	fmt.Println("\n[2/4] Packaging...")
-	if err := Pack(); err != nil {
-		return err
-	}
-
-	// Step 3: Publish
-	fmt.Println("\n[3/4] Publishing to local registry...")
-	if err := Publish(); err != nil {
-		return err
-	}
-
-	// Step 4: Install
-	fmt.Println("\n[4/4] Installing...")
-	// azd may skip installing if the same version is already installed.
-	// Uninstall first to ensure the local build is actually refreshed.
-	_ = sh.RunV("azd", "extension", "uninstall", extensionID)
-	if err := sh.RunV("azd", "extension", "install", extensionID, "--source", "local", "--force"); err != nil {
-		return fmt.Errorf("installation failed: %w", err)
 	}
 
 	fmt.Println("\n✅ Setup complete!")
@@ -158,6 +168,7 @@ func Setup() error {
 }
 
 // ensureLocalRegistry creates the local extension registry if it doesn't exist.
+// This is used by Pack/Publish workflows for testing the release pipeline locally.
 func ensureLocalRegistry() error {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
