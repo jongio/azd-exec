@@ -5,8 +5,11 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
+	"time"
 
 	"github.com/magefile/mage/mg"
 	"github.com/magefile/mage/sh"
@@ -31,8 +34,45 @@ func All() error {
 	return nil
 }
 
+// killExtensionProcesses terminates any running azd exec extension processes.
+func killExtensionProcesses() error {
+	extensionBinaryPrefix := strings.ReplaceAll(extensionID, ".", "-")
+
+	if runtime.GOOS == "windows" {
+		fmt.Println("Stopping any running extension processes...")
+		for _, arch := range []string{"windows-amd64", "windows-arm64"} {
+			procName := extensionBinaryPrefix + "-" + arch
+			_ = exec.Command("powershell", "-NoProfile", "-Command",
+				"Stop-Process -Name '"+procName+"' -Force -ErrorAction SilentlyContinue").Run()
+		}
+	} else {
+		_ = exec.Command("pkill", "-f", extensionBinaryPrefix).Run()
+	}
+	return nil
+}
+
+// runWithEnvRetry runs a command with environment variables, retrying up to 3 times on failure.
+func runWithEnvRetry(env map[string]string, cmd string, args ...string) error {
+	const maxRetries = 3
+	var err error
+	for i := 0; i < maxRetries; i++ {
+		if i > 0 {
+			delay := time.Duration(i*5) * time.Second
+			fmt.Printf("  ⚠️  Attempt %d/%d failed, retrying in %s...\n", i, maxRetries, delay)
+			time.Sleep(delay)
+		}
+		if err = sh.RunWithV(env, cmd, args...); err == nil {
+			return nil
+		}
+	}
+	return err
+}
+
 // Build compiles the CLI binary and installs it locally using azd x build.
 func Build() error {
+	_ = killExtensionProcesses()
+	time.Sleep(500 * time.Millisecond)
+
 	// Ensure azd extensions are set up (enables extensions + installs azd x if needed)
 	if err := ensureAzdExtensions(); err != nil {
 		return err
@@ -53,7 +93,7 @@ func Build() error {
 	}
 
 	// Build and install directly using azd x build
-	if err := sh.RunWithV(env, "azd", "x", "build"); err != nil {
+	if err := runWithEnvRetry(env, "azd", "x", "build"); err != nil {
 		return fmt.Errorf("azd x build failed: %w", err)
 	}
 
