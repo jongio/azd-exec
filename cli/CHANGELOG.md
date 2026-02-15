@@ -1,3 +1,7 @@
+## [0.3.4] - 2026-02-15
+
+- Remove extension preview/alpha requirement (#33) (0443ca1)
+
 ## [0.3.3] - 2026-02-10
 
 - Enhance Build and Setup functions for improved local installation process (#32) (667d771)
