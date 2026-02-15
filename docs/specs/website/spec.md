@@ -118,7 +118,7 @@ web/
 
 **Sections**:
 1. Prerequisites (azd installed)
-2. Enable Extensions & Install
+2. Install
 3. Verify Installation
 4. Run Your First Script
 5. Script Security Best Practices

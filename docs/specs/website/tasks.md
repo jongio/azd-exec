@@ -262,7 +262,7 @@ tags: [tasks, website, tracking]
    - Import Layout, CodeBlock, InstallTabs
    - Sections:
      1. Prerequisites (azd installed)
-     2. Enable Extensions & Install (InstallTabs)
+     2. Install (InstallTabs)
      3. Verify Installation (azd exec version)
      4. Run Your First Script (example script)
      5. Security Best Practices (list)
