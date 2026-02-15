@@ -131,12 +131,9 @@ curl -fsSL https://aka.ms/install-azd.sh | bash
 ```
 </details>
 
-### 2. Enable Extensions & Install azd-exec
+### 2. Install azd-exec
 
 ```bash
-# Enable azd extensions
-azd config set alpha.extension.enabled on
-
 # Add the extension registry
 azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
 

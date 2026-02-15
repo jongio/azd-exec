@@ -12,7 +12,6 @@ Want to test changes from a pull request before they're merged? Follow this guid
 ## Prerequisites
 
 - [Azure Developer CLI (azd)](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd) installed
-- Extensions enabled: `azd config set alpha.extension.enabled on`
 
 ## When Builds Are Available
 
@@ -225,20 +224,17 @@ iex "& { $(irm https://raw.githubusercontent.com/jongio/azd-exec/main/cli/script
 # 1. Download registry (from PR comment)
 curl -L -o pr-registry.json https://github.com/jongio/azd-exec/releases/download/azd-ext-jongio-azd-exec_0.1.0-pr456/pr-registry.json
 
-# 2. Enable extensions (one-time)
-azd config set alpha.extension.enabled on
-
-# 3. Add registry
+# 2. Add registry
 azd extension source add -n pr-456 -t file -l "$(pwd)/pr-registry.json"
 
-# 4. Install
+# 3. Install
 azd extension install jongio.azd.exec --version 0.1.0-pr456
 
-# 5. Test
+# 4. Test
 azd exec version
 azd exec ./my-script.sh
 
-# 6. When done, cleanup
+# 5. When done, cleanup
 azd extension uninstall jongio.azd.exec
 azd extension source remove pr-456
 rm pr-registry.json
