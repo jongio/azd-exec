@@ -28,11 +28,8 @@ const platforms = [
     commands: `# Install Azure Developer CLI
 winget install microsoft.azd
 
-# Enable extensions
-azd config set alpha.extension.enabled on
-
 # Add extension source
-azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+azd extension source add -n jongio -t url -l https://jongio.github.io/azd-extensions/registry.json
 
 # Install extension
 azd extension install jongio.azd.exec`,
@@ -46,11 +43,8 @@ azd extension install jongio.azd.exec`,
     commands: `# Install Azure Developer CLI
 brew tap azure/azd && brew install azd
 
-# Enable extensions
-azd config set alpha.extension.enabled on
-
 # Add extension source
-azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+azd extension source add -n jongio -t url -l https://jongio.github.io/azd-extensions/registry.json
 
 # Install extension
 azd extension install jongio.azd.exec`,
@@ -64,11 +58,8 @@ azd extension install jongio.azd.exec`,
     commands: `# Install Azure Developer CLI
 curl -fsSL https://aka.ms/install-azd.sh | bash
 
-# Enable extensions
-azd config set alpha.extension.enabled on
-
 # Add extension source
-azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+azd extension source add -n jongio -t url -l https://jongio.github.io/azd-extensions/registry.json
 
 # Install extension
 azd extension install jongio.azd.exec`,

@@ -13,7 +13,7 @@ NC='\033[0m' # No Color
 
 REPO="jongio/azd-exec"
 EXTENSION_ID="jongio.azd.exec"
-STABLE_REGISTRY_URL="https://raw.githubusercontent.com/$REPO/refs/heads/main/registry.json"
+STABLE_REGISTRY_URL="https://jongio.github.io/azd-extensions/registry.json"
 
 echo -e "${CYAN}🔄 Restoring stable azd exec extension${NC}"
 echo ""
@@ -44,8 +44,8 @@ rm -f $HOME/pr-registry.json
 # Step 4: Add stable registry source
 echo -e "${GRAY}🔗 Adding stable registry source...${NC}"
 # Remove if exists
-azd extension source remove "azd-exec" 2>/dev/null || true
-azd extension source add -n "azd-exec" -t url -l "$STABLE_REGISTRY_URL"
+azd extension source remove "jongio" 2>/dev/null || true
+azd extension source add -n "jongio" -t url -l "$STABLE_REGISTRY_URL"
 if [ $? -ne 0 ]; then
     echo -e "${RED}❌ Failed to add stable registry source${NC}"
     exit 1

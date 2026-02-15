@@ -19,10 +19,8 @@ if ! command -v azd &> /dev/null; then
     exit 1
 fi
 
-# Check if azd x extensions are enabled
+# Check if azd x extension is available
 if ! azd extension list &> /dev/null; then
-    echo "⚠️  azd extensions not enabled. Enabling..."
-    azd config set alpha.extension.enabled on
     echo "📦 Installing microsoft.azd.extensions..."
     azd extension install microsoft.azd.extensions
 fi
