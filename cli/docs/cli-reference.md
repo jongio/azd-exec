@@ -17,7 +17,7 @@ The `azd exec` extension allows you to execute scripts and commands with full ac
 
 ```bash
 # Add the extension registry
-azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+azd extension source add -n jongio -t url -l https://jongio.github.io/azd-extensions/registry.json
 
 # Install the extension
 azd extension install jongio.azd.exec
@@ -354,7 +354,7 @@ Both invoke the same functionality. New projects should use `azd exec`.
 
 ```bash
 # 1. Add registry
-azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+azd extension source add -n jongio -t url -l https://jongio.github.io/azd-extensions/registry.json
 
 # 2. Install extension
 azd extension install jongio.azd.exec

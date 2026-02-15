@@ -135,7 +135,7 @@ curl -fsSL https://aka.ms/install-azd.sh | bash
 
 ```bash
 # Add the extension registry
-azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+azd extension source add -n jongio -t url -l https://jongio.github.io/azd-extensions/registry.json
 
 # Install the extension
 azd extension install jongio.azd.exec

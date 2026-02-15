@@ -121,7 +121,7 @@ azd extension source remove pr-123
 rm pr-registry.json
 
 # Add stable registry and install
-azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+azd extension source add -n jongio -t url -l https://jongio.github.io/azd-extensions/registry.json
 azd extension install jongio.azd.exec
 ```
 
@@ -240,7 +240,7 @@ azd extension source remove pr-456
 rm pr-registry.json
 
 # 7. Back to stable
-azd extension source add -n azd-exec -t url -l https://raw.githubusercontent.com/jongio/azd-exec/main/registry.json
+azd extension source add -n jongio -t url -l https://jongio.github.io/azd-extensions/registry.json
 azd extension install jongio.azd.exec
 ```
 
