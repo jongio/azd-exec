@@ -397,7 +397,7 @@ Binary created in `cli/bin/exec`.
 
 ### Prerequisites
 
-- Go 1.25.5 or later
+- Go 1.26.0 or later
 - golangci-lint
 - Node.js 20+ (for cspell)
 
