@@ -13,6 +13,7 @@ import (
 	"github.com/jongio/azd-core/env"
 	"github.com/jongio/azd-exec/cli/src/cmd/exec/commands"
 	"github.com/jongio/azd-exec/cli/src/internal/executor"
+	"github.com/jongio/azd-exec/cli/src/internal/skills"
 	"github.com/spf13/cobra"
 )
 
@@ -140,6 +141,13 @@ Examples:
 			}
 			if traceLogURL != "" {
 				_ = os.Setenv("AZD_TRACE_LOG_URL", traceLogURL)
+			}
+
+			// Install Copilot skill
+			if err := skills.InstallSkill(); err != nil {
+				if debugMode {
+					fmt.Fprintf(os.Stderr, "Warning: failed to install copilot skill: %v\n", err)
+				}
 			}
 
 			return nil
