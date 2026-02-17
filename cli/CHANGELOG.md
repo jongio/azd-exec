@@ -1,3 +1,7 @@
+## [0.3.5] - 2026-02-17
+
+- feat: add copilot skills support and Go 1.26.0 (#34) (2d5e740)
+
 ## [0.3.4] - 2026-02-15
 
 - Remove extension preview/alpha requirement (#33) (0443ca1)
