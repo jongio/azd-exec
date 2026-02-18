@@ -1,3 +1,7 @@
+## [0.3.6] - 2026-02-18
+
+- Update azd-core to v0.5.0 (#35) (f670ee6)
+
 ## [0.3.5] - 2026-02-17
 
 - feat: add copilot skills support and Go 1.26.0 (#34) (2d5e740)
