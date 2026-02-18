@@ -3,7 +3,7 @@ module github.com/jongio/azd-exec/cli
 go 1.26.0
 
 require (
-	github.com/jongio/azd-core v0.4.4
+	github.com/jongio/azd-core v0.5.0
 	github.com/magefile/mage v1.15.0
 	github.com/spf13/cobra v1.10.2
 )
