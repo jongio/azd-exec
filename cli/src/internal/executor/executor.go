@@ -251,8 +251,8 @@ func (e *Executor) hasKeyVaultReferences(envVars []string) bool {
 
 // getDefaultShellForOS returns the default shell for the current operating system.
 func getDefaultShellForOS() string {
-	if runtime.GOOS == osWindows {
-		return shellPowerShell
+	if runtime.GOOS == "windows" {
+		return shellutil.ShellPowerShell
 	}
-	return shellBash
+	return shellutil.ShellBash
 }

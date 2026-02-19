@@ -3,17 +3,19 @@ package executor
 import (
 	"os/exec"
 	"strings"
+
+	"github.com/jongio/azd-core/shellutil"
 )
 
 // validShells maps known shell names to whether they're valid.
 // This is used for validation and shell-specific argument construction.
 var validShells = map[string]bool{
-	shellBash:       true,
-	shellSh:         true,
-	shellZsh:        true,
-	shellPwsh:       true,
-	shellPowerShell: true,
-	shellCmd:        true,
+	shellutil.ShellBash:       true,
+	shellutil.ShellSh:         true,
+	shellutil.ShellZsh:        true,
+	shellutil.ShellPwsh:       true,
+	shellutil.ShellPowerShell: true,
+	shellutil.ShellCmd:        true,
 }
 
 // buildCommand builds the exec.Cmd for the given shell and script.
@@ -32,20 +34,20 @@ func (e *Executor) buildCommand(shell, scriptOrPath string, isInline bool) *exec
 	shellLower := strings.ToLower(shell)
 
 	switch shellLower {
-	case shellBash, shellSh, shellZsh:
+	case shellutil.ShellBash, shellutil.ShellSh, shellutil.ShellZsh:
 		if isInline {
 			cmdArgs = []string{shell, "-c", scriptOrPath}
 		} else {
 			cmdArgs = []string{shell, scriptOrPath}
 		}
-	case shellPwsh, shellPowerShell:
+	case shellutil.ShellPwsh, shellutil.ShellPowerShell:
 		if isInline {
 			cmdArgs = []string{shell, "-Command", e.buildPowerShellInlineCommand(scriptOrPath)}
 			skipAppendArgs = true
 		} else {
 			cmdArgs = []string{shell, "-File", scriptOrPath}
 		}
-	case shellCmd:
+	case shellutil.ShellCmd:
 		cmdArgs = []string{shell, "/c", scriptOrPath}
 	default:
 		// Unknown shell: use Unix-like -c pattern as fallback
