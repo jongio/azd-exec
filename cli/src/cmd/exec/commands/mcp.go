@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/jongio/azd-core/azdextutil"
+	"github.com/jongio/azd-core/security"
 	"github.com/jongio/azd-core/shellutil"
 	"github.com/jongio/azd-exec/cli/src/internal/version"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -135,7 +136,7 @@ func handleExecScript(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to determine project directory: %v", err)), nil
 	}
 
-	validPath, err := azdextutil.ValidatePath(scriptPath, projectDir)
+	validPath, err := security.ValidatePathWithinBases(scriptPath, projectDir)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid script path: %v", err)), nil
 	}
@@ -320,13 +321,34 @@ func handleGetEnvironment(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallTo
 	for _, e := range os.Environ() {
 		parts := strings.SplitN(e, "=", 2)
 		if len(parts) == 2 {
-			key := strings.ToUpper(parts[0])
+			name := parts[0]
+			key := strings.ToUpper(name)
+			matched := false
 			for _, prefix := range allowedPrefixes {
 				if strings.HasPrefix(key, prefix) {
-					vars = append(vars, envVar{Key: parts[0], Value: parts[1]})
+					matched = true
 					break
 				}
 			}
+			if !matched {
+				continue
+			}
+
+			// Exclude known secret-bearing variable names
+			secretPatterns := []string{"SECRET", "PASSWORD", "KEY", "TOKEN", "CREDENTIAL", "CERTIFICATE"}
+			isSecret := false
+			upperName := strings.ToUpper(name)
+			for _, pattern := range secretPatterns {
+				if strings.Contains(upperName, pattern) {
+					isSecret = true
+					break
+				}
+			}
+			if isSecret {
+				continue
+			}
+
+			vars = append(vars, envVar{Key: name, Value: parts[1]})
 		}
 	}
 
@@ -398,17 +420,17 @@ func buildShellArgs(shell, scriptOrCmd string, isInline bool, extraArgs []string
 		return args
 	case "powershell", "pwsh":
 		if isInline {
-			return []string{shell, "-NoProfile", "-Command", scriptOrCmd}
+			return []string{shellLower, "-NoProfile", "-Command", scriptOrCmd}
 		}
-		args := []string{shell, "-NoProfile", "-File", scriptOrCmd}
+		args := []string{shellLower, "-NoProfile", "-File", scriptOrCmd}
 		args = append(args, extraArgs...)
 		return args
 	default:
 		// bash, sh, zsh
 		if isInline {
-			return []string{shell, "-c", scriptOrCmd}
+			return []string{shellLower, "-c", scriptOrCmd}
 		}
-		args := []string{shell, scriptOrCmd}
+		args := []string{shellLower, scriptOrCmd}
 		args = append(args, extraArgs...)
 		return args
 	}
