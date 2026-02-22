@@ -9,13 +9,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/azure/azure-dev/cli/azd/pkg/azdext"
 	"github.com/jongio/azd-core/cliout"
 	"github.com/jongio/azd-core/env"
 	"github.com/jongio/azd-exec/cli/src/cmd/exec/commands"
 	"github.com/jongio/azd-exec/cli/src/internal/executor"
 	"github.com/jongio/azd-exec/cli/src/internal/skills"
 	"github.com/spf13/cobra"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 var (
@@ -104,8 +104,19 @@ Examples:
 			return exec.ExecuteInline(cmd.Context(), scriptInput)
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			// Hydrate context with TRACEPARENT for distributed trace correlation
-			cmd.SetContext(azdext.NewContext())
+			// Inject OTel trace context from env vars while preserving cobra's signal handling
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			if parent := os.Getenv("TRACEPARENT"); parent != "" {
+				tc := propagation.TraceContext{}
+				ctx = tc.Extract(ctx, propagation.MapCarrier{
+					"traceparent": parent,
+					"tracestate":  os.Getenv("TRACESTATE"),
+				})
+			}
+			cmd.SetContext(ctx)
 
 			// Set output format from flag
 			if outputFormat == "json" {
