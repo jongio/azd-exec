@@ -314,11 +314,19 @@ func handleGetEnvironment(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallTo
 		return mcp.NewToolResultError("Rate limit exceeded. Please wait before making more requests."), nil
 	}
 
+	allowedPrefixes := []string{"AZD_", "AZURE_", "ARM_", "DOTNET_", "NODE_", "PYTHON"}
+
 	var vars []envVar
 	for _, e := range os.Environ() {
 		parts := strings.SplitN(e, "=", 2)
 		if len(parts) == 2 {
-			vars = append(vars, envVar{Key: parts[0], Value: parts[1]})
+			key := strings.ToUpper(parts[0])
+			for _, prefix := range allowedPrefixes {
+				if strings.HasPrefix(key, prefix) {
+					vars = append(vars, envVar{Key: parts[0], Value: parts[1]})
+					break
+				}
+			}
 		}
 	}
 
