@@ -7,11 +7,11 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
 
+	"github.com/jongio/azd-core/azdextutil"
 	"github.com/jongio/azd-core/shellutil"
 	"github.com/jongio/azd-exec/cli/src/internal/version"
 	"github.com/mark3labs/mcp-go/mcp"
@@ -124,18 +124,18 @@ func handleExecScript(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 
 	shell, _ := getStringParam(args, "shell")
 	if shell != "" {
-		if err := validateShellName(shell); err != nil {
+		if err := azdextutil.ValidateShellName(shell); err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid shell: %v", err)), nil
 		}
 	}
 
 	// Validate script path for security
-	projectDir, err := getProjectDir("AZD_EXEC_PROJECT_DIR")
+	projectDir, err := azdextutil.GetProjectDir("AZD_EXEC_PROJECT_DIR")
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to determine project directory: %v", err)), nil
 	}
 
-	validPath, err := validatePath(scriptPath, projectDir)
+	validPath, err := azdextutil.ValidatePath(scriptPath, projectDir)
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Invalid script path: %v", err)), nil
 	}
@@ -213,7 +213,7 @@ func handleExecInline(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 
 	shell, _ := getStringParam(args, "shell")
 	if shell != "" {
-		if err := validateShellName(shell); err != nil {
+		if err := azdextutil.ValidateShellName(shell); err != nil {
 			return mcp.NewToolResultError(fmt.Sprintf("Invalid shell: %v", err)), nil
 		}
 	}
@@ -406,60 +406,4 @@ func buildShellArgs(shell, scriptOrCmd string, isInline bool, extraArgs []string
 	}
 }
 
-// validateShellName validates that a shell name is one of the known safe values.
-func validateShellName(shell string) error {
-	valid := map[string]bool{
-		"bash": true, "sh": true, "zsh": true,
-		"pwsh": true, "powershell": true, "cmd": true,
-	}
-	if shell != "" && !valid[strings.ToLower(shell)] {
-		return fmt.Errorf("invalid shell %q: must be one of bash, sh, zsh, pwsh, powershell, cmd", shell)
-	}
-	return nil
-}
-
-// validatePath ensures a path is safe: resolves to absolute, no traversal, within allowed base.
-func validatePath(path string, allowedBase string) (string, error) {
-	if path == "" {
-		return "", fmt.Errorf("path cannot be empty")
-	}
-
-	if strings.Contains(path, "..") {
-		return "", fmt.Errorf("path traversal not allowed")
-	}
-
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return "", fmt.Errorf("failed to resolve path: %w", err)
-	}
-	absPath = filepath.Clean(absPath)
-
-	absBase, err := filepath.Abs(allowedBase)
-	if err != nil {
-		return "", fmt.Errorf("failed to resolve base directory: %w", err)
-	}
-	absBase = filepath.Clean(absBase)
-
-	if !strings.HasPrefix(absPath, absBase+string(filepath.Separator)) && absPath != absBase {
-		return "", fmt.Errorf("path %q is outside allowed directory", filepath.Base(path))
-	}
-
-	return absPath, nil
-}
-
-// getProjectDir returns the project directory from an env var, falling back to cwd.
-func getProjectDir(envVar string) (string, error) {
-	dir := os.Getenv(envVar)
-	if dir == "" {
-		var err error
-		dir, err = os.Getwd()
-		if err != nil {
-			return "", fmt.Errorf("failed to get working directory: %w", err)
-		}
-	}
-	absDir, err := filepath.Abs(dir)
-	if err != nil {
-		return "", fmt.Errorf("failed to resolve project directory: %w", err)
-	}
-	return filepath.Clean(absDir), nil
-}
+ 

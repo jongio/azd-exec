@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/jongio/azd-core/azdextutil"
 	"github.com/jongio/azd-core/cliout"
 	"github.com/jongio/azd-core/env"
 	"github.com/jongio/azd-exec/cli/src/cmd/exec/commands"
@@ -103,6 +104,9 @@ Examples:
 			return exec.ExecuteInline(cmd.Context(), scriptInput)
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// Hydrate context with TRACEPARENT for distributed trace correlation
+			cmd.SetContext(azdextutil.SetupTracingFromEnv(cmd.Context()))
+
 			// Set output format from flag
 			if outputFormat == "json" {
 				if err := cliout.SetFormat("json"); err != nil {
