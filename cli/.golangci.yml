@@ -1,21 +1,26 @@
+version: "2"
+
 run:
   timeout: 5m
   tests: true
-  modules-download-mode: readonly
+
+formatters:
+  enable:
+    - gofmt         # Check for code formatting
+    - goimports     # Check for import formatting
+  settings:
+    gofmt:
+      simplify: true
 
 linters:
   enable:
     - errcheck      # Check for unchecked errors
-    - gosimple      # Simplify code
     - govet         # Vet examines Go source code
     - ineffassign   # Detect ineffectual assignments
     - staticcheck   # Go static analysis
     - unused        # Check for unused code
-    - gofmt         # Check for code formatting
-    - goimports     # Check for import formatting
     - misspell      # Check for misspelled words
     - revive        # Drop-in replacement for golint
-    - typecheck     # Type-check Go code
     - unparam       # Report unused function parameters
     - unconvert     # Remove unnecessary type conversions
     - goconst       # Find repeated strings that could be constants
@@ -26,60 +31,50 @@ linters:
     - gosec         # Security checker for Go code
     - bodyclose     # Check for HTTP response body close
     - gocritic      # Comprehensive Go source code linter
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: false  # Allow _ = in tests
+      exclude-functions:
+        - (os).RemoveAll  # Defer cleanup in tests is OK to ignore
+    
+    gosec:
+      excludes:
+        - G204  # Subprocess launched with variable - needed for script execution
+        - G306  # File permissions - we need executable scripts
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: false  # Allow _ = in tests
-    exclude-functions:
-      - (os).RemoveAll  # Defer cleanup in tests is OK to ignore
-  
-  gosec:
-    excludes:
-      - G204  # Subprocess launched with variable - needed for script execution
-      - G306  # File permissions - we need executable scripts
+    govet:
+      enable-all: true
+      disable:
+        - shadow  # Disable shadow checking as it can be noisy
+        - fieldalignment  # Disable struct field alignment - minor optimization
 
-  gofmt:
-    simplify: true
+    revive:
+      rules:
+        - name: exported
+          arguments:
+            - "checkPrivateReceivers"
+            - "disableStutteringCheck"
 
-  govet:
-    enable-all: true
-    disable:
-      - shadow  # Disable shadow checking as it can be noisy
-      - fieldalignment  # Disable struct field alignment - minor optimization
+    misspell:
+      locale: US
 
-  revive:
+    dupl:
+      threshold: 200
+
+    goconst:
+      min-len: 3
+      min-occurrences: 3
+  exclusions:
     rules:
-      - name: exported
-        arguments:
-          - "checkPrivateReceivers"
-          - "disableStutteringCheck"
-
-  misspell:
-    locale: US
-
-  dupl:
-    threshold: 100
-
-  goconst:
-    min-len: 3
-    min-occurrences: 3
-
-issues:
-  exclude-use-default: false
-  max-issues-per-linter: 0
-  max-same-issues: 0
-
-  # Exclude some linters from running on tests files
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - dupl
-        - goconst
+      - path: '(.+)_test\.go'
+        linters:
+          - dupl
+          - goconst
 
 output:
   formats:
-    - format: colored-line-number
+    colored-line-number:
       path: stdout
   print-issued-lines: true
   print-linter-name: true

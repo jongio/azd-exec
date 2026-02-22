@@ -29,7 +29,7 @@ func TestExecute_FileValidation(t *testing.T) {
 
 		// Use OS-appropriate scripts to avoid Windows path translation issues.
 		scriptPath := filepath.Join(projectsDir, "bash", "simple.sh")
-		if runtime.GOOS == osWindows {
+		if runtime.GOOS == "windows" {
 			scriptPath = filepath.Join(projectsDir, "powershell", "simple.ps1")
 		}
 
@@ -186,8 +186,8 @@ func TestRunCommand_ErrorHandling(t *testing.T) {
 	exitCmd := "exit 1"
 	missingCmd := "nonexistent-command-xyz"
 	missingFile := "/nonexistent/file.sh"
-	if runtime.GOOS == osWindows {
-		shell = shellCmd
+	if runtime.GOOS == "windows" {
+		shell = "cmd"
 		exitCmd = "exit /b 1"
 		missingCmd = "nonexistent-command-xyz"
 		missingFile = "C:\\nonexistent\\file.cmd"
@@ -243,7 +243,7 @@ func TestExecutorWithArgs(t *testing.T) {
 
 	scriptPath := filepath.Join(projectsDir, "bash", "with-args.sh")
 	args := []string{"arg1", "arg2"}
-	if runtime.GOOS == osWindows {
+	if runtime.GOOS == "windows" {
 		scriptPath = filepath.Join(projectsDir, "powershell", "with-params.ps1")
 		args = []string{"-Name", "Test", "-Greeting", "Hi"}
 	}

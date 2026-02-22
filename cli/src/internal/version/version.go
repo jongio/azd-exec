@@ -2,28 +2,24 @@
 // Version information is set at build time via ldflags.
 package version
 
-// Version is the current version of the azd exec extension.
-// It follows semantic versioning (e.g., "1.0.0").
-// It is intended to be set at build time via ldflags:
+import coreversion "github.com/jongio/azd-core/version"
+
+// Version is the semantic version of the extension, set at build time via ldflags.
 //
-//	go build -ldflags "-X github.com/jongio/azd-exec/cli/src/internal/version.Version=1.0.0"
+//	go build -ldflags "-X github.com/jongio/azd-exec/cli/src/internal/version.Version=1.0.0 -X github.com/jongio/azd-exec/cli/src/internal/version.BuildDate=2025-01-09T12:00:00Z -X github.com/jongio/azd-exec/cli/src/internal/version.GitCommit=abc123"
 var Version = "0.0.0-dev"
 
-// BuildDate is the UTC timestamp of the build.
-// It is intended to be set at build time via ldflags:
-//
-//	go build -ldflags "-X github.com/jongio/azd-exec/cli/src/internal/version.BuildDate=2025-01-09T12:00:00Z"
+// BuildDate is the build timestamp, set at build time via ldflags.
 var BuildDate = "unknown"
 
-// GitCommit is the git SHA used for the build.
-// It is intended to be set at build time via ldflags:
-//
-//	go build -ldflags "-X github.com/jongio/azd-exec/cli/src/internal/version.GitCommit=abc123"
+// GitCommit is the git commit hash, set at build time via ldflags.
 var GitCommit = "unknown"
 
-// ExtensionID is the unique identifier for this extension.
-// This ID is used by the azd extension registry and must match extension.yaml.
-const ExtensionID = "jongio.azd.exec"
+// Info provides the shared version information for this extension.
+var Info = coreversion.New("jongio.azd.exec", "azd exec")
 
-// Name is the human-readable name of the extension.
-const Name = "azd exec"
+func init() {
+	Info.Version = Version
+	Info.BuildDate = BuildDate
+	Info.GitCommit = GitCommit
+}

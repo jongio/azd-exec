@@ -18,6 +18,8 @@ import (
 	"github.com/jongio/azd-core/shellutil"
 )
 
+const osWindows = "windows"
+
 // Config holds the configuration for script execution.
 // All fields are optional and have sensible defaults.
 type Config struct {
@@ -252,7 +254,7 @@ func (e *Executor) hasKeyVaultReferences(envVars []string) bool {
 // getDefaultShellForOS returns the default shell for the current operating system.
 func getDefaultShellForOS() string {
 	if runtime.GOOS == osWindows {
-		return shellPowerShell
+		return shellutil.ShellPowerShell
 	}
-	return shellBash
+	return shellutil.ShellBash
 }
