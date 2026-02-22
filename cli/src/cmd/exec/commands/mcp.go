@@ -335,7 +335,7 @@ func handleGetEnvironment(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallTo
 			}
 
 			// Exclude known secret-bearing variable names
-			secretPatterns := []string{"SECRET", "PASSWORD", "KEY", "TOKEN", "CREDENTIAL", "CERTIFICATE"}
+			secretPatterns := []string{"SECRET", "PASSWORD", "KEY", "TOKEN", "CREDENTIAL", "CERTIFICATE", "CONNECTION_STRING", "CONNSTR"}
 			isSecret := false
 			upperName := strings.ToUpper(name)
 			for _, pattern := range secretPatterns {
