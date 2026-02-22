@@ -2,15 +2,15 @@
 package commands
 
 import (
-	"github.com/jongio/azd-core/cliout"
+	"context"
+	"fmt"
+
+	"github.com/azure/azure-dev/cli/azd/pkg/azdext"
 	"github.com/spf13/cobra"
 )
 
-// NewListenCommand creates a new listen command for the azd extension framework.
-// This command is required by the azd extension framework for inter-process communication.
-// It is marked as hidden since it's an internal implementation detail not meant for direct use.
-// The extension currently operates in "exec mode" without a persistent listener,
-// so this command is a no-op placeholder for framework compatibility.
+// NewListenCommand creates the listen command that starts the azd extension host.
+// This command is invoked by azd to establish lifecycle event communication via gRPC.
 func NewListenCommand() *cobra.Command {
 	return &cobra.Command{
 		Use:    "listen",
@@ -18,12 +18,44 @@ func NewListenCommand() *cobra.Command {
 		Long:   `Start the extension listener for the azd extension framework. This command is used internally by azd and should not be called directly.`,
 		Hidden: true,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			// This is a placeholder for the extension framework's listen functionality.
-			// In a full implementation, this would start a gRPC server for azd communication.
-			// For now, this extension operates in "exec mode" without persistent listener,
-			// so returning nil is appropriate.
-			cliout.Info("Listen command is not implemented - azd-exec operates in exec mode")
+			ctx := azdext.WithAccessToken(cmd.Context())
+
+			azdClient, err := azdext.NewAzdClient()
+			if err != nil {
+				return fmt.Errorf("failed to create azd client: %w", err)
+			}
+			defer azdClient.Close()
+
+			host := azdext.NewExtensionHost(azdClient).
+				WithProjectEventHandler("postprovision", handlePostProvision).
+				WithProjectEventHandler("postdeploy", handlePostDeploy).
+				WithServiceEventHandler("postdeploy", handleServicePostDeploy, nil)
+
+			if err := host.Run(ctx); err != nil {
+				return fmt.Errorf("failed to run extension: %w", err)
+			}
+
 			return nil
 		},
 	}
+}
+
+func handlePostProvision(ctx context.Context, args *azdext.ProjectEventArgs) error {
+	fmt.Printf("Post-provision completed for project: %s\n", args.Project.Name)
+	return nil
+}
+
+func handlePostDeploy(ctx context.Context, args *azdext.ProjectEventArgs) error {
+	fmt.Printf("Deployment completed for project: %s\n", args.Project.Name)
+	return nil
+}
+
+func handleServicePostDeploy(ctx context.Context, args *azdext.ServiceEventArgs) error {
+	fmt.Printf("Service %s deployed successfully\n", args.Service.Name)
+	for _, artifact := range args.ServiceContext.Deploy {
+		if artifact.Kind == azdext.ArtifactKind_ARTIFACT_KIND_ENDPOINT {
+			fmt.Printf("  Endpoint: %s\n", artifact.Location)
+		}
+	}
+	return nil
 }

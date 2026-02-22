@@ -81,9 +81,10 @@ func TestNewListenCommand(t *testing.T) {
 func TestListenCommandExecution(t *testing.T) {
 	cmd := NewListenCommand()
 
-	// Listen command should execute without error (it's a placeholder)
+	// Listen command requires a running azd server for gRPC communication.
+	// In unit tests without azd, it should fail with a connection error.
 	err := cmd.Execute()
-	if err != nil {
-		t.Errorf("Listen command should not error, got: %v", err)
+	if err == nil {
+		t.Error("Listen command should error without azd server running")
 	}
 }

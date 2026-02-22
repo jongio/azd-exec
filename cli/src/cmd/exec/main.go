@@ -187,6 +187,7 @@ Examples:
 		commands.NewVersionCommand(&outputFormat),
 		commands.NewListenCommand(),
 		commands.NewMetadataCommand(),
+		commands.NewMCPCommand(),
 	)
 
 	return rootCmd
