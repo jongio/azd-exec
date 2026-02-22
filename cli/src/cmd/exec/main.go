@@ -186,6 +186,7 @@ Examples:
 	rootCmd.AddCommand(
 		commands.NewVersionCommand(&outputFormat),
 		commands.NewListenCommand(),
+		commands.NewMetadataCommand(),
 	)
 
 	return rootCmd
