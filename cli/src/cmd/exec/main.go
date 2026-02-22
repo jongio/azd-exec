@@ -9,7 +9,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jongio/azd-core/azdextutil"
+	"github.com/azure/azure-dev/cli/azd/pkg/azdext"
 	"github.com/jongio/azd-core/cliout"
 	"github.com/jongio/azd-core/env"
 	"github.com/jongio/azd-exec/cli/src/cmd/exec/commands"
@@ -105,7 +105,7 @@ Examples:
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// Hydrate context with TRACEPARENT for distributed trace correlation
-			cmd.SetContext(azdextutil.SetupTracingFromEnv(cmd.Context()))
+			cmd.SetContext(azdext.NewContext())
 
 			// Set output format from flag
 			if outputFormat == "json" {
@@ -190,7 +190,7 @@ Examples:
 	rootCmd.AddCommand(
 		commands.NewVersionCommand(&outputFormat),
 		commands.NewListenCommand(),
-		commands.NewMetadataCommand(),
+		commands.NewMetadataCommand(func() *cobra.Command { return newRootCmd() }),
 		commands.NewMCPCommand(),
 	)
 
