@@ -1,3 +1,8 @@
+## [0.3.7] - 2026-02-22
+
+- fix: update golangci-lint to v2 in release workflow (02c880f)
+- refactor: use azd-core shared packages (#36) (b211c99)
+
 ## [0.3.6] - 2026-02-18
 
 - Update azd-core to v0.5.0 (#35) (f670ee6)
