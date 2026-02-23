@@ -15,6 +15,7 @@ import (
 	"github.com/jongio/azd-exec/cli/src/internal/executor"
 	"github.com/jongio/azd-exec/cli/src/internal/skills"
 	"github.com/spf13/cobra"
+	"go.opentelemetry.io/otel/propagation"
 )
 
 var (
@@ -103,6 +104,20 @@ Examples:
 			return exec.ExecuteInline(cmd.Context(), scriptInput)
 		},
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// Inject OTel trace context from env vars while preserving cobra's signal handling
+			ctx := cmd.Context()
+			if ctx == nil {
+				ctx = context.Background()
+			}
+			if parent := os.Getenv("TRACEPARENT"); parent != "" {
+				tc := propagation.TraceContext{}
+				ctx = tc.Extract(ctx, propagation.MapCarrier{
+					"traceparent": parent,
+					"tracestate":  os.Getenv("TRACESTATE"),
+				})
+			}
+			cmd.SetContext(ctx)
+
 			// Set output format from flag
 			if outputFormat == "json" {
 				if err := cliout.SetFormat("json"); err != nil {
@@ -186,6 +201,8 @@ Examples:
 	rootCmd.AddCommand(
 		commands.NewVersionCommand(&outputFormat),
 		commands.NewListenCommand(),
+		commands.NewMetadataCommand(newRootCmd),
+		commands.NewMCPCommand(),
 	)
 
 	return rootCmd

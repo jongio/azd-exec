@@ -4,6 +4,8 @@
   "words": [
     "akvs",
     "azd",
+    "azdext",
+    "azdextutil",
     "azcore",
     "azidentity",
     "azsecrets",
@@ -62,6 +64,8 @@
     "subtest",
     "tcpdump",
     "testall",
+    "traceparent",
+    "tracestate",
     "testcache",
     "testcoverage",
     "testhelpers",
