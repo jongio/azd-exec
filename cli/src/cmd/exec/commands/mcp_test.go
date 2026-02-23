@@ -122,22 +122,22 @@ func TestHandleGetEnvironment_SecretFiltering(t *testing.T) {
 		for _, e := range origEnv {
 			parts := strings.SplitN(e, "=", 2)
 			if len(parts) == 2 {
-				os.Setenv(parts[0], parts[1])
+				_ = os.Setenv(parts[0], parts[1])
 			}
 		}
 	}()
 
 	// Set a controlled environment
 	os.Clearenv()
-	os.Setenv("AZD_ENVIRONMENT_NAME", "myenv")
-	os.Setenv("AZURE_LOCATION", "eastus2")
-	os.Setenv("AZURE_CLIENT_SECRET", "supersecret")
-	os.Setenv("ARM_CLIENT_SECRET", "anothersecret")
-	os.Setenv("AZD_ACCESS_TOKEN", "tok123")
-	os.Setenv("AZURE_SUBSCRIPTION_PASSWORD", "pw")
-	os.Setenv("AZURE_TENANT_ID", "tid")
-	os.Setenv("NODE_ENV", "production")
-	os.Setenv("HOME", "/home/user") // not an allowed prefix
+	t.Setenv("AZD_ENVIRONMENT_NAME", "myenv")
+	t.Setenv("AZURE_LOCATION", "eastus2")
+	t.Setenv("AZURE_CLIENT_SECRET", "supersecret")
+	t.Setenv("ARM_CLIENT_SECRET", "anothersecret")
+	t.Setenv("AZD_ACCESS_TOKEN", "tok123")
+	t.Setenv("AZURE_SUBSCRIPTION_PASSWORD", "pw")
+	t.Setenv("AZURE_TENANT_ID", "tid")
+	t.Setenv("NODE_ENV", "production")
+	t.Setenv("HOME", "/home/user") // not an allowed prefix
 
 	// Reset rate limiter so we don't hit limits
 	saved := globalRateLimiter

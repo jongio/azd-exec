@@ -201,7 +201,7 @@ Examples:
 	rootCmd.AddCommand(
 		commands.NewVersionCommand(&outputFormat),
 		commands.NewListenCommand(),
-		commands.NewMetadataCommand(func() *cobra.Command { return newRootCmd() }),
+		commands.NewMetadataCommand(newRootCmd),
 		commands.NewMCPCommand(),
 	)
 
