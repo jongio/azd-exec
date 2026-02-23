@@ -435,5 +435,3 @@ func buildShellArgs(shell, scriptOrCmd string, isInline bool, extraArgs []string
 		return args
 	}
 }
-
- 
