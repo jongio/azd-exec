@@ -1,3 +1,7 @@
+## [0.3.8] - 2026-02-23
+
+- feat: full azd extension framework adoption - metadata, MCP server, lifecycle events (#37) (1620019)
+
 ## [0.3.7] - 2026-02-22
 
 - fix: update golangci-lint to v2 in release workflow (02c880f)
