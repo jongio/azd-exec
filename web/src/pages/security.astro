@@ -274,23 +274,21 @@ azd exec -- az monitor activity-log list \\
   .page-container {
     max-width: 900px;
     margin: 0 auto;
-    padding: 3rem 1.5rem;
+    padding: var(--space-12) var(--space-6);
   }
 
   .page-header {
-    margin-bottom: 3rem;
+    margin-bottom: var(--space-12);
   }
 
   .page-header h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin: 0 0 1rem;
-    color: var(--color-text-primary);
+    font-size: var(--text-2xl);
+    margin: 0 0 var(--space-4);
   }
 
   .page-intro {
-    font-size: 1.25rem;
-    color: var(--color-text-secondary);
+    font-size: var(--text-base);
+    color: var(--color-text-muted);
     margin: 0;
   }
 
@@ -298,178 +296,22 @@ azd exec -- az monitor activity-log list \\
     line-height: 1.7;
   }
 
-  .alert-danger {
-    background-color: #fee;
-    border: 2px solid #dc3545;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    margin: 0 0 3rem;
-  }
-
-  [data-theme="dark"] .alert-danger {
-    background-color: #5a1a1a;
-    border-color: #dc3545;
-  }
-
-  .alert-danger h3 {
-    margin: 0 0 0.5rem;
-    color: #dc3545;
-    font-size: 1.25rem;
-  }
-
-  .alert-danger p {
-    margin: 0;
-    color: #721c24;
-  }
-
-  [data-theme="dark"] .alert-danger p {
-    color: #ffcccb;
-  }
-
   .section {
-    margin-bottom: 3rem;
+    margin-bottom: var(--space-12);
   }
 
   .section h2 {
-    font-size: 1.75rem;
-    font-weight: 600;
-    margin: 0 0 1rem;
-    color: var(--color-text-primary);
+    font-size: var(--text-lg);
+    margin: 0 0 var(--space-4);
   }
 
   .section h3 {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin: 2rem 0 1rem;
-    color: var(--color-text-primary);
+    font-size: var(--text-sm);
+    margin: var(--space-8) 0 var(--space-4);
   }
 
   .section p {
-    margin: 0 0 1rem;
-    color: var(--color-text-secondary);
-  }
-
-  .access-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1.5rem;
-    margin: 1.5rem 0;
-  }
-
-  .access-card {
-    border: 2px solid #dc3545;
-    border-radius: 0.5rem;
-    padding: 1.5rem;
-    background-color: #fff5f5;
-  }
-
-  [data-theme="dark"] .access-card {
-    background-color: #2a1a1a;
-  }
-
-  .access-card h3 {
-    font-size: 1.125rem;
-    margin: 0 0 0.75rem;
-    color: #dc3545;
-  }
-
-  .access-card ul {
-    margin: 0;
-    padding-left: 1.25rem;
-    font-size: 0.875rem;
-  }
-
-  .access-card li {
-    margin: 0.5rem 0;
-    color: #4b5563;
-  }
-
-  [data-theme="dark"] .access-card li {
-    color: #e2e8f0;
-  }
-
-  .checklist {
-    list-style: none;
-    padding-left: 0;
-  }
-
-  .checklist li {
-    margin: 2rem 0;
-    padding-left: 2rem;
-    position: relative;
-  }
-
-  .checklist li::before {
-    content: "✅";
-    position: absolute;
-    left: 0;
-    font-size: 1.25rem;
-  }
-
-  .checklist.danger li::before {
-    content: "❌";
-  }
-
-  .checklist strong {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--color-text-primary);
-  }
-
-  .attack-vector {
-    background-color: var(--color-bg-secondary);
-    border-left: 4px solid var(--color-interactive-default);
-    padding: 1.5rem;
-    margin: 1.5rem 0;
-    border-radius: 0.25rem;
-  }
-
-  .attack-vector h3 {
-    margin: 0 0 0.5rem;
-    font-size: 1.125rem;
-  }
-
-  .attack-vector p {
-    margin: 0.5rem 0;
-  }
-
-  .attack-vector ul {
-    margin: 0.5rem 0;
-    padding-left: 1.5rem;
-  }
-
-  .incident-steps {
-    padding-left: 1.5rem;
-  }
-
-  .incident-steps li {
-    margin: 1.5rem 0;
-  }
-
-  .incident-steps strong {
-    display: block;
-    margin-bottom: 0.5rem;
-    color: var(--color-text-primary);
-  }
-
-  .resources {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .resource-link {
-    display: block;
-    padding: 1rem;
-    border: 1px solid var(--color-border-default);
-    border-radius: 0.5rem;
-    color: var(--color-interactive-default);
-    text-decoration: none;
-    font-weight: 600;
-    transition: border-color 0.2s;
-  }
-
-  .resource-link:hover {
-    border-color: var(--color-interactive-default);
+    margin: 0 0 var(--space-4);
+    color: var(--color-text-muted);
   }
 </style>
