@@ -183,7 +183,7 @@ func handleExecScript(ctx context.Context, args azdext.ToolArgs) (*mcp.CallToolR
 	cmd.Stderr = &stderr
 
 	runErr := cmd.Run()
-	return marshalExecResult(stdout.String(), stderr.String(), cmd.ProcessState, runErr)
+	return marshalExecResult(stdout.String(), stderr.String(), cmd.ProcessState, runErr), nil
 }
 
 // --- exec_inline handler ---
@@ -221,7 +221,7 @@ func handleExecInline(ctx context.Context, args azdext.ToolArgs) (*mcp.CallToolR
 	cmd.Stderr = &stderr
 
 	runErr := cmd.Run()
-	return marshalExecResult(stdout.String(), stderr.String(), cmd.ProcessState, runErr)
+	return marshalExecResult(stdout.String(), stderr.String(), cmd.ProcessState, runErr), nil
 }
 
 // --- list_shells handler ---
@@ -310,7 +310,7 @@ type execResult struct {
 	Error    string `json:"error,omitempty"`
 }
 
-func marshalExecResult(stdout, stderr string, ps *os.ProcessState, err error) (*mcp.CallToolResult, error) {
+func marshalExecResult(stdout, stderr string, ps *os.ProcessState, err error) *mcp.CallToolResult {
 	result := execResult{
 		Stdout: stdout,
 		Stderr: stderr,
@@ -324,7 +324,7 @@ func marshalExecResult(stdout, stderr string, ps *os.ProcessState, err error) (*
 			result.ExitCode = -1
 		}
 	}
-	return azdext.MCPJSONResult(result), nil
+	return azdext.MCPJSONResult(result)
 }
 
 // buildShellArgs constructs command arguments for the given shell.
