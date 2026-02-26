@@ -11,5 +11,7 @@
     "test:web": "pnpm --filter @jongio/azd-exec-docs test",
     "test:all": "pnpm test"
   },
-  "devDependencies": {}
+  "dependencies": {
+    "@jongio/azd-web-core": "^2.1.0"
+  }
 }
