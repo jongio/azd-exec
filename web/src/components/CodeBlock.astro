@@ -1,9 +1,8 @@
 ---
 /**
  * CodeBlock Component
- * 
- * Syntax-highlighted code block with copy button.
- * Uses astro-expressive-code's Code component.
+ *
+ * Syntax-highlighted code block using astro-expressive-code.
  */
 import { Code } from 'astro-expressive-code/components';
 
@@ -25,8 +24,8 @@ const {
 ---
 
 <div class="code-block-wrapper">
-  <Code 
-    code={code} 
+  <Code
+    code={code}
     lang={language}
     title={title}
     meta={showLanguage ? undefined : 'no-lang-badge'}
@@ -35,6 +34,6 @@ const {
 
 <style>
   .code-block-wrapper {
-    margin: 1.5rem 0;
+    margin: var(--space-6) 0;
   }
 </style>
