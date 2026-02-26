@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/jongio/azd-core/azdextutil"
+	"github.com/azure/azure-dev/cli/azd/pkg/azdext"
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
@@ -139,12 +139,7 @@ func TestHandleGetEnvironment_SecretFiltering(t *testing.T) {
 	t.Setenv("NODE_ENV", "production")
 	t.Setenv("HOME", "/home/user") // not an allowed prefix
 
-	// Reset rate limiter so we don't hit limits
-	saved := globalRateLimiter
-	globalRateLimiter = azdextutil.NewRateLimiter(100, 100)
-	defer func() { globalRateLimiter = saved }()
-
-	result, err := handleGetEnvironment(context.Background(), mcp.CallToolRequest{})
+	result, err := handleGetEnvironment(context.Background(), azdext.ToolArgs{})
 	if err != nil {
 		t.Fatalf("handleGetEnvironment returned error: %v", err)
 	}
@@ -198,104 +193,5 @@ func TestParseTimeout(t *testing.T) {
 	// Verify the default is 30 seconds as documented.
 	if defaultTimeout.Seconds() != 30 {
 		t.Errorf("defaultTimeout = %v, want 30s", defaultTimeout)
-	}
-}
-
-// ---------------------------------------------------------------------------
-// TestRateLimiting
-// ---------------------------------------------------------------------------
-
-func TestRateLimiting(t *testing.T) {
-	// Create a limiter with only 2 burst tokens and 0 refill to test exhaustion.
-	rl := azdextutil.NewRateLimiter(2, 0)
-
-	if !rl.Allow() {
-		t.Error("first Allow() should succeed")
-	}
-	if !rl.Allow() {
-		t.Error("second Allow() should succeed")
-	}
-	// Third call must be rejected (burst exhausted, no refill)
-	if rl.Allow() {
-		t.Error("third Allow() should be rejected after burst exhaustion")
-	}
-}
-
-func TestRateLimiting_HandlersReject(t *testing.T) {
-	// Swap the global rate limiter with an exhausted one
-	saved := globalRateLimiter
-	globalRateLimiter = azdextutil.NewRateLimiter(0, 0) // zero tokens
-	defer func() { globalRateLimiter = saved }()
-
-	handlers := []struct {
-		name string
-		fn   func(context.Context, mcp.CallToolRequest) (*mcp.CallToolResult, error)
-	}{
-		{"handleGetEnvironment", handleGetEnvironment},
-		{"handleListShells", handleListShells},
-	}
-
-	for _, h := range handlers {
-		t.Run(h.name, func(t *testing.T) {
-			result, err := h.fn(context.Background(), mcp.CallToolRequest{})
-			if err != nil {
-				t.Fatalf("unexpected error: %v", err)
-			}
-			text, ok := result.Content[0].(mcp.TextContent)
-			if !ok {
-				t.Fatalf("expected TextContent, got %T", result.Content[0])
-			}
-			if !strings.Contains(text.Text, "Rate limit exceeded") {
-				t.Errorf("expected rate limit error, got: %s", text.Text)
-			}
-		})
-	}
-}
-
-// ---------------------------------------------------------------------------
-// TestGetArgsMap / TestGetStringParam helpers
-// ---------------------------------------------------------------------------
-
-func TestGetArgsMap(t *testing.T) {
-	req := mcp.CallToolRequest{}
-	req.Params.Arguments = map[string]interface{}{
-		"shell": "bash",
-		"count": 42,
-	}
-
-	m := getArgsMap(req)
-	if m["shell"] != "bash" {
-		t.Errorf("expected shell=bash, got %v", m["shell"])
-	}
-
-	// nil Arguments returns empty map
-	req2 := mcp.CallToolRequest{}
-	m2 := getArgsMap(req2)
-	if len(m2) != 0 {
-		t.Errorf("expected empty map for nil arguments, got %v", m2)
-	}
-}
-
-func TestGetStringParam(t *testing.T) {
-	args := map[string]interface{}{
-		"name":  "test",
-		"count": 42,
-	}
-
-	val, ok := getStringParam(args, "name")
-	if !ok || val != "test" {
-		t.Errorf("expected (test, true), got (%q, %v)", val, ok)
-	}
-
-	// non-string value
-	_, ok = getStringParam(args, "count")
-	if ok {
-		t.Error("expected false for non-string value")
-	}
-
-	// missing key
-	_, ok = getStringParam(args, "missing")
-	if ok {
-		t.Error("expected false for missing key")
 	}
 }

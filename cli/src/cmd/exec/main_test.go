@@ -36,29 +36,10 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 
 	newWd := t.TempDir()
 
-	oldDebug := os.Getenv("AZD_DEBUG")
-	oldNoPrompt := os.Getenv("AZD_NO_PROMPT")
-	oldTraceFile := os.Getenv("AZD_TRACE_LOG_FILE")
-	oldTraceURL := os.Getenv("AZD_TRACE_LOG_URL")
-
 	cmd := newRootCmd()
 	cmd.SetContext(context.Background())
-	if setErr := cmd.PersistentFlags().Set("debug", "true"); setErr != nil {
-		t.Fatalf("setting debug flag failed: %v", setErr)
-	}
-	if setErr := cmd.PersistentFlags().Set("no-prompt", "true"); setErr != nil {
-		t.Fatalf("setting no-prompt flag failed: %v", setErr)
-	}
 	if setErr := cmd.PersistentFlags().Set("cwd", newWd); setErr != nil {
 		t.Fatalf("setting cwd flag failed: %v", setErr)
-	}
-	// Note: -e/--environment flag is not tested here because it now calls 'azd env get-values'
-	// which requires an actual azd environment to exist. See TestLoadAzdEnvironment for unit tests.
-	if setErr := cmd.PersistentFlags().Set("trace-log-file", "trace.log"); setErr != nil {
-		t.Fatalf("setting trace-log-file flag failed: %v", setErr)
-	}
-	if setErr := cmd.PersistentFlags().Set("trace-log-url", "http://example.invalid"); setErr != nil {
-		t.Fatalf("setting trace-log-url flag failed: %v", setErr)
 	}
 	if cmd.PersistentPreRunE == nil {
 		t.Fatalf("expected PersistentPreRunE to be set")
@@ -85,25 +66,8 @@ func TestPersistentPreRunE_SetsEnvAndCwd(t *testing.T) {
 		t.Fatalf("expected cwd %q, got %q", newWdNorm, gotWdNorm)
 	}
 
-	if os.Getenv("AZD_DEBUG") != "true" {
-		t.Fatalf("expected AZD_DEBUG=true")
-	}
-	if os.Getenv("AZD_NO_PROMPT") != "true" {
-		t.Fatalf("expected AZD_NO_PROMPT=true")
-	}
-	if os.Getenv("AZD_TRACE_LOG_FILE") != "trace.log" {
-		t.Fatalf("expected AZD_TRACE_LOG_FILE=trace.log")
-	}
-	if os.Getenv("AZD_TRACE_LOG_URL") != "http://example.invalid" {
-		t.Fatalf("expected AZD_TRACE_LOG_URL=http://example.invalid")
-	}
-
 	// Restore process state.
 	_ = os.Chdir(oldWd)
-	_ = os.Setenv("AZD_DEBUG", oldDebug)
-	_ = os.Setenv("AZD_NO_PROMPT", oldNoPrompt)
-	_ = os.Setenv("AZD_TRACE_LOG_FILE", oldTraceFile)
-	_ = os.Setenv("AZD_TRACE_LOG_URL", oldTraceURL)
 }
 
 // TestLoadAzdEnvironment_Validation verifies that the azd-core env package
@@ -132,12 +96,6 @@ func TestRunE_DispatchesFileOrInline(t *testing.T) {
 	}
 
 	// Avoid changing env/cwd during Execute.
-	debugMode = false
-	noPrompt = false
-	cwd = ""
-	environment = ""
-	traceLogFile = ""
-	traceLogURL = ""
 	shell = ""
 	interactive = false
 
@@ -198,12 +156,6 @@ func TestRunE_AllowsPassthroughArgsWithoutDoubleDash(t *testing.T) {
 	}
 
 	// Avoid changing env/cwd during Execute.
-	debugMode = false
-	noPrompt = false
-	cwd = ""
-	environment = ""
-	traceLogFile = ""
-	traceLogURL = ""
 	shell = ""
 	interactive = false
 

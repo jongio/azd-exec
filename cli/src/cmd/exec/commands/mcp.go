@@ -3,7 +3,6 @@ package commands
 import (
 	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/azure/azure-dev/cli/azd/pkg/azdext"
 	"github.com/jongio/azd-core/azdextutil"
 	"github.com/jongio/azd-core/security"
 	"github.com/jongio/azd-core/shellutil"
@@ -64,19 +64,58 @@ variables and Azure Key Vault secret resolution.
 - Prefer exec_script for file-based scripts, exec_inline for one-liners
 - Be cautious with destructive operations; review commands before executing`
 
-	s := server.NewMCPServer(
-		"exec-mcp-server",
-		version.Version,
-		server.WithToolCapabilities(true),
-		server.WithInstructions(instructions),
+	builder := azdext.NewMCPServerBuilder("exec-mcp-server", version.Version).
+		WithRateLimit(10, 1.0).
+		WithInstructions(instructions)
+
+	builder.AddTool("exec_script", handleExecScript, azdext.MCPToolOptions{
+		Description: "Execute a script file with azd environment context and Key Vault integration. " +
+			"The script runs with all azd environment variables available, including resolved Key Vault secrets.",
+		Title:       "Execute Script File",
+		Destructive: true,
+	},
+		mcp.WithString("script_path",
+			mcp.Description("Path to the script file to execute. Must be an existing file within the project directory."),
+			mcp.Required(),
+		),
+		mcp.WithString("shell",
+			mcp.Description("Shell to use for execution (bash, sh, zsh, pwsh, powershell, cmd). Auto-detected from file extension if not specified."),
+		),
+		mcp.WithString("args",
+			mcp.Description("Space-separated arguments to pass to the script."),
+		),
 	)
 
-	s.AddTools(
-		newExecScriptTool(),
-		newExecInlineTool(),
-		newListShellsTool(),
-		newGetEnvironmentTool(),
+	builder.AddTool("exec_inline", handleExecInline, azdext.MCPToolOptions{
+		Description: "Execute an inline command with azd environment context. " +
+			"The command runs with all azd environment variables, including resolved Key Vault secrets.",
+		Title:       "Execute Inline Command",
+		Destructive: true,
+	},
+		mcp.WithString("command",
+			mcp.Description("The command to execute inline."),
+			mcp.Required(),
+		),
+		mcp.WithString("shell",
+			mcp.Description("Shell to use (bash, sh, zsh, pwsh, powershell, cmd). Defaults to bash on Unix, powershell on Windows."),
+		),
 	)
+
+	builder.AddTool("list_shells", handleListShells, azdext.MCPToolOptions{
+		Description: "List shells available on the system for script execution.",
+		Title:       "List Available Shells",
+		ReadOnly:    true,
+		Idempotent:  true,
+	})
+
+	builder.AddTool("get_environment", handleGetEnvironment, azdext.MCPToolOptions{
+		Description: "Get current azd environment variables available for script execution.",
+		Title:       "Get Environment Variables",
+		ReadOnly:    true,
+		Idempotent:  true,
+	})
+
+	s := builder.Build()
 
 	if err := server.ServeStdio(s); err != nil {
 		fmt.Fprintf(os.Stderr, "MCP server error: %v\n", err)
@@ -85,73 +124,43 @@ variables and Azure Key Vault secret resolution.
 	return nil
 }
 
-// --- exec_script tool ---
+// --- exec_script handler ---
 
-func newExecScriptTool() server.ServerTool {
-	return server.ServerTool{
-		Tool: mcp.NewTool(
-			"exec_script",
-			mcp.WithTitleAnnotation("Execute Script File"),
-			mcp.WithDescription("Execute a script file with azd environment context and Key Vault integration. "+
-				"The script runs with all azd environment variables available, including resolved Key Vault secrets."),
-			mcp.WithReadOnlyHintAnnotation(false),
-			mcp.WithDestructiveHintAnnotation(true),
-			mcp.WithString("script_path",
-				mcp.Description("Path to the script file to execute. Must be an existing file within the project directory."),
-				mcp.Required(),
-			),
-			mcp.WithString("shell",
-				mcp.Description("Shell to use for execution (bash, sh, zsh, pwsh, powershell, cmd). Auto-detected from file extension if not specified."),
-			),
-			mcp.WithString("args",
-				mcp.Description("Space-separated arguments to pass to the script."),
-			),
-		),
-		Handler: handleExecScript,
-	}
-}
-
-func handleExecScript(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	if !globalRateLimiter.Allow() {
-		return mcp.NewToolResultError("Rate limit exceeded. Please wait before making more requests."), nil
+func handleExecScript(ctx context.Context, args azdext.ToolArgs) (*mcp.CallToolResult, error) {
+	scriptPath, err := args.RequireString("script_path")
+	if err != nil || scriptPath == "" {
+		return azdext.MCPErrorResult("script_path is required"), nil
 	}
 
-	args := getArgsMap(request)
-
-	scriptPath, ok := getStringParam(args, "script_path")
-	if !ok || scriptPath == "" {
-		return mcp.NewToolResultError("script_path is required"), nil
-	}
-
-	shell, _ := getStringParam(args, "shell")
+	shell := args.OptionalString("shell", "")
 	if shell != "" {
 		if err := azdextutil.ValidateShellName(shell); err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid shell: %v", err)), nil
+			return azdext.MCPErrorResult("Invalid shell: %v", err), nil
 		}
 	}
 
 	// Validate script path for security
 	projectDir, err := azdextutil.GetProjectDir("AZD_EXEC_PROJECT_DIR")
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to determine project directory: %v", err)), nil
+		return azdext.MCPErrorResult("Failed to determine project directory: %v", err), nil
 	}
 
 	validPath, err := security.ValidatePathWithinBases(scriptPath, projectDir)
 	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Invalid script path: %v", err)), nil
+		return azdext.MCPErrorResult("Invalid script path: %v", err), nil
 	}
 
 	info, statErr := os.Stat(validPath)
 	if statErr != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Script file not found: %s", scriptPath)), nil
+		return azdext.MCPErrorResult("Script file not found: %s", scriptPath), nil
 	}
 	if info.IsDir() {
-		return mcp.NewToolResultError("script_path must be a file, not a directory"), nil
+		return azdext.MCPErrorResult("script_path must be a file, not a directory"), nil
 	}
 
 	// Parse extra args
 	var scriptArgs []string
-	if argsStr, ok := getStringParam(args, "args"); ok && argsStr != "" {
+	if argsStr := args.OptionalString("args", ""); argsStr != "" {
 		scriptArgs = strings.Fields(argsStr)
 	}
 
@@ -177,45 +186,18 @@ func handleExecScript(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	return marshalExecResult(stdout.String(), stderr.String(), cmd.ProcessState, runErr)
 }
 
-// --- exec_inline tool ---
+// --- exec_inline handler ---
 
-func newExecInlineTool() server.ServerTool {
-	return server.ServerTool{
-		Tool: mcp.NewTool(
-			"exec_inline",
-			mcp.WithTitleAnnotation("Execute Inline Command"),
-			mcp.WithDescription("Execute an inline command with azd environment context. "+
-				"The command runs with all azd environment variables, including resolved Key Vault secrets."),
-			mcp.WithReadOnlyHintAnnotation(false),
-			mcp.WithDestructiveHintAnnotation(true),
-			mcp.WithString("command",
-				mcp.Description("The command to execute inline."),
-				mcp.Required(),
-			),
-			mcp.WithString("shell",
-				mcp.Description("Shell to use (bash, sh, zsh, pwsh, powershell, cmd). Defaults to bash on Unix, powershell on Windows."),
-			),
-		),
-		Handler: handleExecInline,
-	}
-}
-
-func handleExecInline(ctx context.Context, request mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	if !globalRateLimiter.Allow() {
-		return mcp.NewToolResultError("Rate limit exceeded. Please wait before making more requests."), nil
+func handleExecInline(ctx context.Context, args azdext.ToolArgs) (*mcp.CallToolResult, error) {
+	command, err := args.RequireString("command")
+	if err != nil || strings.TrimSpace(command) == "" {
+		return azdext.MCPErrorResult("command is required and cannot be empty"), nil
 	}
 
-	args := getArgsMap(request)
-
-	command, ok := getStringParam(args, "command")
-	if !ok || strings.TrimSpace(command) == "" {
-		return mcp.NewToolResultError("command is required and cannot be empty"), nil
-	}
-
-	shell, _ := getStringParam(args, "shell")
+	shell := args.OptionalString("shell", "")
 	if shell != "" {
 		if err := azdextutil.ValidateShellName(shell); err != nil {
-			return mcp.NewToolResultError(fmt.Sprintf("Invalid shell: %v", err)), nil
+			return azdext.MCPErrorResult("Invalid shell: %v", err), nil
 		}
 	}
 	if shell == "" {
@@ -242,32 +224,14 @@ func handleExecInline(ctx context.Context, request mcp.CallToolRequest) (*mcp.Ca
 	return marshalExecResult(stdout.String(), stderr.String(), cmd.ProcessState, runErr)
 }
 
-// --- list_shells tool ---
+// --- list_shells handler ---
 
 type shellInfo struct {
 	Name      string `json:"name"`
 	Available bool   `json:"available"`
 }
 
-func newListShellsTool() server.ServerTool {
-	return server.ServerTool{
-		Tool: mcp.NewTool(
-			"list_shells",
-			mcp.WithTitleAnnotation("List Available Shells"),
-			mcp.WithDescription("List shells available on the system for script execution."),
-			mcp.WithReadOnlyHintAnnotation(true),
-			mcp.WithIdempotentHintAnnotation(true),
-			mcp.WithDestructiveHintAnnotation(false),
-		),
-		Handler: handleListShells,
-	}
-}
-
-func handleListShells(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	if !globalRateLimiter.Allow() {
-		return mcp.NewToolResultError("Rate limit exceeded. Please wait before making more requests."), nil
-	}
-
+func handleListShells(_ context.Context, _ azdext.ToolArgs) (*mcp.CallToolResult, error) {
 	shells := []string{
 		shellutil.ShellBash,
 		shellutil.ShellSh,
@@ -286,35 +250,17 @@ func handleListShells(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolRe
 		})
 	}
 
-	return marshalToolResult(results)
+	return azdext.MCPJSONResult(results), nil
 }
 
-// --- get_environment tool ---
+// --- get_environment handler ---
 
 type envVar struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
 }
 
-func newGetEnvironmentTool() server.ServerTool {
-	return server.ServerTool{
-		Tool: mcp.NewTool(
-			"get_environment",
-			mcp.WithTitleAnnotation("Get Environment Variables"),
-			mcp.WithDescription("Get current azd environment variables available for script execution."),
-			mcp.WithReadOnlyHintAnnotation(true),
-			mcp.WithIdempotentHintAnnotation(true),
-			mcp.WithDestructiveHintAnnotation(false),
-		),
-		Handler: handleGetEnvironment,
-	}
-}
-
-func handleGetEnvironment(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallToolResult, error) {
-	if !globalRateLimiter.Allow() {
-		return mcp.NewToolResultError("Rate limit exceeded. Please wait before making more requests."), nil
-	}
-
+func handleGetEnvironment(_ context.Context, _ azdext.ToolArgs) (*mcp.CallToolResult, error) {
 	allowedPrefixes := []string{"AZD_", "AZURE_", "ARM_", "DOTNET_", "NODE_", "PYTHON"}
 
 	var vars []envVar
@@ -352,28 +298,10 @@ func handleGetEnvironment(_ context.Context, _ mcp.CallToolRequest) (*mcp.CallTo
 		}
 	}
 
-	return marshalToolResult(vars)
+	return azdext.MCPJSONResult(vars), nil
 }
 
 // --- Helpers ---
-
-func getArgsMap(request mcp.CallToolRequest) map[string]interface{} {
-	if request.Params.Arguments != nil {
-		if m, ok := request.Params.Arguments.(map[string]interface{}); ok {
-			return m
-		}
-	}
-	return map[string]interface{}{}
-}
-
-func getStringParam(args map[string]interface{}, key string) (string, bool) {
-	val, ok := args[key]
-	if !ok {
-		return "", false
-	}
-	s, ok := val.(string)
-	return s, ok
-}
 
 type execResult struct {
 	Stdout   string `json:"stdout"`
@@ -396,15 +324,7 @@ func marshalExecResult(stdout, stderr string, ps *os.ProcessState, err error) (*
 			result.ExitCode = -1
 		}
 	}
-	return marshalToolResult(result)
-}
-
-func marshalToolResult(data interface{}) (*mcp.CallToolResult, error) {
-	jsonBytes, err := json.MarshalIndent(data, "", "  ")
-	if err != nil {
-		return mcp.NewToolResultError(fmt.Sprintf("Failed to marshal result: %v", err)), nil
-	}
-	return mcp.NewToolResultText(string(jsonBytes)), nil
+	return azdext.MCPJSONResult(result), nil
 }
 
 // buildShellArgs constructs command arguments for the given shell.

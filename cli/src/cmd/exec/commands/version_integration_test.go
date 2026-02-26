@@ -25,17 +25,12 @@ func TestVersionCommandIntegration(t *testing.T) {
 		{
 			name:       "Default output",
 			outputFlag: "default",
-			wantText:   "azd exec",
+			wantText:   version.Version,
 		},
 		{
 			name:       "JSON output",
 			outputFlag: "json",
 			wantText:   `"version"`,
-		},
-		{
-			name:       "Quiet output",
-			outputFlag: "",
-			wantText:   version.Version,
 		},
 	}
 
@@ -43,11 +38,6 @@ func TestVersionCommandIntegration(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			outputFormat := tt.outputFlag
 			cmd := NewVersionCommand(&outputFormat)
-
-			// Set quiet flag if needed
-			if tt.name == "Quiet output" {
-				cmd.Flags().Set("quiet", "true")
-			}
 
 			// Capture output
 			output := testutil.CaptureOutput(t, func() error {
@@ -73,28 +63,22 @@ func TestVersionCommandIntegration(t *testing.T) {
 	}
 }
 
-func TestVersionCommandIntegration_QuietFlag(t *testing.T) {
+func TestVersionCommandIntegration_DefaultFormat(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping integration test in short mode")
 	}
 
 	outputFormat := "default"
 	cmd := NewVersionCommand(&outputFormat)
-	cmd.Flags().Set("quiet", "true")
 
 	output := testutil.CaptureOutput(t, func() error {
 		return cmd.Execute()
 	})
 
-	// Quiet output should be just the version number
+	// Default output should contain the version
 	output = strings.TrimSpace(output)
-	if !strings.HasPrefix(output, "0.") {
-		t.Errorf("Quiet output should be just version number, got: %s", output)
-	}
-
-	// Should not contain "azd exec version" prefix
-	if strings.Contains(output, "azd exec version") {
-		t.Errorf("Quiet output should not contain prefix, got: %s", output)
+	if !strings.Contains(output, version.Version) {
+		t.Errorf("Default output should contain version, got: %s", output)
 	}
 }
 
