@@ -18,8 +18,8 @@ importers:
         specifier: ^4.3.13
         version: 4.3.13(astro@5.17.1(@types/node@25.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.55.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))
       '@jongio/azd-web-core':
-        specifier: ^2.2.0
-        version: 2.2.0(astro@5.17.1(@types/node@25.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.55.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@4.1.18)
+        specifier: ^2.3.0
+        version: 2.3.0(astro@5.17.1(@types/node@25.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.55.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@4.1.18)
       astro:
         specifier: ^5.17.1
         version: 5.17.1(@types/node@25.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.55.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
@@ -572,8 +572,8 @@ packages:
       astro: '>=5.0.0'
       tailwindcss: '>=4.0.0'
 
-  '@jongio/azd-web-core@2.2.0':
-    resolution: {integrity: sha512-eWxBaQ/bAZhlYW3o8Cc6Vc33WqWJrAHFWx4dB4D9DrX3O5TCP7yv2pdqlcs5fEwZePosJ0dqUQ3Yk7ZBPi3pwg==, tarball: https://npm.pkg.github.com/download/@jongio/azd-web-core/2.2.0/a189e63a3af339373978dcfc07a706974454ccec}
+  '@jongio/azd-web-core@2.3.0':
+    resolution: {integrity: sha512-S7X2pyegsLHFnYYP+W1g5Imu+o3gDYdkm1WRioXIaEMUm/kLWiQbf1Me15bCqZMUMlWQIlP9fDDkSRWPByoz8A==, tarball: https://npm.pkg.github.com/download/@jongio/azd-web-core/2.3.0/71faae323c3d77501ee25c05c32081156407c1f7}
     peerDependencies:
       astro: '>=5.0.0'
       tailwindcss: '>=4.0.0'
@@ -2556,7 +2556,7 @@ snapshots:
       astro: 5.17.1(@types/node@25.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.55.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       tailwindcss: 4.1.18
 
-  '@jongio/azd-web-core@2.2.0(astro@5.17.1(@types/node@25.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.55.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@4.1.18)':
+  '@jongio/azd-web-core@2.3.0(astro@5.17.1(@types/node@25.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.55.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2))(tailwindcss@4.1.18)':
     dependencies:
       astro: 5.17.1(@types/node@25.2.1)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.55.1)(tsx@4.21.0)(typescript@5.9.3)(yaml@2.8.2)
       tailwindcss: 4.1.18
