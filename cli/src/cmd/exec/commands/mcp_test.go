@@ -6,6 +6,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 
@@ -481,6 +482,9 @@ func TestHandleExecScript_Validation(t *testing.T) {
 
 func TestHandleExecInline_Execution(t *testing.T) {
 	t.Run("executes cmd inline on Windows", func(t *testing.T) {
+		if runtime.GOOS != "windows" {
+			t.Skip("Windows-only test: cmd.exe is not available on this platform")
+		}
 		args := makeToolArgs(map[string]interface{}{"command": "echo hello", "shell": "cmd"})
 		result, err := handleExecInline(context.Background(), args)
 		if err != nil {
