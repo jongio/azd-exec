@@ -106,6 +106,17 @@ Examples:
 			}
 		}
 
+		// Propagate flag-derived values to env vars so child processes and
+		// the executor package (which reads AZD_DEBUG from os.Getenv) see them.
+		// The SDK reads these flags/env vars into extCtx but does not set them
+		// back into the process environment.
+		if extCtx.Debug {
+			_ = os.Setenv("AZD_DEBUG", "true")
+		}
+		if extCtx.NoPrompt {
+			_ = os.Setenv("AZD_NO_PROMPT", "true")
+		}
+
 		// Set output format from flag
 		if extCtx.OutputFormat == "json" {
 			if err := cliout.SetFormat("json"); err != nil {

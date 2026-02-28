@@ -175,3 +175,57 @@ func TestRunE_AllowsPassthroughArgsWithoutDoubleDash(t *testing.T) {
 		t.Fatalf("expected inline execution of 'pnpm', got %q", fake.inlineContent)
 	}
 }
+
+func TestPersistentPreRunE_PropagatesDebugEnvVar(t *testing.T) {
+	// Save and restore AZD_DEBUG
+	origDebug := os.Getenv("AZD_DEBUG")
+	defer func() {
+		if origDebug != "" {
+			_ = os.Setenv("AZD_DEBUG", origDebug)
+		} else {
+			_ = os.Unsetenv("AZD_DEBUG")
+		}
+	}()
+	_ = os.Unsetenv("AZD_DEBUG")
+
+	cmd := newRootCmd()
+	cmd.SetContext(context.Background())
+	if setErr := cmd.PersistentFlags().Set("debug", "true"); setErr != nil {
+		t.Fatalf("setting debug flag failed: %v", setErr)
+	}
+
+	if runErr := cmd.PersistentPreRunE(cmd, []string{"echo"}); runErr != nil {
+		t.Fatalf("PersistentPreRunE failed: %v", runErr)
+	}
+
+	if got := os.Getenv("AZD_DEBUG"); got != "true" {
+		t.Errorf("AZD_DEBUG = %q, want %q", got, "true")
+	}
+}
+
+func TestPersistentPreRunE_PropagatesNoPromptEnvVar(t *testing.T) {
+	// Save and restore AZD_NO_PROMPT
+	origNoPrompt := os.Getenv("AZD_NO_PROMPT")
+	defer func() {
+		if origNoPrompt != "" {
+			_ = os.Setenv("AZD_NO_PROMPT", origNoPrompt)
+		} else {
+			_ = os.Unsetenv("AZD_NO_PROMPT")
+		}
+	}()
+	_ = os.Unsetenv("AZD_NO_PROMPT")
+
+	cmd := newRootCmd()
+	cmd.SetContext(context.Background())
+	if setErr := cmd.PersistentFlags().Set("no-prompt", "true"); setErr != nil {
+		t.Fatalf("setting no-prompt flag failed: %v", setErr)
+	}
+
+	if runErr := cmd.PersistentPreRunE(cmd, []string{"echo"}); runErr != nil {
+		t.Fatalf("PersistentPreRunE failed: %v", runErr)
+	}
+
+	if got := os.Getenv("AZD_NO_PROMPT"); got != "true" {
+		t.Errorf("AZD_NO_PROMPT = %q, want %q", got, "true")
+	}
+}

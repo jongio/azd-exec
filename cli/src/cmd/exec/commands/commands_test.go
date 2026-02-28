@@ -78,8 +78,12 @@ func TestListenCommandExecution(t *testing.T) {
 	cmd := NewListenCommand()
 
 	// Listen command requires a running azd server for gRPC communication.
-	// The SDK listen command may handle missing server gracefully.
+	// Without a server, we expect it to return an error.
 	err := cmd.Execute()
-	// Just verify the command can be invoked without panic
-	_ = err
+	if err == nil {
+		t.Log("Listen command succeeded (unexpected without azd server)")
+	} else {
+		// Expected: no gRPC server available
+		t.Logf("Listen command returned expected error: %v", err)
+	}
 }

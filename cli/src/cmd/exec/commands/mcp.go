@@ -261,6 +261,9 @@ type envVar struct {
 }
 
 func handleGetEnvironment(_ context.Context, _ azdext.ToolArgs) (*mcp.CallToolResult, error) {
+	// allowedPrefixes defines env var prefixes exposed to MCP clients.
+	// "PYTHON" intentionally omits a trailing underscore to match both
+	// PYTHONPATH and PYTHON_* variables commonly used by Python tooling.
 	allowedPrefixes := []string{"AZD_", "AZURE_", "ARM_", "DOTNET_", "NODE_", "PYTHON"}
 
 	var vars []envVar
