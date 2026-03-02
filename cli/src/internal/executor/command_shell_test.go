@@ -10,7 +10,10 @@ import (
 )
 
 func TestBuildCommand_Bash(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	t.Run("Inline bash", func(t *testing.T) {
 		cmd := exec.buildCommand("bash", "echo test", true)
@@ -43,7 +46,10 @@ func TestBuildCommand_Bash(t *testing.T) {
 }
 
 func TestBuildCommand_PowerShell(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	t.Run("Inline pwsh", func(t *testing.T) {
 		cmd := exec.buildCommand("pwsh", "Write-Host 'test'", true)
@@ -76,9 +82,12 @@ func TestBuildCommand_PowerShell(t *testing.T) {
 }
 
 func TestBuildCommand_PowerShellInlineArgsAreEmbedded(t *testing.T) {
-	exec := New(Config{
+	exec, err := New(Config{
 		Args: []string{"sync", "--", "--skip-sync"},
 	})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	cmd := exec.buildCommand("pwsh", "pnpm", true)
 
@@ -97,7 +106,10 @@ func TestBuildCommand_PowerShellInlineArgsAreEmbedded(t *testing.T) {
 }
 
 func TestBuildCommand_Cmd(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	t.Run("Inline cmd", func(t *testing.T) {
 		cmd := exec.buildCommand("cmd", "echo test", true)
@@ -124,9 +136,12 @@ func TestBuildCommand_Cmd(t *testing.T) {
 }
 
 func TestBuildCommand_WithArgs(t *testing.T) {
-	exec := New(Config{
+	exec, err := New(Config{
 		Args: []string{"--verbose", "--output=json"},
 	})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	cmd := exec.buildCommand("bash", "script.sh", false)
 	if len(cmd.Args) < 4 {
@@ -143,7 +158,10 @@ func TestBuildCommand_WithArgs(t *testing.T) {
 }
 
 func TestBuildCommand_Zsh(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	t.Run("Inline zsh", func(t *testing.T) {
 		cmd := exec.buildCommand("zsh", "echo test", true)
@@ -167,7 +185,10 @@ func TestBuildCommand_Zsh(t *testing.T) {
 }
 
 func TestBuildCommand_Sh(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	cmd := exec.buildCommand("sh", "script.sh", false)
 	if cmd.Args[0] != "sh" {
@@ -176,7 +197,10 @@ func TestBuildCommand_Sh(t *testing.T) {
 }
 
 func TestBuildCommand_CustomShell(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	t.Run("Inline custom shell", func(t *testing.T) {
 		cmd := exec.buildCommand("python3", "print('test')", true)
@@ -200,17 +224,22 @@ func TestBuildCommand_CustomShell(t *testing.T) {
 }
 
 func TestBuildCommand_CaseInsensitiveShellNames(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	tests := []struct {
 		shell    string
 		expected string
 	}{
-		{"BASH", "BASH"},
-		{"Bash", "Bash"},
-		{"PWSH", "PWSH"},
-		{"PowerShell", "PowerShell"},
-		{"CMD", "CMD"},
+		// Known shells are normalized to lowercase for correct binary lookup
+		// on case-sensitive filesystems.
+		{"BASH", "bash"},
+		{"Bash", "bash"},
+		{"PWSH", "pwsh"},
+		{"PowerShell", "powershell"},
+		{"CMD", "cmd"},
 	}
 
 	for _, tt := range tests {
@@ -403,7 +432,10 @@ func TestBuildCommand(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			exec := New(Config{Shell: tt.shell, Args: tt.args})
+			exec, err := New(Config{Shell: tt.shell, Args: tt.args})
+			if err != nil {
+				t.Fatalf("New() error: %v", err)
+			}
 			cmd := exec.buildCommand(tt.shell, tt.scriptPath, tt.isInline)
 
 			if cmd.Path == "" {

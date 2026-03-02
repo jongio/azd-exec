@@ -1,5 +1,4 @@
 //go:build integration
-// +build integration
 
 package executor
 
@@ -163,8 +162,11 @@ func TestExecutorWithKeyVaultReferences(t *testing.T) {
 	os.Setenv("MY_KV_SECRET", kvRef)
 	defer os.Unsetenv("MY_KV_SECRET")
 
-	executor := New(Config{})
-	err := executor.Execute(context.Background(), scriptPath)
+	executor, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	err = executor.Execute(context.Background(), scriptPath)
 
 	// We expect this to work if Azure credentials are available
 	if err != nil {

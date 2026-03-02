@@ -33,7 +33,7 @@ type scriptExecutor interface {
 	ExecuteInline(ctx context.Context, scriptContent string) error
 }
 
-var newScriptExecutor = func(config executor.Config) scriptExecutor {
+var newScriptExecutor = func(config executor.Config) (scriptExecutor, error) {
 	return executor.New(config)
 }
 
@@ -75,12 +75,15 @@ Examples:
 		}
 
 		// Create executor
-		exec := newScriptExecutor(executor.Config{
+		exec, err := newScriptExecutor(executor.Config{
 			Shell:               shell,
 			Interactive:         interactive,
 			StopOnKeyVaultError: stopOnKeyVaultError,
 			Args:                scriptArgs,
 		})
+		if err != nil {
+			return fmt.Errorf("invalid configuration: %w", err)
+		}
 
 		// Check if input is a file or inline script
 		// Try to resolve as file path first

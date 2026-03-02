@@ -61,14 +61,13 @@ type Executor struct {
 }
 
 // New creates a new script executor with the given configuration.
-// Returns a configured Executor ready to execute scripts.
-// The config is validated before creating the executor.
-func New(config Config) *Executor {
-	// Validate config early to catch errors before execution.
-	// Note: We don't return an error to maintain backward compatibility,
-	// but validation happens here to fail fast on invalid shells.
-	_ = config.Validate()
-	return &Executor{config: config}
+// Returns a configured Executor ready to execute scripts, or an error
+// if the configuration is invalid (e.g., unknown shell name).
+func New(config Config) (*Executor, error) {
+	if err := config.Validate(); err != nil {
+		return nil, err
+	}
+	return &Executor{config: config}, nil
 }
 
 // Execute runs a script file with azd context.
@@ -91,10 +90,9 @@ func (e *Executor) Execute(ctx context.Context, scriptPath string) error {
 		return &ValidationError{Field: "scriptPath", Reason: fmt.Sprintf("invalid path: %v", err)}
 	}
 
-	// Check for path traversal attempts (after getting absolute path)
-	if strings.Contains(filepath.ToSlash(absPath), "/../") {
-		return &ValidationError{Field: "scriptPath", Reason: "path traversal not allowed"}
-	}
+	// Note: filepath.Abs resolves all ".." components, so explicit traversal
+	// checks are unnecessary here. The CLI path is user-trusted (direct invocation).
+	// The MCP path uses security.ValidatePathWithinBases for containment enforcement.
 
 	// Ensure script exists before attempting to execute it
 	info, err := os.Stat(absPath)

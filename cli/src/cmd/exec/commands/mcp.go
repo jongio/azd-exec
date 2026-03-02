@@ -12,6 +12,7 @@ import (
 
 	"github.com/azure/azure-dev/cli/azd/pkg/azdext"
 	"github.com/jongio/azd-core/azdextutil"
+	"github.com/jongio/azd-core/keyvault"
 	"github.com/jongio/azd-core/security"
 	"github.com/jongio/azd-core/shellutil"
 	"github.com/jongio/azd-exec/cli/src/internal/version"
@@ -176,7 +177,10 @@ func handleExecScript(ctx context.Context, args azdext.ToolArgs) (*mcp.CallToolR
 
 	cmdArgs := buildShellArgs(shell, validPath, false, scriptArgs)
 	cmd := exec.CommandContext(execCtx, cmdArgs[0], cmdArgs[1:]...)
-	cmd.Env = os.Environ()
+
+	// Resolve Key Vault references in environment variables, matching the
+	// CLI execution path behavior. Continue on error (best-effort).
+	cmd.Env = prepareEnvironmentForMCP(ctx)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -214,7 +218,10 @@ func handleExecInline(ctx context.Context, args azdext.ToolArgs) (*mcp.CallToolR
 
 	cmdArgs := buildShellArgs(shell, command, true, nil)
 	cmd := exec.CommandContext(execCtx, cmdArgs[0], cmdArgs[1:]...)
-	cmd.Env = os.Environ()
+
+	// Resolve Key Vault references in environment variables, matching the
+	// CLI execution path behavior. Continue on error (best-effort).
+	cmd.Env = prepareEnvironmentForMCP(ctx)
 
 	var stdout, stderr bytes.Buffer
 	cmd.Stdout = &stdout
@@ -283,8 +290,13 @@ func handleGetEnvironment(_ context.Context, _ azdext.ToolArgs) (*mcp.CallToolRe
 				continue
 			}
 
-			// Exclude known secret-bearing variable names
-			secretPatterns := []string{"SECRET", "PASSWORD", "KEY", "TOKEN", "CREDENTIAL", "CERTIFICATE", "CONNECTION_STRING", "CONNSTR"}
+			// Exclude known secret-bearing variable names.
+			// This denylist covers common Azure, cloud, and application secret patterns.
+			secretPatterns := []string{
+				"SECRET", "PASSWORD", "KEY", "TOKEN", "CREDENTIAL", "CERTIFICATE",
+				"CONNECTION_STRING", "CONNSTR", "PAT", "SAS", "SIGNING",
+				"PRIVATE", "PASSPHRASE", "AUTH",
+			}
 			isSecret := false
 			upperName := strings.ToUpper(name)
 			for _, pattern := range secretPatterns {
@@ -305,6 +317,41 @@ func handleGetEnvironment(_ context.Context, _ azdext.ToolArgs) (*mcp.CallToolRe
 }
 
 // --- Helpers ---
+
+// prepareEnvironmentForMCP resolves Key Vault references in environment variables.
+// This mirrors the CLI execution path (executor.prepareEnvironment) to ensure
+// consistent behavior between CLI and MCP invocations. Operates in best-effort
+// mode: if resolution fails, the original environment is returned unchanged.
+func prepareEnvironmentForMCP(ctx context.Context) []string {
+	envVars := os.Environ()
+
+	// Quick check: skip resolver setup if no Key Vault references are present.
+	hasRef := false
+	for _, envVar := range envVars {
+		if parts := strings.SplitN(envVar, "=", 2); len(parts) == 2 && keyvault.IsKeyVaultReference(parts[1]) {
+			hasRef = true
+			break
+		}
+	}
+	if !hasRef {
+		return envVars
+	}
+
+	resolver, err := keyvault.NewKeyVaultResolver()
+	if err != nil {
+		// Cannot create resolver — fall back to raw environment.
+		fmt.Fprintf(os.Stderr, "Warning: failed to create Key Vault resolver: %v\n", err)
+		return envVars
+	}
+
+	resolved, _, err := resolver.ResolveEnvironmentVariables(ctx, envVars, keyvault.ResolveEnvironmentOptions{StopOnError: false})
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Warning: Key Vault resolution error: %v\n", err)
+		return envVars
+	}
+
+	return resolved
+}
 
 type execResult struct {
 	Stdout   string `json:"stdout"`

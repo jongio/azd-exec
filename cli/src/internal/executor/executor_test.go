@@ -1,5 +1,4 @@
 //go:build integration
-// +build integration
 
 package executor
 
@@ -48,11 +47,14 @@ func TestExecuteIntegration(t *testing.T) {
 				t.Fatal(err)
 			}
 
-			exec := New(Config{
+			exec, err := New(Config{
 				Shell: tt.shell,
 			})
+			if err != nil {
+				t.Fatalf("New() error: %v", err)
+			}
 
-			err := exec.Execute(context.Background(), scriptPath)
+			err = exec.Execute(context.Background(), scriptPath)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Execute() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -123,11 +125,14 @@ func TestExecuteInlineIntegration(t *testing.T) {
 				t.Skip("Skipping test on this platform")
 			}
 
-			exec := New(Config{
+			exec, err := New(Config{
 				Shell: tt.shell,
 			})
+			if err != nil {
+				t.Fatalf("New() error: %v", err)
+			}
 
-			err := exec.ExecuteInline(context.Background(), tt.script)
+			err = exec.ExecuteInline(context.Background(), tt.script)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ExecuteInline() error = %v, wantErr %v", err, tt.wantErr)
 			}
@@ -137,8 +142,11 @@ func TestExecuteInlineIntegration(t *testing.T) {
 
 // TestExecuteInlineEmptyScript tests that empty inline scripts return an error.
 func TestExecuteInlineEmptyScript(t *testing.T) {
-	exec := New(Config{})
-	err := exec.ExecuteInline(context.Background(), "")
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	err = exec.ExecuteInline(context.Background(), "")
 	if err == nil {
 		t.Error("ExecuteInline() with empty script should return an error")
 	}
