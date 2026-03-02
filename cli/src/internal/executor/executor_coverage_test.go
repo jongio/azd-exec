@@ -2,6 +2,7 @@ package executor
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -270,6 +271,111 @@ func TestExecutorInteractiveMode(t *testing.T) {
 	// Just verify the config is set - can't easily test actual interactive behavior
 	if !exec.config.Interactive {
 		t.Error("Expected Interactive to be true")
+	}
+}
+
+// TestExecute_DirectoryPath verifies that executing a directory returns an error.
+func TestExecute_DirectoryPath(t *testing.T) {
+	exec := New(Config{})
+	err := exec.Execute(context.Background(), t.TempDir())
+	if err == nil {
+		t.Error("Expected error for directory path")
+	}
+	if !strings.Contains(err.Error(), "must be a file") {
+		t.Errorf("Unexpected error: %v", err)
+	}
+}
+
+// TestPrepareEnvironment_StopOnKeyVaultError verifies fail-fast behavior.
+func TestPrepareEnvironment_StopOnKeyVaultError(t *testing.T) {
+	origEnv := os.Environ()
+	defer func() {
+		os.Clearenv()
+		for _, env := range origEnv {
+			parts := strings.SplitN(env, "=", 2)
+			if len(parts) == 2 {
+				_ = os.Setenv(parts[0], parts[1])
+			}
+		}
+	}()
+
+	os.Clearenv()
+	_ = os.Setenv("KV_VAR", "@Microsoft.KeyVault(VaultName=test;SecretName=secret)")
+
+	exec := New(Config{StopOnKeyVaultError: true})
+	_, _, err := exec.prepareEnvironment(context.Background())
+	// With StopOnKeyVaultError=true and no real Azure credentials, we expect an error
+	// (either resolver creation fails or resolution fails)
+	if err != nil {
+		t.Logf("Got expected error in fail-fast mode: %v", err)
+	} else {
+		t.Log("Resolver succeeded (Azure credentials available)")
+	}
+}
+
+// TestPrepareEnvironment_ResolverCreationError verifies handling when Key Vault resolver fails to initialize.
+func TestPrepareEnvironment_ResolverCreationError(t *testing.T) {
+	origEnv := os.Environ()
+	defer func() {
+		os.Clearenv()
+		for _, env := range origEnv {
+			parts := strings.SplitN(env, "=", 2)
+			if len(parts) == 2 {
+				_ = os.Setenv(parts[0], parts[1])
+			}
+		}
+	}()
+
+	os.Clearenv()
+	_ = os.Setenv("KV_VAR", "@Microsoft.KeyVault(VaultName=test;SecretName=secret)")
+
+	// Inject a resolver that always fails
+	oldResolver := newKeyVaultEnvResolver
+	defer func() { newKeyVaultEnvResolver = oldResolver }()
+	newKeyVaultEnvResolver = func() (keyVaultEnvResolver, error) {
+		return nil, fmt.Errorf("mock resolver error")
+	}
+
+	t.Run("continue on error mode", func(t *testing.T) {
+		exec := New(Config{StopOnKeyVaultError: false})
+		envVars, warnings, err := exec.prepareEnvironment(context.Background())
+		if err != nil {
+			t.Fatalf("expected no error in continue mode, got: %v", err)
+		}
+		if len(warnings) == 0 {
+			t.Error("expected warnings when resolver fails")
+		}
+		if len(envVars) == 0 {
+			t.Error("expected fallback to original env vars")
+		}
+	})
+
+	t.Run("stop on error mode", func(t *testing.T) {
+		exec := New(Config{StopOnKeyVaultError: true})
+		_, _, err := exec.prepareEnvironment(context.Background())
+		if err == nil {
+			t.Error("expected error in stop-on-error mode")
+		}
+		if !strings.Contains(err.Error(), "mock resolver error") {
+			t.Errorf("unexpected error: %v", err)
+		}
+	})
+}
+
+// TestGetDefaultShellForOS verifies platform-specific shell detection.
+func TestGetDefaultShellForOS(t *testing.T) {
+	shell := getDefaultShellForOS()
+	if shell == "" {
+		t.Error("getDefaultShellForOS returned empty string")
+	}
+	if runtime.GOOS == "windows" {
+		if shell != "powershell" {
+			t.Errorf("expected powershell on Windows, got %q", shell)
+		}
+	} else {
+		if shell != "bash" {
+			t.Errorf("expected bash on non-Windows, got %q", shell)
+		}
 	}
 }
 

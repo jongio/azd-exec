@@ -2,12 +2,12 @@
 package commands
 
 import (
-	coreversion "github.com/jongio/azd-core/version"
+	"github.com/azure/azure-dev/cli/azd/pkg/azdext"
 	"github.com/jongio/azd-exec/cli/src/internal/version"
 	"github.com/spf13/cobra"
 )
 
 // NewVersionCommand creates a new version command that displays extension version information.
 func NewVersionCommand(outputFormat *string) *cobra.Command {
-	return coreversion.NewCommand(version.Info, outputFormat)
+	return azdext.NewVersionCommand("jongio.azd.exec", version.Version, outputFormat)
 }

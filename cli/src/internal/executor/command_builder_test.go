@@ -106,3 +106,46 @@ func TestBuildCommandLookPath(t *testing.T) {
 func execLookPath(file string) (string, error) {
 	return exec.LookPath(file)
 }
+
+func TestQuotePowerShellArg(t *testing.T) {
+	tests := []struct {
+		name string
+		arg  string
+		want string
+	}{
+		{name: "empty string", arg: "", want: "''"},
+		{name: "simple arg", arg: "hello", want: "'hello'"},
+		{name: "arg with single quote", arg: "it's", want: "'it''s'"},
+		{name: "arg with multiple quotes", arg: "a'b'c", want: "'a''b''c'"},
+		{name: "arg with double dash", arg: "--skip-sync", want: "'--skip-sync'"},
+		{name: "arg with spaces", arg: "hello world", want: "'hello world'"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := quotePowerShellArg(tt.arg)
+			if got != tt.want {
+				t.Errorf("quotePowerShellArg(%q) = %q, want %q", tt.arg, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestBuildPowerShellInlineCommand(t *testing.T) {
+	t.Run("no args returns script as-is", func(t *testing.T) {
+		e := New(Config{})
+		got := e.buildPowerShellInlineCommand("Get-Date")
+		if got != "Get-Date" {
+			t.Errorf("got %q, want %q", got, "Get-Date")
+		}
+	})
+
+	t.Run("with args joins and quotes", func(t *testing.T) {
+		e := New(Config{Args: []string{"arg1", "it's"}})
+		got := e.buildPowerShellInlineCommand("cmd")
+		want := "cmd 'arg1' 'it''s'"
+		if got != want {
+			t.Errorf("got %q, want %q", got, want)
+		}
+	})
+}
