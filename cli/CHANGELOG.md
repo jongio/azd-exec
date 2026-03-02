@@ -1,3 +1,7 @@
+## [0.4.0] - 2026-03-02
+
+- feat: adopt azdext SDK helpers — full extension framework migration (#39) (7ac164c)
+
 ## [0.3.8] - 2026-02-23
 
 - feat: full azd extension framework adoption - metadata, MCP server, lifecycle events (#37) (1620019)
