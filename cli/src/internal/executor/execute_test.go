@@ -7,9 +7,12 @@ import (
 )
 
 func TestExecuteWithInteractiveMode(t *testing.T) {
-	exec := New(Config{
+	exec, err := New(Config{
 		Interactive: true,
 	})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	if !exec.config.Interactive {
 		t.Error("Interactive mode not set")
@@ -17,9 +20,12 @@ func TestExecuteWithInteractiveMode(t *testing.T) {
 }
 
 func TestExecuteWithCustomShell(t *testing.T) {
-	exec := New(Config{
+	exec, err := New(Config{
 		Shell: "bash",
 	})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	if exec.config.Shell != "bash" {
 		t.Errorf("Shell = %v, want bash", exec.config.Shell)
@@ -28,16 +34,22 @@ func TestExecuteWithCustomShell(t *testing.T) {
 
 func TestExecuteError(t *testing.T) {
 	t.Run("Nonexistent script", func(t *testing.T) {
-		exec := New(Config{})
-		err := exec.Execute(context.Background(), "nonexistent-script.sh")
+		exec, err := New(Config{})
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		err = exec.Execute(context.Background(), "nonexistent-script.sh")
 		if err == nil {
 			t.Error("Expected error for nonexistent script, got nil")
 		}
 	})
 
 	t.Run("Empty script path", func(t *testing.T) {
-		exec := New(Config{})
-		err := exec.Execute(context.Background(), "")
+		exec, err := New(Config{})
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		err = exec.Execute(context.Background(), "")
 		if err == nil {
 			t.Error("Expected error for empty script path, got nil")
 		}
@@ -49,7 +61,10 @@ func TestExecuteError(t *testing.T) {
 
 func TestExecuteWithArguments(t *testing.T) {
 	args := []string{"arg1", "arg2", "arg3"}
-	exec := New(Config{Args: args})
+	exec, err := New(Config{Args: args})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	if len(exec.config.Args) != 3 {
 		t.Errorf("Args length = %v, want 3", len(exec.config.Args))

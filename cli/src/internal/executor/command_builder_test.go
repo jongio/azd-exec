@@ -31,7 +31,10 @@ func TestBuildCommandWithCustomShell(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			exec := New(Config{Shell: tt.shell, Args: tt.args})
+			exec, err := New(Config{Args: tt.args})
+			if err != nil {
+				t.Fatalf("New() error: %v", err)
+			}
 			cmd := exec.buildCommand(tt.shell, tt.scriptPath, false)
 
 			// Check if command was built
@@ -75,7 +78,10 @@ func TestBuildCommandShellVariations(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.shell, func(t *testing.T) {
-			exec := New(Config{Shell: tt.shell})
+			exec, err := New(Config{Shell: tt.shell})
+			if err != nil {
+				t.Fatalf("New() error: %v", err)
+			}
 			cmd := exec.buildCommand(tt.shell, tt.scriptPath, false)
 
 			if cmd == nil {
@@ -87,7 +93,10 @@ func TestBuildCommandShellVariations(t *testing.T) {
 
 func TestBuildCommandLookPath(t *testing.T) {
 	// Test that buildCommand creates a valid exec.Cmd
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 	cmd := exec.buildCommand("cmd", "test.bat", false)
 
 	// On Windows, cmd should be findable
@@ -96,7 +105,7 @@ func TestBuildCommandLookPath(t *testing.T) {
 	}
 
 	// Verify we can look up the command
-	_, err := execLookPath(cmd.Args[0])
+	_, err = execLookPath(cmd.Args[0])
 	if err != nil {
 		t.Logf("Command %v not found in PATH (may be platform-specific)", cmd.Args[0])
 	}
@@ -133,7 +142,10 @@ func TestQuotePowerShellArg(t *testing.T) {
 
 func TestBuildPowerShellInlineCommand(t *testing.T) {
 	t.Run("no args returns script as-is", func(t *testing.T) {
-		e := New(Config{})
+		e, err := New(Config{})
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
 		got := e.buildPowerShellInlineCommand("Get-Date")
 		if got != "Get-Date" {
 			t.Errorf("got %q, want %q", got, "Get-Date")
@@ -141,7 +153,10 @@ func TestBuildPowerShellInlineCommand(t *testing.T) {
 	})
 
 	t.Run("with args joins and quotes", func(t *testing.T) {
-		e := New(Config{Args: []string{"arg1", "it's"}})
+		e, err := New(Config{Args: []string{"arg1", "it's"}})
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
 		got := e.buildPowerShellInlineCommand("cmd")
 		want := "cmd 'arg1' 'it''s'"
 		if got != want {

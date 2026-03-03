@@ -13,7 +13,10 @@ import (
 )
 
 func TestExecute_FileValidation(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	t.Run("Empty script path", func(t *testing.T) {
 		err := exec.Execute(context.Background(), "")
@@ -47,7 +50,10 @@ func TestExecute_FileValidation(t *testing.T) {
 }
 
 func TestExecuteInline_Validation(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	t.Run("Empty script content", func(t *testing.T) {
 		err := exec.ExecuteInline(context.Background(), "")
@@ -68,7 +74,10 @@ func TestExecuteInline_Validation(t *testing.T) {
 }
 
 func TestPrepareEnvironment(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	t.Run("No Key Vault references", func(t *testing.T) {
 		// Set up environment without KV references
@@ -123,7 +132,10 @@ func TestPrepareEnvironment(t *testing.T) {
 }
 
 func TestHasKeyVaultReferences(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	tests := []struct {
 		name    string
@@ -168,7 +180,10 @@ func TestHasKeyVaultReferences(t *testing.T) {
 }
 
 func TestLogDebugInfo(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	// Test doesn't crash and produces output
 	t.Run("Inline script", func(t *testing.T) {
@@ -181,7 +196,10 @@ func TestLogDebugInfo(t *testing.T) {
 }
 
 func TestRunCommand_ErrorHandling(t *testing.T) {
-	exec := New(Config{})
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	shell := "bash"
 	exitCmd := "exit 1"
@@ -232,8 +250,11 @@ func TestExecutorWithDebugMode(t *testing.T) {
 
 	_ = os.Setenv("AZD_SCRIPT_DEBUG", "true")
 
-	exec := New(Config{})
-	err := exec.ExecuteInline(context.Background(), "echo 'debug test'")
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	err = exec.ExecuteInline(context.Background(), "echo 'debug test'")
 	if err != nil {
 		t.Errorf("Unexpected error in debug mode: %v", err)
 	}
@@ -253,20 +274,26 @@ func TestExecutorWithArgs(t *testing.T) {
 		t.Skip("Test script not found, skipping")
 	}
 
-	exec := New(Config{
+	exec, err := New(Config{
 		Args: args,
 	})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
-	err := exec.Execute(context.Background(), scriptPath)
+	err = exec.Execute(context.Background(), scriptPath)
 	if err != nil {
 		t.Logf("Script execution error (may be expected): %v", err)
 	}
 }
 
 func TestExecutorInteractiveMode(t *testing.T) {
-	exec := New(Config{
+	exec, err := New(Config{
 		Interactive: true,
 	})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
 
 	// Just verify the config is set - can't easily test actual interactive behavior
 	if !exec.config.Interactive {
@@ -276,8 +303,11 @@ func TestExecutorInteractiveMode(t *testing.T) {
 
 // TestExecute_DirectoryPath verifies that executing a directory returns an error.
 func TestExecute_DirectoryPath(t *testing.T) {
-	exec := New(Config{})
-	err := exec.Execute(context.Background(), t.TempDir())
+	exec, err := New(Config{})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	err = exec.Execute(context.Background(), t.TempDir())
 	if err == nil {
 		t.Error("Expected error for directory path")
 	}
@@ -302,8 +332,11 @@ func TestPrepareEnvironment_StopOnKeyVaultError(t *testing.T) {
 	os.Clearenv()
 	_ = os.Setenv("KV_VAR", "@Microsoft.KeyVault(VaultName=test;SecretName=secret)")
 
-	exec := New(Config{StopOnKeyVaultError: true})
-	_, _, err := exec.prepareEnvironment(context.Background())
+	exec, err := New(Config{StopOnKeyVaultError: true})
+	if err != nil {
+		t.Fatalf("New() error: %v", err)
+	}
+	_, _, err = exec.prepareEnvironment(context.Background())
 	// With StopOnKeyVaultError=true and no real Azure credentials, we expect an error
 	// (either resolver creation fails or resolution fails)
 	if err != nil {
@@ -337,7 +370,10 @@ func TestPrepareEnvironment_ResolverCreationError(t *testing.T) {
 	}
 
 	t.Run("continue on error mode", func(t *testing.T) {
-		exec := New(Config{StopOnKeyVaultError: false})
+		exec, err := New(Config{StopOnKeyVaultError: false})
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
 		envVars, warnings, err := exec.prepareEnvironment(context.Background())
 		if err != nil {
 			t.Fatalf("expected no error in continue mode, got: %v", err)
@@ -351,8 +387,11 @@ func TestPrepareEnvironment_ResolverCreationError(t *testing.T) {
 	})
 
 	t.Run("stop on error mode", func(t *testing.T) {
-		exec := New(Config{StopOnKeyVaultError: true})
-		_, _, err := exec.prepareEnvironment(context.Background())
+		exec, err := New(Config{StopOnKeyVaultError: true})
+		if err != nil {
+			t.Fatalf("New() error: %v", err)
+		}
+		_, _, err = exec.prepareEnvironment(context.Background())
 		if err == nil {
 			t.Error("expected error in stop-on-error mode")
 		}
@@ -406,7 +445,10 @@ func TestNewExecutor(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			exec := New(tt.config)
+			exec, err := New(tt.config)
+			if err != nil {
+				t.Fatalf("New() error: %v", err)
+			}
 			if exec == nil {
 				t.Error("New() returned nil")
 				return

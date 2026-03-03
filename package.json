@@ -12,6 +12,6 @@
     "test:all": "pnpm test"
   },
   "dependencies": {
-    "@jongio/azd-web-core": "^2.1.0"
+    "@jongio/azd-web-core": "^2.4.1"
   }
 }

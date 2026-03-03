@@ -25,32 +25,44 @@ var validShells = map[string]bool{
 //   - Windows cmd: Use /c for both inline and files
 //   - Unknown shells: Fall back to -c flag (Unix-like behavior)
 //
+// Known shell names are normalized to lowercase for the executable binary
+// to ensure correct lookup on case-sensitive filesystems.
 // Script arguments (e.config.Args) are appended after the script specification.
 func (e *Executor) buildCommand(shell, scriptOrPath string, isInline bool) *exec.Cmd {
 	var cmdArgs []string
 	skipAppendArgs := false
 
-	// Normalize shell name to lowercase for comparison
+	// Normalize shell name to lowercase for both comparison and executable name.
+	// This ensures correct binary lookup on case-sensitive filesystems
+	// (e.g., --shell BASH resolves to "bash", not "BASH").
 	shellLower := strings.ToLower(shell)
+
+	// Use the lowercase name for known shells; keep original for unknown shells
+	// (custom interpreters like "Python3" should preserve user's casing).
+	shellBin := shell
+	if validShells[shellLower] {
+		shellBin = shellLower
+	}
 
 	switch shellLower {
 	case shellutil.ShellBash, shellutil.ShellSh, shellutil.ShellZsh:
 		if isInline {
-			cmdArgs = []string{shell, "-c", scriptOrPath}
+			cmdArgs = []string{shellBin, "-c", scriptOrPath}
 		} else {
-			cmdArgs = []string{shell, scriptOrPath}
+			cmdArgs = []string{shellBin, scriptOrPath}
 		}
 	case shellutil.ShellPwsh, shellutil.ShellPowerShell:
 		if isInline {
-			cmdArgs = []string{shell, "-Command", e.buildPowerShellInlineCommand(scriptOrPath)}
+			cmdArgs = []string{shellBin, "-Command", e.buildPowerShellInlineCommand(scriptOrPath)}
 			skipAppendArgs = true
 		} else {
-			cmdArgs = []string{shell, "-File", scriptOrPath}
+			cmdArgs = []string{shellBin, "-File", scriptOrPath}
 		}
 	case shellutil.ShellCmd:
-		cmdArgs = []string{shell, "/c", scriptOrPath}
+		cmdArgs = []string{shellBin, "/c", scriptOrPath}
 	default:
-		// Unknown shell: use Unix-like -c pattern as fallback
+		// Unknown shell: use Unix-like -c pattern as fallback.
+		// Preserve original casing for custom interpreters.
 		if isInline {
 			cmdArgs = []string{shell, "-c", scriptOrPath}
 		} else {

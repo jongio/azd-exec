@@ -90,9 +90,9 @@ func TestRunE_DispatchesFileOrInline(t *testing.T) {
 	defer func() { newScriptExecutor = oldNew }()
 
 	fake := &fakeExecutor{}
-	newScriptExecutor = func(cfg executor.Config) scriptExecutor {
+	newScriptExecutor = func(cfg executor.Config) (scriptExecutor, error) {
 		fake.args = append([]string{}, cfg.Args...)
-		return fake
+		return fake, nil
 	}
 
 	// Avoid changing env/cwd during Execute.
@@ -150,9 +150,9 @@ func TestRunE_AllowsPassthroughArgsWithoutDoubleDash(t *testing.T) {
 	defer func() { newScriptExecutor = oldNew }()
 
 	fake := &fakeExecutor{}
-	newScriptExecutor = func(cfg executor.Config) scriptExecutor {
+	newScriptExecutor = func(cfg executor.Config) (scriptExecutor, error) {
 		fake.args = append([]string{}, cfg.Args...)
-		return fake
+		return fake, nil
 	}
 
 	// Avoid changing env/cwd during Execute.
