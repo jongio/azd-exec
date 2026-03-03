@@ -1,3 +1,7 @@
+## [0.4.1] - 2026-03-03
+
+- fix: add packages:read permission to deploy-website job in release workflow (364aa90)
+
 ## [0.4.0] - 2026-03-02
 
 - feat: adopt azdext SDK helpers — full extension framework migration (#39) (7ac164c)
