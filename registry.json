@@ -11,7 +11,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "script",
@@ -40,7 +40,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "script",
@@ -106,7 +106,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -180,7 +180,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -254,7 +254,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -328,7 +328,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -402,7 +402,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -476,7 +476,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -550,7 +550,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -624,7 +624,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -698,7 +698,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -772,7 +772,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -846,7 +846,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -920,7 +920,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -994,7 +994,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -1068,7 +1068,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -1142,7 +1142,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -1216,7 +1216,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -1290,7 +1290,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -1364,7 +1364,7 @@
           "capabilities": [
             "custom-commands"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -1441,7 +1441,7 @@
             "mcp-server",
             "metadata"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -1518,7 +1518,7 @@
             "mcp-server",
             "metadata"
           ],
-          "usage": "azd exec <command> [options]",
+          "usage": "azd exec \u003ccommand\u003e [options]",
           "examples": [
             {
               "name": "execute script",
@@ -1584,6 +1584,83 @@
               },
               "entryPoint": "jongio-azd-exec-windows-arm64.exe",
               "url": "https://github.com/jongio/azd-exec/releases/download/azd-ext-jongio-azd-exec_0.4.0/jongio-azd-exec-windows-arm64.zip"
+            }
+          }
+        },
+        {
+          "version": "0.4.1",
+          "capabilities": [
+            "custom-commands",
+            "lifecycle-events",
+            "mcp-server",
+            "metadata"
+          ],
+          "usage": "azd exec \u003ccommand\u003e [options]",
+          "examples": [
+            {
+              "name": "execute script",
+              "description": "Execute a script file with azd context",
+              "usage": "azd exec ./my-script.sh"
+            },
+            {
+              "name": "with shell",
+              "description": "Execute with specific shell",
+              "usage": "azd exec --shell pwsh ./deploy.ps1"
+            },
+            {
+              "name": "version",
+              "description": "Display extension version",
+              "usage": "azd exec version"
+            }
+          ],
+          "artifacts": {
+            "darwin/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "0b77e167df5ba2c9384279a849ff1ba4b298d5c17f827b5e3b26a71f7179dbf3"
+              },
+              "entryPoint": "jongio-azd-exec-darwin-amd64",
+              "url": "https://github.com/jongio/azd-exec/releases/download/azd-ext-jongio-azd-exec_0.4.1/jongio-azd-exec-darwin-amd64.zip"
+            },
+            "darwin/arm64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "60fdd770359ed7185a66f2db2bf9fd771a905953a60d56fb920eabe11e19f718"
+              },
+              "entryPoint": "jongio-azd-exec-darwin-arm64",
+              "url": "https://github.com/jongio/azd-exec/releases/download/azd-ext-jongio-azd-exec_0.4.1/jongio-azd-exec-darwin-arm64.zip"
+            },
+            "linux/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "020d2bdef005a76aa556f8fe026f973ebf9a3043b2832759df22d07c59e8a65b"
+              },
+              "entryPoint": "jongio-azd-exec-linux-amd64",
+              "url": "https://github.com/jongio/azd-exec/releases/download/azd-ext-jongio-azd-exec_0.4.1/jongio-azd-exec-linux-amd64.tar.gz"
+            },
+            "linux/arm64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "6d257f0a593f51d36eb59f1786c7b63de156bba161bd2fd28e215d97111d0f68"
+              },
+              "entryPoint": "jongio-azd-exec-linux-arm64",
+              "url": "https://github.com/jongio/azd-exec/releases/download/azd-ext-jongio-azd-exec_0.4.1/jongio-azd-exec-linux-arm64.tar.gz"
+            },
+            "windows/amd64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "25d19fc276e8d2365fefb20f1cc40d3d60df8b8b154fec1486ec57954cf253ac"
+              },
+              "entryPoint": "jongio-azd-exec-windows-amd64.exe",
+              "url": "https://github.com/jongio/azd-exec/releases/download/azd-ext-jongio-azd-exec_0.4.1/jongio-azd-exec-windows-amd64.zip"
+            },
+            "windows/arm64": {
+              "checksum": {
+                "algorithm": "sha256",
+                "value": "3e4c677d28c9414b85d338f83dd2d23557fe9cc3a1c19a3919884b068825853d"
+              },
+              "entryPoint": "jongio-azd-exec-windows-arm64.exe",
+              "url": "https://github.com/jongio/azd-exec/releases/download/azd-ext-jongio-azd-exec_0.4.1/jongio-azd-exec-windows-arm64.zip"
             }
           }
         }
