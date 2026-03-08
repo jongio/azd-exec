@@ -55,7 +55,7 @@ That's it. Your script has access to all azd environment variables, Azure creden
 Automatically detects and runs bash, sh, zsh, PowerShell, pwsh, and cmd scripts based on file extension or shebang.
 
 ### 🎯 Script Arguments
-Pass arguments to your scripts seamlessly with the `--` separator for clean parameter handling.
+Pass arguments to your scripts using the `--` separator for clean parameter handling.
 
 ### 🌍 Full Azure Context
 Access all azd environment variables including subscription, tenant, location, and custom variables.
