@@ -1,3 +1,7 @@
+## [0.4.2] - 2026-03-12
+
+- chore: update azd-core to v0.5.6 (#43) (7cb044e)
+
 ## [0.4.1] - 2026-03-03
 
 - fix: add packages:read permission to deploy-website job in release workflow (364aa90)
