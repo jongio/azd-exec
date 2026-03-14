@@ -248,7 +248,7 @@ func handleListShells(_ context.Context, _ azdext.ToolArgs) (*mcp.CallToolResult
 		shellutil.ShellCmd,
 	}
 
-	var results []shellInfo
+	results := make([]shellInfo, 0, len(shells))
 	for _, sh := range shells {
 		_, err := exec.LookPath(sh)
 		results = append(results, shellInfo{
@@ -385,14 +385,16 @@ func buildShellArgs(shell, scriptOrCmd string, isInline bool, extraArgs []string
 		if isInline {
 			return []string{"cmd", "/c", scriptOrCmd}
 		}
-		args := []string{"cmd", "/c", scriptOrCmd}
+		args := make([]string, 0, 3+len(extraArgs))
+		args = append(args, "cmd", "/c", scriptOrCmd)
 		args = append(args, extraArgs...)
 		return args
 	case "powershell", "pwsh":
 		if isInline {
 			return []string{shellLower, "-NoProfile", "-Command", scriptOrCmd}
 		}
-		args := []string{shellLower, "-NoProfile", "-File", scriptOrCmd}
+		args := make([]string, 0, 4+len(extraArgs))
+		args = append(args, shellLower, "-NoProfile", "-File", scriptOrCmd)
 		args = append(args, extraArgs...)
 		return args
 	default:
@@ -400,7 +402,8 @@ func buildShellArgs(shell, scriptOrCmd string, isInline bool, extraArgs []string
 		if isInline {
 			return []string{shellLower, "-c", scriptOrCmd}
 		}
-		args := []string{shellLower, scriptOrCmd}
+		args := make([]string, 0, 2+len(extraArgs))
+		args = append(args, shellLower, scriptOrCmd)
 		args = append(args, extraArgs...)
 		return args
 	}

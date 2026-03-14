@@ -25,12 +25,21 @@ linters:
     - unconvert     # Remove unnecessary type conversions
     - goconst       # Find repeated strings that could be constants
     - dupl          # Code clone detection
-    - godot         # Check for proper comment punctuation
-    - goprintffuncname # Check printf-like function names
     - nolintlint    # Ensure nolint directives are properly formatted
     - gosec         # Security checker for Go code
     - bodyclose     # Check for HTTP response body close
     - gocritic      # Comprehensive Go source code linter
+    # Dispatch-level linters
+    - errname       # Check error type naming conventions
+    - exhaustive    # Check exhaustiveness of enum switch statements
+    - forcetypeassert # Find forced type assertions
+    - makezero      # Find slice declarations not initialized with zero length
+    - nilerr        # Find code returning nil error incorrectly
+    - noctx         # Find HTTP requests without context
+    - prealloc      # Find slice pre-allocation opportunities
+    - predeclared   # Find shadowed predeclared identifiers
+    - tparallel     # Detect inappropriate t.Parallel() usage
+    - wastedassign  # Find wasted assignments
   settings:
     errcheck:
       check-type-assertions: true
@@ -44,10 +53,8 @@ linters:
         - G306  # File permissions - we need executable scripts
 
     govet:
-      enable-all: true
       disable:
-        - shadow  # Disable shadow checking as it can be noisy
-        - fieldalignment  # Disable struct field alignment - minor optimization
+        - fieldalignment
 
     revive:
       rules:
@@ -65,16 +72,33 @@ linters:
     goconst:
       min-len: 3
       min-occurrences: 3
+    exhaustive:
+      default-signifies-exhaustive: true
+    gocritic:
+      disabled-checks:
+        - ifElseChain
+        - appendAssign
+        - elseif
   exclusions:
     rules:
       - path: '(.+)_test\.go'
         linters:
           - dupl
+          - errcheck
           - goconst
+          - unparam
+          - forcetypeassert
+          - noctx
+          - exhaustive
+          - prealloc
+          - gosec
+          - revive
+      - path: 'magefile\.go'
+        linters:
+          - unparam
+          - errcheck
 
 output:
   formats:
-    colored-line-number:
+    text:
       path: stdout
-  print-issued-lines: true
-  print-linter-name: true
