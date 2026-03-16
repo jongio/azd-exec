@@ -75,7 +75,7 @@ func (e *Executor) buildCommand(shell, scriptOrPath string, isInline bool) *exec
 		cmdArgs = append(cmdArgs, e.config.Args...)
 	}
 
-	return exec.Command(cmdArgs[0], cmdArgs[1:]...) // #nosec G204 - cmdArgs are controlled by caller
+	return exec.Command(cmdArgs[0], cmdArgs[1:]...) //nolint:noctx // CLI command builder has no context available; #nosec G204
 }
 
 // buildPowerShellInlineCommand joins the inline script with its arguments into a single
