@@ -1,3 +1,16 @@
+## [0.4.3] - 2026-03-16
+
+- fix: correct cosign-installer SHA for v3 (3ea690d)
+- fix: release workflow - add shell:bash, limit build to ubuntu, fix gosec (681d3c9)
+- fix: remove non-existent 'build' job from release.yml needs (0a42db5)
+- ci: bump codecov/codecov-action from 4.6.0 to 5.5.2 (#49) (c84df55)
+- ci: bump actions/cache from 4.2.3 to 5.0.3 (#48) (5e8f5c1)
+- ci: bump actions/upload-artifact from 4.6.2 to 7.0.0 (#47) (980ed68)
+- ci: bump anchore/sbom-action from 0.20.0 to 0.23.1 (#46) (a364063)
+- ci: bump actions/setup-python from 5.6.0 to 6.2.0 (#45) (b993883)
+- feat: dispatch-parity quality improvements (#44) (05e975c)
+- chore: update registry for v0.4.2 (ded83bf)
+
 ## [0.4.2] - 2026-03-12
 
 - chore: update azd-core to v0.5.6 (#43) (7cb044e)
