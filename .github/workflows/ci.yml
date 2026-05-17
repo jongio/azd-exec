@@ -119,13 +119,6 @@ jobs:
           COVERAGE=$(go tool cover -func=../coverage/coverage.out | grep total | awk '{print $3}')
           echo "**Total Coverage: $COVERAGE**" >> $GITHUB_STEP_SUMMARY
 
-      - name: Set up Go
-        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
-        with:
-          go-version: '${{ env.GO_VERSION }}'
-          cache: true
-          cache-dependency-path: cli/go.sum
-
       - name: Build for multiple platforms
         run: |
           mkdir -p bin/windows-amd64 bin/linux-amd64 bin/darwin-amd64 bin/darwin-arm64
