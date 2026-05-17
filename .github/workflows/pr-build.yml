@@ -39,8 +39,6 @@ jobs:
     runs-on: ubuntu-latest
     # Only run if:
     # 1. CI workflow succeeded, OR
-    # Only run if:
-    # 1. CI workflow succeeded, OR
     # 2. Manual trigger via workflow_dispatch, OR
     # 3. PR labeled with 'safe-to-build', OR
     # 4. Push to prbuild branch (for testing)
