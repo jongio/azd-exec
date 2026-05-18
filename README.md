@@ -8,16 +8,19 @@ tags: [azure, cli, devops, scripts, keyvault, deprecated]
 > [!CAUTION]
 > ## ⛔ This extension is DEPRECATED
 >
-> **`azd exec` is now part of core Azure Developer CLI** as `microsoft.azd.exec`.
+> **`azd exec` is now a built-in command in Azure Developer CLI (azd) as of v1.25.1.**
 >
-> This community extension (`jongio.azd.exec`) is no longer maintained. Please use the official version instead:
+> This community extension (`jongio.azd.exec`) is no longer maintained. Simply update azd and use the built-in command:
 >
 > ```bash
 > # Uninstall this community extension
 > azd extension uninstall jongio.azd.exec
 >
-> # Install the official extension
-> azd extension install microsoft.azd.exec
+> # Update azd to v1.25.1+ (azd exec is now built-in)
+> azd version
+>
+> # Use the built-in command directly
+> azd exec ./my-script.sh
 > ```
 >
 > See [azure/azure-dev#7400](https://github.com/Azure/azure-dev/pull/7400) for details.
@@ -28,7 +31,7 @@ tags: [azure, cli, devops, scripts, keyvault, deprecated]
 
 # azd exec (DEPRECATED)
 
-### **⛔ This extension has moved to core azd — see notice above**
+### **⛔ This is now a built-in azd command — see notice above**
 
 Execute any script with full access to your Azure Developer CLI environment variables and Azure credentials.
 
