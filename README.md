@@ -1,15 +1,34 @@
 ---
-title: azd exec
+title: azd exec (DEPRECATED)
 description: Execute any script with full access to your Azure Developer CLI environment variables and Azure credentials
-lastUpdated: 2026-01-09
-tags: [azure, cli, devops, scripts, keyvault]
+lastUpdated: 2026-05-17
+tags: [azure, cli, devops, scripts, keyvault, deprecated]
 ---
+
+> [!CAUTION]
+> ## ⛔ This extension is DEPRECATED
+>
+> **`azd exec` is now part of core Azure Developer CLI** as `microsoft.azd.exec`.
+>
+> This community extension (`jongio.azd.exec`) is no longer maintained. Please use the official version instead:
+>
+> ```bash
+> # Uninstall this community extension
+> azd extension uninstall jongio.azd.exec
+>
+> # Install the official extension
+> azd extension install microsoft.azd.exec
+> ```
+>
+> See [azure/azure-dev#7400](https://github.com/Azure/azure-dev/pull/7400) for details.
+>
+> This repository is archived and read-only.
 
 <div align="center">
 
-# azd exec
+# azd exec (DEPRECATED)
 
-### **Execute Scripts with azd Environment Context**
+### **⛔ This extension has moved to core azd — see notice above**
 
 Execute any script with full access to your Azure Developer CLI environment variables and Azure credentials.
 
@@ -520,7 +539,7 @@ azd exec is part of a suite of Azure Developer CLI extensions by [Jon Gallant](h
 |-----------|-------------|---------|
 | **[azd app](https://github.com/jongio/azd-app)** | Run Azure apps locally with auto-dependencies, dashboard, and AI debugging | [jongio.github.io/azd-app](https://jongio.github.io/azd-app/) |
 | **[azd copilot](https://github.com/jongio/azd-copilot)** | AI-powered Azure development with 16 agents and 28 skills | [jongio.github.io/azd-copilot](https://jongio.github.io/azd-copilot/) |
-| **[azd exec](https://github.com/jongio/azd-exec)** | Execute scripts with azd environment context and Key Vault integration | [jongio.github.io/azd-exec](https://jongio.github.io/azd-exec/) |
+| ~~**[azd exec](https://github.com/jongio/azd-exec)**~~ | **DEPRECATED** — Now part of core azd as `microsoft.azd.exec` | — |
 | **[azd rest](https://github.com/jongio/azd-rest)** | Authenticated REST API calls with automatic scope detection | [jongio.github.io/azd-rest](https://jongio.github.io/azd-rest/) |
 
 🌐 **Extension Hub**: [jongio.github.io/azd-extensions](https://jongio.github.io/azd-extensions/) — Browse all extensions, quick install, and registry info.
